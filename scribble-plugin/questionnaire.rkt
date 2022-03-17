@@ -4,5 +4,5 @@
 
 (provide step)
 
-(define (step x)
+(define (step)
   (cond-element [html "→"] [latex "$\\longrightarrow$"]))

@@ -13,6 +13,6 @@ Questionnaire-Modul testen.
 @section{Test des Setups}
 
 Dieser Teil soll testen, ob das Test-Setup und das importieren
-des Plugins generell funktioniert. Wenn ja, sollte hier ein Pfeil stehen: @step[1].
+des Plugins generell funktioniert. Wenn ja, sollte hier ein Pfeil stehen: @step{}.
 
 Wir hoffen das Beste!

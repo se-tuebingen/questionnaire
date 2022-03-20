@@ -17,7 +17,7 @@ question {
   width: 90%;
   margin: 40px auto;
   font-size: 18pt;
-  padding:60px;
+  padding:4vw;
   background-color: #fcfcfc;
 }
 
@@ -35,6 +35,7 @@ question {
   padding: 5px 12px;
   font-size: 14pt;
   margin: 15px 0 10px;
+  width:90%;
 }
 
 answer p {
@@ -62,7 +63,6 @@ explanation {
 answer [visible="true"] {
   display: block;
   margin: 5px 0 30px;
-  width:100%;
   padding: 15px 12px;
   font-size: 12pt;
   word-break: break-word;

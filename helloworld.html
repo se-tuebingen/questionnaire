@@ -3,52 +3,69 @@
 
 <head>
   <title>Hello World from TypeScript!</title>
+  <link rel="stylesheet" href="ressources/style.css">
 </head>
 
 <body>
   <h1 id="test"></h1>
 
+  <!-- TEST QUESTIONNAIRE FOR SVG-ICONS SCALING -->
   <questionnaire>
-    <question class="multiplechoice">
-      <p>What is TS?</p>
+    <question type="multiplechoice">
+      <p>What is TS? (multiple-choice)</p>
       <answer>
-        <p>Torso Syndrome</p>
+          <p>Torso Syndrome</p>
         <explanation>
           No, there is no such thing
         </explanation>
       </answer>
       <answer correct="true">
-        <p>TypeScript</p>
+          <p>TypeScript</p>
         <explanation>
           This is correct
         </explanation>
       </answer>
       <answer>
-        <p>Thin Slice</p>
+          <p>Thin Slice</p>
         <explanation>
           No, there is no such thing
+        </explanation>
+      </answer>
+      <answer correct="true">
+          <p>Team Speak</p>
+        <explanation>
+          Also correct.
         </explanation>
       </answer>
     </question>
 
-    <question class="multiplechoice">
-      <p>What is TS?</p>
+    <question type="singlechoice">
+      <p>What is an example question? (single-choice)</p>
       <answer>
-        <p>Torso Syndrome</p>
+        <p>Some good old-fashioned dialog</p>
         <explanation>
-          No, there is no such thing
+          No, there is no such thing. This will be a way longer text than other answer-explanation-texts, just for the fun of observing text-wrapping onto the next lines.
         </explanation>
       </answer>
       <answer correct="true">
-        <p>TypeScript</p>
+        <p>For trying stuff</p>
         <explanation>
           This is correct
         </explanation>
       </answer>
       <answer>
-        <p>Thin Slice</p>
+        <p>lorem ipsum</p>
         <explanation>
-          No, there is no such thing
+          <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
+            gubergren,
+            no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et
+            justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna
+            aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+
+          <p>Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis
+            dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</p>
+
+          <p>Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse</p>
         </explanation>
       </answer>
     </question>
@@ -59,4 +76,5 @@
 
 <script src="dist/helloworld.js"></script>
 <script src="dist/questionnaire.js"></script>
+
 </html>

@@ -6,11 +6,24 @@
          scribble/html-properties
          (only-in xml cdata))
 
-(provide step)
+(provide questionnaire question answer)
 
 ;;;;;;;;;;; custom HTML tags
 
 (define questiontypes (or/c "singlechoice" "multiplechoice")) ; one-of does not work with strings
+
+;; questionnaire
+(define
+  questionnaire-tag-wrapper
+  (xexpr-property
+    (cdata #f #f "<questionnaire>")
+    (cdata #f #f "</questionnaire>")))
+
+(define/contract
+  (questionnaire-tag content)
+  (-> content? content?)
+      (element (style #f (list questionnaire-tag-wrapper))
+                content))
 
 ;; question
 (define/contract
@@ -58,8 +71,47 @@
                 content))
 
 ;;;;;;;;;;;; Exposed Macros
+(define (newline x) (string=? "\n" x))
+(define (pseudobool x) (one-of/c 0 1))
+
+; questionnaire
+(define/contract
+  (questionnaire questions)
+  (-> content? content?)
+  (questionnaire-tag questions)
+)
+
 ; single question
-; TODO
+(define/contract
+  (question type text _ answers)
+  (-> questiontypes content? newline (listof content?) content?)
+  (question-tag type
+    (cons (paragraph text) answers)
+  )
+)
+
+; answer
+; (define/contract
+;   (answer correct text _ explanation)
+;   (-> pseudobool content? newline content? content?)
+;   (answer-tag (equal? correct 1)
+;     (list
+;       (paragraph text)
+;       (explanation-tag explanation)
+;     )
+;   )
+; )
+(define/contract
+  (answer correct text explanation)
+  (-> pseudobool content? content? content?)
+  (answer-tag (equal? correct 1)
+    (list
+      (paragraph text)
+      (explanation-tag explanation)
+    )
+  )
+)
+
 
 (define (step)
   (cond-element

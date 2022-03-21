@@ -6,7 +6,7 @@
          scribble/html-properties
          (only-in xml cdata))
 
-(provide questionnaire question answer)
+(provide questionnaire question answer explanation)
 
 ;;;;;;;;;;; custom HTML tags
 
@@ -75,45 +75,34 @@
 (define (pseudobool x) (one-of/c 0 1))
 
 ; questionnaire
-(define/contract
-  (questionnaire questions)
-  (-> content? content?)
+(define
+  (questionnaire . questions)
   (questionnaire-tag questions)
 )
 
 ; single question
-(define/contract
-  (question type text _ answers)
-  (-> questiontypes content? newline (listof content?) content?)
+(define
+  (question type . content)
   (question-tag type
-    (cons (paragraph text) answers)
+    content
   )
 )
 
 ; answer
-; (define/contract
-;   (answer correct text _ explanation)
-;   (-> pseudobool content? newline content? content?)
-;   (answer-tag (equal? correct 1)
-;     (list
-;       (paragraph text)
-;       (explanation-tag explanation)
-;     )
-;   )
-; )
-(define/contract
-  (answer correct text explanation)
-  (-> pseudobool content? content? content?)
-  (answer-tag (equal? correct 1)
-    (list
-      (paragraph text)
-      (explanation-tag explanation)
-    )
+(define
+  (answer correct . content)
+  (answer-tag correct ;(equal? correct 1)
+    content
   )
 )
+; explanation
+(define
+  (explanation . exp)
+  (explanation-tag exp)
+)
 
-
-(define (step)
-  (cond-element
-    [html (question-tag "singlechoice" "arrow")]
-    [latex "$\\longrightarrow$"]))
+; TODO: LaTex Output
+; (define (step)
+;   (cond-element
+;     [html (question-tag "singlechoice" "arrow")]
+;     [latex "$\\longrightarrow$"]))

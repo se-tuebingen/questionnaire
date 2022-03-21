@@ -17,14 +17,39 @@ Test einer Single-Choice-Frage:
 @questionnaire[
   @question["singlechoice"]{
     What is this course about?
-    @answer[0 "Learning to swim"]{
-      We do not have a pool
+    @answer[#f]{
+      Learning to swim
+      @explanation{We do not have a pool}
     }
-    @answer[0 "Learning to sing."]{
-      Singing is hard with masks on or network latency.
+    @answer[#f]{
+      Learning to sing.
+      @explanation{Singing is hard with masks on or network latency.}
     }
-    @answer[1 "Learning to program."]{
-      Correct, you are reading this on some computer.
+    @answer[#t]{
+      Learning to program
+      @explanation{Correct, you are reading this on some computer.}
+    }
+  }
+]
+
+@section{Multiple-Choice}
+
+Test einer Multiple-Choice-Frage:
+
+@questionnaire[
+  @question["multiplechoice"]{
+    What does TS stand for?
+    @answer[#t]{
+      TeamSpeak
+      @explanation{etc}
+    }
+    @answer[#f]{
+      Torus Examination
+      @explanation{although technically...}
+    }
+    @answer[#t]{
+      TypeScript
+      @explanation{Yup}
     }
   }
 ]

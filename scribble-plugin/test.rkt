@@ -1,10 +1,8 @@
 #lang racket/base
 
-(require racket/contract)
-(define/contract
+(define
   (test a . b)
-  (-> number? any/c (listof number?))
-  b)
+  (if (pair? b) (car b) b))
 
-(test 1 2 3)
+(test 1 2)
 (test 1 2 3 4)

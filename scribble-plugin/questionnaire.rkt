@@ -22,7 +22,7 @@
 (define/contract
   (questionnaire-tag content)
   (-> content? content?)
-      (element (style #f (list questionnaire-tag-wrapper))
+      (element (style #f (list (alt-tag "questionnaire"))) ;questionnaire-tag-wrapper))
                 content))
 
 ;; question
@@ -38,7 +38,7 @@
 (define/contract
   (question-tag type content)
   (-> questiontypes content? content?)
-        (element (style #f (list (question-tag-wrapper type)))
+        (element (style #f (list (alt-tag "question"))) ;(question-tag-wrapper type)))
                  content))
 
 ;; answer
@@ -54,7 +54,7 @@
 (define/contract
   (answer-tag correct content)
   (-> boolean? content? content?)
-        (element (style #f (list (answer-tag-wrapper correct)))
+        (element (style #f (list (alt-tag "answer"))) ;(answer-tag-wrapper correct)))
                  content))
 
 ;; explanation
@@ -67,12 +67,24 @@
 (define/contract
   (explanation-tag content)
   (-> content? content?)
-      (element (style #f (list explanation-tag-wrapper))
+      (element (style #f (list (alt-tag "explanation"))) ;explanation-tag-wrapper))
+                content))
+
+;; explanation
+(define
+  p-tag-wrapper
+  (xexpr-property
+    (cdata #f #f "<p>")
+    (cdata #f #f "</p>")))
+
+(define/contract
+  (p-tag content)
+  (-> content? content?)
+      (element (style #f (list p-tag-wrapper))
                 content))
 
 ;;;;;;;;;;;; Exposed Macros
 (define (newline x) (string=? "\n" x))
-(define (pseudobool x) (one-of/c 0 1))
 
 ; questionnaire
 (define
@@ -84,6 +96,9 @@
 (define
   (question type . content)
   (question-tag type
+    ; (if (pair? content)
+    ;     (cons (p-tag (car content)) (cdr content))
+    ;     content)
     content
   )
 )
@@ -92,7 +107,10 @@
 (define
   (answer correct . content)
   (answer-tag correct ;(equal? correct 1)
-    content
+    (if (pair? content)
+        (cons (element (style #f (list (alt-tag "p"))) (car content)) (cdr content))
+        content)
+    ;content
   )
 )
 ; explanation

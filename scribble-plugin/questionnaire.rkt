@@ -6,7 +6,7 @@
          scribble/html-properties
          (only-in xml cdata))
 
-(provide questionnaire question answer explanation)
+(provide questionnaire question answer explanation setup-questionnaire)
 
 ;;;;;;;;;;; custom HTML tags
 
@@ -71,8 +71,6 @@
                 content))
 
 ;;;;;;;;;;;; Exposed Macros
-(define (newline x) (string=? "\n" x))
-(define (pseudobool x) (one-of/c 0 1))
 
 ; questionnaire
 (define
@@ -101,6 +99,13 @@
   (explanation-tag exp)
 )
 
+(define setup-questionnaire
+  (paragraph
+   (style
+    #f (list (alt-tag "script")
+             (attributes `((type . "text/javascript")
+                           (src . "questionnaire.js" )))))
+   '()))
 ; TODO: LaTex Output
 ; (define (step)
 ;   (cond-element

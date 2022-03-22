@@ -31,6 +31,7 @@ Test einer Single-Choice-Frage:
     }
   }
 ]
+@setup-questionnaire
 
 @section{Multiple-Choice}
 
@@ -53,3 +54,4 @@ Test einer Multiple-Choice-Frage:
     }
   }
 ]
+@setup-questionnaire

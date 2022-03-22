@@ -3,9 +3,9 @@
 
 // <questionnaire> <- List of questions
 //   <question type="multiplechoice|singlechoice">
-//     <p>Question Text
+//     Question Text
 //     <answer correct="true|false">
-//       <p>Answer Text
+//       Answer Text
 //       <explanation>Explanation Text
 
 function setup() {
@@ -43,7 +43,9 @@ function renderQuestions(questionnaire: HTMLElement) {
   let questions: HTMLCollection = questionnaire.getElementsByTagName("question");
   for (let i = questions.length - 1; i >= 0; i--) {
     let question: HTMLElement = questions[i] as HTMLElement;
-    let text = question.getElementsByTagName("p")[0] as HTMLParagraphElement;
+    let text = document.createElement("p");
+    text.innerHTML = (question.childNodes[0] as Text).data;
+    question.childNodes[0].remove();
     // build div-wrapper
     let new_div: HTMLDivElement = document.createElement("div");
     new_div.setAttribute("class", "wrapper-question");
@@ -67,7 +69,9 @@ function renderAnswers(questionnaire: HTMLElement) {
     let answer: HTMLElement = answers[i] as HTMLElement;
     // build div-wrapper
     let new_div: HTMLDivElement = document.createElement("div");
-    let text = answer.getElementsByTagName("p")[0] as HTMLParagraphElement;
+    let text = document.createElement("p");
+    text.innerHTML = (answer.childNodes[0] as Text).data;
+    answer.childNodes[0].remove();
     new_div.setAttribute("class", "wrapper-answer");
     answer.prepend(new_div);
     //append text and img

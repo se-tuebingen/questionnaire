@@ -1,18 +1,11 @@
 "use strict";
-var testel = document.getElementById("test");
-if (testel) {
-    testel.innerHTML = "Hello from TypeScript!";
-}
-else {
-    window.alert("Element with id 'test' is missing from HTML!");
-}
 // #### QUESTIONNAIRE MODULE ####
 // This module implements the questionnaire functionality
 // <questionnaire> <- List of questions
 //   <question type="multiplechoice|singlechoice">
-//     <p>Question Text
+//     Question Text
 //     <answer correct="true|false">
-//       <p>Answer Text
+//       Answer Text
 //       <explanation>Explanation Text
 function setup() {
     // setup style
@@ -45,7 +38,9 @@ function renderQuestions(questionnaire) {
     var questions = questionnaire.getElementsByTagName("question");
     for (var i = questions.length - 1; i >= 0; i--) {
         var question = questions[i];
-        var text = question.getElementsByTagName("p")[0];
+        var text = document.createElement("p");
+        text.innerHTML = question.childNodes[0].data;
+        question.childNodes[0].remove();
         // build div-wrapper
         var new_div = document.createElement("div");
         new_div.setAttribute("class", "wrapper-question");
@@ -67,7 +62,9 @@ function renderAnswers(questionnaire) {
         var answer = answers[i];
         // build div-wrapper
         var new_div = document.createElement("div");
-        var text = answer.getElementsByTagName("p")[0];
+        var text = document.createElement("p");
+        text.innerHTML = answer.childNodes[0].data;
+        answer.childNodes[0].remove();
         new_div.setAttribute("class", "wrapper-answer");
         answer.prepend(new_div);
         //append text and img

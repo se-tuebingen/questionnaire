@@ -8,13 +8,20 @@
 //       <p>Answer Text
 //       <explanation>Explanation Text
 
+function setup() {
+  // setup style
+  const styleNode = document.createElement('style');
+  styleNode.innerHTML = Ressources.style;
+  document.getElementsByTagName('head')[0].appendChild(styleNode);
 
-const q_col: HTMLCollection = document.getElementsByTagName("questionnaire") as HTMLCollection;
-// render every questionnaire in the HTML Document
-for (let i = q_col.length - 1; i >= 0; i--) {
-  let questionnaire: HTMLElement = q_col[i] as HTMLElement;
-  renderQuestionaire(questionnaire);
+  const q_col: HTMLCollection = document.getElementsByTagName("questionnaire") as HTMLCollection;
+  // render every questionnaire in the HTML Document
+  for (let i = q_col.length - 1; i >= 0; i--) {
+    let questionnaire: HTMLElement = q_col[i] as HTMLElement;
+    renderQuestionaire(questionnaire);
+  }
 }
+window.onload = setup;
 
 // render questionnaire:
 // addEventListener for "click"-Events
@@ -43,7 +50,7 @@ function renderQuestions(questionnaire: HTMLElement) {
     question.prepend(new_div);
     // append text and img
     let img = document.createElement("img");
-    img.setAttribute("src", "ressources/icons/plus-solid.svg");
+    img.setAttribute("src", Ressources.plus_solid);
     new_div.append(text, img);
     img.addEventListener("click", ExplanationEventHandler.bind(img, true));
   }
@@ -65,7 +72,7 @@ function renderAnswers(questionnaire: HTMLElement) {
     answer.prepend(new_div);
     //append text and img
     let img = document.createElement("img");
-    img.setAttribute("src", "ressources/icons/circle-regular.svg");
+    img.setAttribute("src", Ressources.circle_regular);
     new_div.append(img, text);
     answer.addEventListener("click", checkAnswer);
     answer.addEventListener("click", ExplanationEventHandler.bind(answer, false));
@@ -79,7 +86,7 @@ function ExplanationEventHandler(this: HTMLElement, collapse: boolean) {
     let answers: HTMLCollection = question.getElementsByTagName("answer") as HTMLCollection;
     //change icons and collapse
     if (this.getAttribute("clicked") == "true") {
-      this.setAttribute("src", "ressources/icons/plus-solid.svg");
+      this.setAttribute("src", Ressources.plus_solid);
       this.setAttribute("clicked", "false");
       for (let i = answers.length - 1; i >= 0; i--) {
         let answer = answers[i] as HTMLElement;
@@ -87,7 +94,7 @@ function ExplanationEventHandler(this: HTMLElement, collapse: boolean) {
       }
     }
     else {
-      this.setAttribute("src", "ressources/icons/minus-solid.svg");
+      this.setAttribute("src", Ressources.minus_solid);
       this.setAttribute("clicked", "true");
       for (let i = answers.length - 1; i >= 0; i--) {
         let answer = answers[i] as HTMLElement;
@@ -137,9 +144,9 @@ function showAnswer(answer: HTMLElement) {
   answer.setAttribute("clicked", "true");
   let img = answer.getElementsByTagName("img")[0];
   if (answer.getAttribute("correct") == "true") {
-    img.setAttribute("src", "ressources/icons/check-solid.svg");
+    img.setAttribute("src", Ressources.check_solid);
   }
   else {
-    img.setAttribute("src", "ressources/icons/xmark-solid.svg");
+    img.setAttribute("src", Ressources.xmark_solid);
   }
 }

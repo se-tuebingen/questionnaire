@@ -78,6 +78,7 @@ After compiling your HTML output, you need to copy `questionnaire.js` to the out
 - (Linus)TS-Code, damit das ganze tut
 - (Flo) Scribbl-Modul schreiben
 
+<!--
 <questionnaire>
   <question type="multiplechoice">
     Thank you for your interest, do you have any questions regarding the questionnaire module?
@@ -96,4 +97,4 @@ After compiling your HTML output, you need to copy `questionnaire.js` to the out
   </question>
 </questionnaire>
 
-<script src="dist/questionnaire.js"></script>
+<script src="dist/questionnaire.js"></script>-->

@@ -150,3 +150,9 @@ function showAnswer(answer: HTMLElement) {
     img.setAttribute("src", Ressources.xmark_solid);
   }
 }
+// swipeEvent
+// const divContainer = document.getElementById("touch-event-test");
+// divContainer.addEventListener("")
+// function (){
+//
+// }

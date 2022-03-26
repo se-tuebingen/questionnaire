@@ -1,11 +1,4 @@
 "use strict";
-var testel = document.getElementById("test");
-if (testel) {
-    testel.innerHTML = "Hello from TypeScript!";
-}
-else {
-    window.alert("Element with id 'test' is missing from HTML!");
-}
 // #### QUESTIONNAIRE MODULE ####
 // This module implements the questionnaire functionality
 // <questionnaire> <- List of questions
@@ -148,6 +141,12 @@ function showAnswer(answer) {
         img.setAttribute("src", Ressources.xmark_solid);
     }
 }
+// swipeEvent
+// const divContainer = document.getElementById("touch-event-test");
+// divContainer.addEventListener("")
+// function (){
+//
+// }
 var Ressources;
 (function (Ressources) {
     Ressources.angle_left_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMTkyIDQ0OGMtOC4xODggMC0xNi4zOC0zLjEyNS0yMi42Mi05LjM3NWwtMTYwLTE2MGMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNWwxNjAtMTYwYzEyLjUtMTIuNSAzMi43NS0xMi41IDQ1LjI1IDBzMTIuNSAzMi43NSAwIDQ1LjI1TDc3LjI1IDI1NmwxMzcuNCAxMzcuNGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1QzIwOC40IDQ0NC45IDIwMC4yIDQ0OCAxOTIgNDQ4eiIvPjwvc3ZnPg==";

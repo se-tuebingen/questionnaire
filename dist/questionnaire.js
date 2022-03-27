@@ -48,6 +48,7 @@ function renderQuestions(questionnaire) {
     // get wrapper-content
     var wrapper_content = questionnaire.firstChild;
     var questions = questionnaire.getElementsByTagName("question");
+    questions[1].setAttribute("visible", "true");
     for (var i = questions.length - 1; i >= 0; i--) {
         var question = questions[i];
         buildQuestionHeader(question);
@@ -72,10 +73,30 @@ function renderQuestions(questionnaire) {
 //previousQuestion
 //EventHandler -> DOM Manipulation
 function prevQuestion() {
+    var _a;
+    var question = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement;
+    var prev_question = question.previousSibling;
+    if (prev_question == null) {
+        //DO NOTHING
+    }
+    else {
+        question.removeAttribute("visible");
+        prev_question.setAttribute("visible", "true");
+    }
 }
 //nextQuestion
 //EventHandler -> DOM Manipulation
 function nextQuestion() {
+    var _a;
+    var question = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement;
+    var next_question = question.nextSibling;
+    if (next_question == null) {
+        //DO NOTHING
+    }
+    else {
+        question.removeAttribute("visible");
+        next_question.setAttribute("visible", "true");
+    }
 }
 // question->DOM Manipulation
 // Question Text and CollapseAll-Functionality in question-header
@@ -124,7 +145,7 @@ function ExplanationEventHandler(collapse) {
             this.setAttribute("clicked", "false");
             for (var i = answers.length - 1; i >= 0; i--) {
                 var answer = answers[i];
-                answer.getElementsByTagName("explanation")[0].setAttribute("visible", "false");
+                answer.getElementsByTagName("explanation")[0].removeAttribute("visible");
             }
         }
         else {
@@ -145,7 +166,7 @@ function ExplanationEventHandler(collapse) {
 function showExplanation(answer) {
     var explanation = answer.getElementsByTagName("explanation")[0];
     if (explanation.getAttribute("visible") == "true") {
-        explanation.setAttribute("visible", "false");
+        explanation.removeAttribute("visible");
     }
     else {
         explanation.setAttribute("visible", "true");
@@ -203,5 +224,5 @@ var Ressources;
     Ressources.minus_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0\nNDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt\nIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l\nLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp\nY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMy\nLTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTMxLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIg\nMzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8+PC9zdmc+\n";
     Ressources.plus_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0\nNDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt\nIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l\nLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp\nY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDMyIDI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMy\nIDMyLjAxSDI1NnYxNDRjMCAxNy42OS0xNC4zMyAzMS45OS0zMiAzMS45OXMtMzItMTQuMy0z\nMi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5\nIDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQu\nMzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8+PC9z\ndmc+\n";
     Ressources.xmark_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAz\nMjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt\nIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l\nLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp\nY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIu\nNzUgMCA0NS4yNUMzMDQuNCA0MTIuOSAyOTYuMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUt\nMjIuNjItOS4zNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQx\nNiAzMiA0MTZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1\nIDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1\nIDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41\nLTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1\nLjRMMzEwLjYgMzYxLjR6Ii8+PC9zdmc+\n";
-    Ressources.style = "body {\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  font-family: monospace;\n}\n\nquestionnaire{\n\n}\n\n.wrapper-content {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: column;\n  margin: 10px;\n  padding: 10px;\n}\n\n/*.wrapper-content [visible=\"true\"]*/\nquestion {\n  width: 90%;\n  marquestion-footer, .gin: 40px auto;\n  font-size: 18pt;\n  padding:4vw;\n  background-color: #fcfcfc;\n}\n\n.question-header, .wrapper-answer {\n  display: inline-flex;\n question-footer{\n  height:80px;\n  justify-content: center;\n}\n\n.change-question-button{\npadding:20px;\n}\n\n. width: 100%;\n}\n\n.question-header {\n  justify-content: space-between;\n}\n\n.wrapper-answer, answer [visible=\"true\"] {\n  border: 1px solid #eee;\n  padding: 5px 12px;\n  font-size: 14pt;\n  margin: 15px 0 10px;\n  width:90%;\n}\n\nanswer p {\n  margin-left: 16px;\n  /*font-si,z.change-question-button:hover e: 12pt;\n  padding: 6px;\n  border: 1px solid #000;\n  width:100%;*/\n}\n\n.wrapper-answer:hover, img:hover {\n  cursor: pointer;\n  /*background-color: #ddd;*/\n}\n\n.wrapper-answer:hover {\n  background-color: #eee;\n}\n\nexplanation {\n  display: none;\n  /*max-width: 30vw;*/\n}\n\nanswer [visible=\"true\"] {\n  display: block;\n  margin: 5px 0 30px;\n  padding: 15px 12px;\n  font-size: 12pt;\n  word-break: break-word;\n  border:0;\n  background-color: #fdfdfd;\n}\n\na  border: 0;\n}\n\n@media (min-width: 768px) {\n  question {\n    max-width: 800px;\n  }\n;\n\n@medi  (mi .width: 768px) {\n  x-wadthe \n  }tion-button{\npadding:20px}\n[clicked=\"true\"][correct=\"true\"] .wrapper-answer{\n  background-color:green;\n}\n[clicked=\"true\"] .wrapper-answer{\n  background-color:darkred;\n}";
+    Ressources.style = "body {\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  font-family: monospace;\n}\n\nquestionnaire{\n\n}\n\n.wrapper-content {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: column;\n  margin: 10px;\n  padding: 10px;\n}\n\n/*.wrapper-content [visible=\"true\"]*/\nquestion {\n  width: 90%;\n  marquestion-footer, .gin: 40px auto;\n  font-size: 18pt;\n  padding:4vw;\n  background-color: #fcfcfc;\n}\n\n.question-header, .wrapper-aeen;\n}\n\n.question-footer{\n  justify-content: center;\n}\n\n. width: 100%;\n}\n\n.question-header {\n  justify-content: space-between;\n}\n\n.wrapper-answer, answer [visible=\"true\"] {\n  border: 1px solid #eee;\n  padding: 5px 12px;\n  font-size: 14pt;\n  margin: 15px 0 10px;\n  width:90%;\n}\n\nanswer p {\n  margin-left: 16px;\n  /*font-si,z.change-question-button:hover e: 12pt;\n  padding: 6px;\n  border: 1px solid #000;\n  width:100%;*/\n}\n\n\n.wrapper-answer:hover, img:hover {\n  cursor: pointer;\n  /*background-color: #ddd;*/\n}\n\n.wrapper-answer:hover {\n  background-color: #eee;\n}\n\nexplanation {\n  display: none;\n  /*max-width: 30vw;*/\n}\n\nanswer [visible=\"true\"] {\n  display: block;\n  margin: 5px 0 30px;\n  padding: 15px 12px;\n  font-size: 12pt;\n  word-break: break-word;\n  border:0;\n  background-color: #fdfdfd;\n}\n\na  border: 0;\n}\n\n[clicked=\"true\"] .wrapper-answer, @media (min-width: 768px) {\n  er:hovquestion {\n    max-width: 800px;\n\n.change-question-button{\n  padding:20px;\n  margin:30px 30px 0;\n  border: 4px solid #bbb;\n  border-radius: 7px;\n}\n.change-question-button:hover{\n  background-color: #bbb;\n}  }\n;\n\n@medi  (mi .width: 768px) {\n  x-wadthe \n  }tion-button{\npadding:20px}\n[clicked=\"true\"][correct=\"true\"] .wrapper-answer{\n  background-color:green;\n}\n[clicked=\"true\"] .wrapper-answer{\n  background-color:darkred;\n}";
 })(Ressources || (Ressources = {}));

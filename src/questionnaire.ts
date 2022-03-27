@@ -37,7 +37,7 @@ function renderQuestionaire(questionnaire: HTMLElement) {
   let children = questionnaire.children as HTMLCollection;
   // access children and append to wrapper-content
 
-  for(let i = children.length - 1; i >=0; i--){
+  for (let i = children.length - 1; i >= 0; i--) {
     content.append(children[i]);
   }
   questionnaire.prepend(content);
@@ -55,24 +55,26 @@ function renderQuestions(questionnaire: HTMLElement) {
   // get wrapper-content
   let wrapper_content = questionnaire.firstChild as HTMLDivElement;
   let questions: HTMLCollection = questionnaire.getElementsByTagName("question");
+  questions[1].setAttribute("visible", "true");
   for (let i = questions.length - 1; i >= 0; i--) {
     let question: HTMLElement = questions[i] as HTMLElement;
     buildQuestionHeader(question);
+
     // build question footer
     let footer: HTMLDivElement = document.createElement("div");
     footer.setAttribute("class", "question-footer");
     question.append(footer);
 
     //build 2 buttons
-    let prev_button:HTMLDivElement = makeDiv("change-question-button");
-    let next_button:HTMLDivElement = makeDiv("change-question-button");
+    let prev_button: HTMLDivElement = makeDiv("change-question-button");
+    let next_button: HTMLDivElement = makeDiv("change-question-button");
     prev_button.setAttribute("id", "prev_button");
     next_button.setAttribute("id", "next_button");
     prev_button.textContent = "prev";
-    next_button.textContent ="next";
-    prev_button.addEventListener("click",prevQuestion);
-    next_button.addEventListener("click",nextQuestion);
-    footer.append(prev_button,next_button);
+    next_button.textContent = "next";
+    prev_button.addEventListener("click", prevQuestion);
+    next_button.addEventListener("click", nextQuestion);
+    footer.append(prev_button, next_button);
     //append question to wrapper-content
     wrapper_content.append(question);
   }
@@ -80,18 +82,34 @@ function renderQuestions(questionnaire: HTMLElement) {
 
 //previousQuestion
 //EventHandler -> DOM Manipulation
-function prevQuestion(this: HTMLElement){
-
+function prevQuestion(this: HTMLElement) {
+  let question: HTMLElement = this.parentElement ?.parentElement as HTMLElement;
+  let prev_question = question.previousSibling as HTMLElement | null;
+  if (prev_question == null) {
+    //DO NOTHING
+  }
+  else {
+    question.removeAttribute("visible");
+    prev_question.setAttribute("visible", "true");
+  }
 }
 //nextQuestion
 //EventHandler -> DOM Manipulation
-function nextQuestion(this: HTMLElement){
-
+function nextQuestion(this: HTMLElement) {
+  let question: HTMLElement = this.parentElement ?.parentElement as HTMLElement;
+  let next_question = question.nextSibling as HTMLElement | null;
+  if (next_question == null) {
+    //DO NOTHING
+  }
+  else {
+    question.removeAttribute("visible");
+    next_question.setAttribute("visible", "true");
+  }
 }
 
-  // question->DOM Manipulation
-  // Question Text and CollapseAll-Functionality in question-header
-function buildQuestionHeader(question: HTMLElement){
+// question->DOM Manipulation
+// Question Text and CollapseAll-Functionality in question-header
+function buildQuestionHeader(question: HTMLElement) {
   let text = question.getElementsByTagName("p")[0] as HTMLParagraphElement;
   let header: HTMLDivElement = document.createElement("div");
   header.setAttribute("class", "question-header");
@@ -136,7 +154,7 @@ function ExplanationEventHandler(this: HTMLElement, collapse: boolean) {
       this.setAttribute("clicked", "false");
       for (let i = answers.length - 1; i >= 0; i--) {
         let answer = answers[i] as HTMLElement;
-        answer.getElementsByTagName("explanation")[0].setAttribute("visible", "false");
+        answer.getElementsByTagName("explanation")[0].removeAttribute("visible");
       }
     }
     else {
@@ -157,7 +175,7 @@ function ExplanationEventHandler(this: HTMLElement, collapse: boolean) {
 function showExplanation(answer: HTMLElement) {
   let explanation: HTMLElement = answer.getElementsByTagName("explanation")[0] as HTMLElement;
   if (explanation.getAttribute("visible") == "true") {
-    explanation.setAttribute("visible", "false");
+    explanation.removeAttribute("visible");
   }
   else {
     explanation.setAttribute("visible", "true");
@@ -199,7 +217,7 @@ function showAnswer(answer: HTMLElement) {
 
 // makeDiv
 // ClassName as String -> HTMLDivElement
-function makeDiv (css_name:string){
+function makeDiv(css_name: string) {
   let new_div = document.createElement("div");
   new_div.setAttribute("class", css_name);
   return new_div;

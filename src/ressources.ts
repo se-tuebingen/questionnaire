@@ -93,13 +93,17 @@ question {
   background-color: #fcfcfc;
 }
 
-.question-header, .wrapper-answer {
+.question-header, .question-footer, .wrapper-answer {
   display: inline-flex;
   width: 100%;
 }
 
 .question-header {
   justify-content: space-between;
+}
+
+.question-footer{
+  justify-content: center;
 }
 
 .wrapper-answer, answer [visible="true"] {
@@ -127,6 +131,7 @@ answer p {
   background-color: #eee;
 }
 
+
 explanation {
   display: none;
   /*max-width: 30vw;*/
@@ -153,10 +158,19 @@ img {
 [clicked="true"][correct="true"] .wrapper-answer{
   background-color:green;
 }
-[clicked="true"] .wrapper-answer{
+[clicked="true"] .wrapper-answer, [clicked="true"] .wrapper-answer:hover{
   background-color:darkred;
 }
 
+.change-question-button{
+  padding:20px;
+  margin:30px 30px 0;
+  border: 4px solid #bbb;
+  border-radius: 7px;
+}
+.change-question-button:hover{
+  background-color: #bbb;
+}
 
 @media (min-width: 768px) {
   question {

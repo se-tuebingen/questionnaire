@@ -6,7 +6,7 @@ body {
 }
 
 questionnaire{
-  
+
 }
 
 .wrapper-content {
@@ -19,7 +19,6 @@ questionnaire{
 
 /*.wrapper-content [visible="true"]*/
 question {
-  display:block;
   width: 90%;
   margin: 40px auto;
   font-size: 18pt;

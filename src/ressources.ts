@@ -72,13 +72,6 @@ export const style = `body {
   font-family: monospace;
 }
 
-body {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: monospace;
-}
-
 questionnaire{
 
 }
@@ -93,7 +86,6 @@ questionnaire{
 
 /*.wrapper-content [visible="true"]*/
 question {
-  display:block;
   width: 90%;
   margin: 40px auto;
   font-size: 18pt;
@@ -169,6 +161,5 @@ img {
 }
 [clicked="true"] .wrapper-answer{
   background-color:darkred;
-}
-`;
+}`;
 }

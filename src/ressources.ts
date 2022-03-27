@@ -14,13 +14,16 @@ export const style = `body {
 }
 
 questionnaire {
+
+}
+
+.wrapper-content{
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
   margin: 10px;
   padding: 10px;
 }
-
 question {
   width: 90%;
   margin: 40px auto;

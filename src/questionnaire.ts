@@ -31,6 +31,18 @@ window.onload = setup;
 
 function renderQuestionaire(questionnaire: HTMLElement) {
   console.log(questionnaire);
+  //build wrapper-content
+  let content: HTMLDivElement = document.createElement("div");
+  content.setAttribute("class", "wrapper-content");
+  let children = questionnaire.children as HTMLCollection;
+  // access children and append to wrapper-content
+
+  for(let i = children.length - 1; i >=0; i--){
+    content.append(children[i]);
+  }
+  questionnaire.prepend(content);
+
+  //render Questions + Answers
   renderQuestions(questionnaire);
   renderAnswers(questionnaire);
 }
@@ -40,19 +52,23 @@ function renderQuestionaire(questionnaire: HTMLElement) {
 // add <div>-wrapper + <img>-icon (done)
 // add EventListener for CollapseAll-Function
 function renderQuestions(questionnaire: HTMLElement) {
+  // get wrapper-content
+  let wrapper_content = questionnaire.firstChild as HTMLDivElement;
   let questions: HTMLCollection = questionnaire.getElementsByTagName("question");
   for (let i = questions.length - 1; i >= 0; i--) {
     let question: HTMLElement = questions[i] as HTMLElement;
     let text = question.getElementsByTagName("p")[0] as HTMLParagraphElement;
-    // build div-wrapper
-    let new_div: HTMLDivElement = document.createElement("div");
-    new_div.setAttribute("class", "wrapper-question");
-    question.prepend(new_div);
+    // build question-wrapper
+    let wrapper: HTMLDivElement = document.createElement("div");
+    wrapper.setAttribute("class", "wrapper-question");
+    question.prepend(wrapper);
     // append text and img
     let img = document.createElement("img");
     img.setAttribute("src", Ressources.plus_solid);
-    new_div.append(text, img);
+    wrapper.append(text, img);
     img.addEventListener("click", ExplanationEventHandler.bind(img, true));
+    //append wrapper-question to wrapper-content
+    wrapper_content.append(question);
   }
 }
 
@@ -150,6 +166,9 @@ function showAnswer(answer: HTMLElement) {
     img.setAttribute("src", Ressources.xmark_solid);
   }
 }
+
+// makeDiv
+// className,
 // swipeEvent
 // const divContainer = document.getElementById("touch-event-test");
 // divContainer.addEventListener("")

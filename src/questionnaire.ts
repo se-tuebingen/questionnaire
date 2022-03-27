@@ -57,21 +57,51 @@ function renderQuestions(questionnaire: HTMLElement) {
   let questions: HTMLCollection = questionnaire.getElementsByTagName("question");
   for (let i = questions.length - 1; i >= 0; i--) {
     let question: HTMLElement = questions[i] as HTMLElement;
-    let text = question.getElementsByTagName("p")[0] as HTMLParagraphElement;
-    // build question-wrapper
-    let header: HTMLDivElement = document.createElement("div");
-    header.setAttribute("class", "question-header");
-    question.prepend(header);
-    // append text and img
-    let img = document.createElement("img");
-    img.setAttribute("src", Ressources.plus_solid);
-    header.append(text, img);
-    img.addEventListener("click", ExplanationEventHandler.bind(img, true));
-    //append wrapper-question to wrapper-content
+    buildQuestionHeader(question);
+    // build question footer
+    let footer: HTMLDivElement = document.createElement("div");
+    footer.setAttribute("class", "question-footer");
+    question.append(footer);
+
+    //build 2 buttons
+    let prev_button:HTMLDivElement = makeDiv("change-question-button");
+    let next_button:HTMLDivElement = makeDiv("change-question-button");
+    prev_button.setAttribute("id", "prev_button");
+    next_button.setAttribute("id", "next_button");
+    prev_button.textContent = "prev";
+    next_button.textContent ="next";
+    prev_button.addEventListener("click",prevQuestion);
+    next_button.addEventListener("click",nextQuestion);
+    footer.append(prev_button,next_button);
+    //append question to wrapper-content
     wrapper_content.append(question);
   }
 }
 
+//previousQuestion
+//EventHandler -> DOM Manipulation
+function prevQuestion(this: HTMLElement){
+
+}
+//nextQuestion
+//EventHandler -> DOM Manipulation
+function nextQuestion(this: HTMLElement){
+
+}
+
+  // question->DOM Manipulation
+  // Question Text and CollapseAll-Functionality in question-header
+function buildQuestionHeader(question: HTMLElement){
+  let text = question.getElementsByTagName("p")[0] as HTMLParagraphElement;
+  let header: HTMLDivElement = document.createElement("div");
+  header.setAttribute("class", "question-header");
+  question.prepend(header);
+  // append text and img
+  let img = document.createElement("img");
+  img.setAttribute("src", Ressources.plus_solid);
+  img.addEventListener("click", ExplanationEventHandler.bind(img, true));
+  header.append(text, img);
+}
 
 // questionnaire->DOM Manipulation
 function renderAnswers(questionnaire: HTMLElement) {
@@ -168,7 +198,13 @@ function showAnswer(answer: HTMLElement) {
 }
 
 // makeDiv
-// className,
+// ClassName as String -> HTMLDivElement
+function makeDiv (css_name:string){
+  let new_div = document.createElement("div");
+  new_div.setAttribute("class", css_name);
+  return new_div;
+}
+
 // swipeEvent
 // const divContainer = document.getElementById("touch-event-test");
 // divContainer.addEventListener("")

@@ -118,7 +118,7 @@ answer p {
   width:100%;*/
 }
 
-.wrapper-answer:hover, img:hover {
+.wrapper-answer:hover, img:hover, .change-question-button:hover {
   cursor: pointer;
   /*background-color: #ddd;*/
 }
@@ -150,16 +150,17 @@ img {
   height: auto;
   width: 20px;
 }
-
-@media (min-width: 768px) {
-  question {
-    max-width: 800px;
-  }
-}
 [clicked="true"][correct="true"] .wrapper-answer{
   background-color:green;
 }
 [clicked="true"] .wrapper-answer{
   background-color:darkred;
+}
+
+
+@media (min-width: 768px) {
+  question {
+    max-width: 800px;
+  }
 }`;
 }

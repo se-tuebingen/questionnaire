@@ -59,13 +59,13 @@ function renderQuestions(questionnaire: HTMLElement) {
     let question: HTMLElement = questions[i] as HTMLElement;
     let text = question.getElementsByTagName("p")[0] as HTMLParagraphElement;
     // build question-wrapper
-    let wrapper: HTMLDivElement = document.createElement("div");
-    wrapper.setAttribute("class", "wrapper-question");
-    question.prepend(wrapper);
+    let header: HTMLDivElement = document.createElement("div");
+    header.setAttribute("class", "question-header");
+    question.prepend(header);
     // append text and img
     let img = document.createElement("img");
     img.setAttribute("src", Ressources.plus_solid);
-    wrapper.append(text, img);
+    header.append(text, img);
     img.addEventListener("click", ExplanationEventHandler.bind(img, true));
     //append wrapper-question to wrapper-content
     wrapper_content.append(question);
@@ -154,7 +154,7 @@ function checkAnswer(this: HTMLElement) {
 }
 
 // showAnswer
-// show icons and highlight correct answer
+// show icons and highlight answer
 
 function showAnswer(answer: HTMLElement) {
   answer.setAttribute("clicked", "true");

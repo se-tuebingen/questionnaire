@@ -5,7 +5,11 @@ body {
   font-family: monospace;
 }
 
-questionnaire {
+questionnaire{
+  
+}
+
+.wrapper-content {
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
@@ -13,7 +17,9 @@ questionnaire {
   padding: 10px;
 }
 
+/*.wrapper-content [visible="true"]*/
 question {
+  display:block;
   width: 90%;
   margin: 40px auto;
   font-size: 18pt;
@@ -21,12 +27,12 @@ question {
   background-color: #fcfcfc;
 }
 
-.wrapper-question, .wrapper-answer {
+.question-header, .wrapper-answer {
   display: inline-flex;
   width: 100%;
 }
 
-.wrapper-question {
+.question-header {
   justify-content: space-between;
 }
 
@@ -86,4 +92,7 @@ img {
 }
 [clicked="true"][correct="true"] .wrapper-answer{
   background-color:green;
+}
+[clicked="true"] .wrapper-answer{
+  background-color:darkred;
 }

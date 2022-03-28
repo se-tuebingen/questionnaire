@@ -21,41 +21,41 @@
     (cdata #f #f "<questionnaire>")
     (cdata #f #f "</questionnaire>")))
 
-(define/contract
+(define ;/contract
   (questionnaire-tag content)
-  (-> content? content?)
+  ;(-> content? content?)
       (element (style #f (list questionnaire-tag-wrapper))
                 content))
 
 ;; question
-(define/contract
+(define ;/contract
   (question-tag-wrapper type)
-  (-> questiontypes xexpr-property?)
+  ;(-> questiontypes xexpr-property?)
   (xexpr-property
     (cdata #f #f (string-append
       "<question type=\"" type "\">"
       ))
     (cdata #f #f "</question>")))
 
-(define/contract
+(define ;/contract
   (question-tag type content)
-  (-> questiontypes content? content?)
+  ;(-> questiontypes content? content?)
         (element (style #f (list (question-tag-wrapper type)))
                  content))
 
 ;; answer
-(define/contract
+(define ;/contract
   (answer-tag-wrapper correct)
-  (-> boolean? xexpr-property?)
+  ;(-> boolean? xexpr-property?)
   (xexpr-property
     (cdata #f #f (string-append
       "<answer correct=\"" (if correct "true" "false") "\">"
       ))
     (cdata #f #f "</answer>")))
 
-(define/contract
+(define ;/contract
   (answer-tag correct content)
-  (-> boolean? content? content?)
+  ;(-> boolean? content? content?)
         (element (style #f (list (answer-tag-wrapper correct)))
                  content))
 

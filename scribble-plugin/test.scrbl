@@ -1,6 +1,7 @@
 #lang scribble/manual
 
 @(require "questionnaire.rkt")
+@(require pict) @; for testing picture rendering
 
 @title[#:version ""]{Test-Seite für Questionnaire-Plugin}
 @author["Florian Kellner"]
@@ -104,6 +105,39 @@ Test eines Blocks mit mehreren Fragen
     @answer[#t]{
       Goat
       @explanation{Whatever floats your goat}
+    }
+  }
+]
+@setup-questionnaire
+
+@section{Sonderzeichen und Rich Text}
+
+Test, ob Bilder, Code und Auflistungen als Frageinhalte richtig dargestellt werden:
+
+@questionnaire[
+  @question["multiplechoice"]{
+    Choose all answers that
+    @itemlist[@item{Look right}
+              @item{Are Correct}]
+    @answer[#t]{
+      @centered{Centered Text}
+      @explanation{@centered{@bold{bold choice}}}
+    }
+    @answer[#t]{
+      @(colorize (filled-ellipse 40 40) "beige")
+      @explanation{@(colorize (filled-ellipse 40 40) "brown")}
+    }
+    @answer[#f]{
+      @tabular[#:sep @hspace[1]
+         (list (list "soup" "gazpacho")
+               (list "soup" "tonjiru"))]
+      @explanation{@tabular[#:style 'boxed
+         #:column-properties '(left right)
+         #:row-properties '(bottom-border ())
+         (list (list @bold{recipe}   @bold{vegetable})
+               (list "caldo verde"   "kale")
+               (list "kinpira gobō"  "burdock")
+               (list "makizushi"     'cont))]}
     }
   }
 ]

@@ -30,12 +30,13 @@ function renderQuestionaire(questionnaire) {
     //build wrapper-content
     var content = makeDiv("wrapper-content");
     var children = questionnaire.children;
+    var question_number = children.length;
     // prepend question-overview
     var q_overview = makeDiv("question-overview");
-    q_overview.textContent = "Frage 1" + " von " + children.length;
+    q_overview.textContent = "Frage 1" + " von " + question_number;
     content.prepend(q_overview);
     // set attributes for QUESTIONNAIRE
-    questionnaire.setAttribute("total_questions", "" + children.length);
+    questionnaire.setAttribute("total_questions", "" + question_number);
     questionnaire.setAttribute("current_question", "1");
     // access children and append to wrapper-content
     for (var i = children.length - 1; i >= 0; i--) {
@@ -47,7 +48,8 @@ function renderQuestionaire(questionnaire) {
     renderAnswers(questionnaire);
     // build question footer
     // if only one question: DO NOTHING
-    if (children.length == 1) {
+    console.log(question_number);
+    if (question_number == 1) {
         //Do NOTHING
     }
     else {

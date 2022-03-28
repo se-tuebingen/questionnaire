@@ -33,12 +33,13 @@ function renderQuestionaire(questionnaire: HTMLElement) {
   //build wrapper-content
   let content: HTMLDivElement = makeDiv("wrapper-content");
   let children = questionnaire.children as HTMLCollection;
+  let question_number:number = children.length;
   // prepend question-overview
   let q_overview: HTMLDivElement = makeDiv("question-overview");
-  q_overview.textContent = "Frage 1" + " von " + children.length;
+  q_overview.textContent = "Frage 1" + " von " + question_number;
   content.prepend(q_overview);
   // set attributes for QUESTIONNAIRE
-  questionnaire.setAttribute("total_questions", "" + children.length);
+  questionnaire.setAttribute("total_questions", "" + question_number);
   questionnaire.setAttribute("current_question", "1")
   // access children and append to wrapper-content
   for (let i = children.length - 1; i >= 0; i--) {
@@ -50,7 +51,8 @@ function renderQuestionaire(questionnaire: HTMLElement) {
   renderAnswers(questionnaire);
   // build question footer
   // if only one question: DO NOTHING
-  if (children.length == 1) {
+  console.log(question_number);
+  if (question_number == 1) {
     //Do NOTHING
   }
   else {

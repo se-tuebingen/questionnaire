@@ -5,6 +5,8 @@
 (require scribble/core
          scribble/html-properties
          (only-in xml cdata))
+(require scribble/base)
+(require scribble/decode)
 
 (provide questionnaire question answer explanation setup-questionnaire)
 
@@ -70,35 +72,102 @@
       (element (style #f (list explanation-tag-wrapper))
                 content))
 
+;;;;; Latex versions
+(define answer-type (cons/c boolean? (cons/c content? content?)))
+(define question-type (cons/c content? (listof answer-type)))
+(define questionnaire-type (listof question-type))
+
+; latex-renderer for questions
+(define
+  (latex-answer content)
+  (item (car (cdr content))))
+(define
+  (latex-question content)
+  (list (centered (car content))
+        (itemlist (map latex-answer (cdr content)))))
+(define
+  (latex-questions content)
+  (map latex-question content))
+
+; latex-renderer for solutions
+(define
+  (latex-solutions content) "")
+
+;;; pass content up in order to split it into questions and solutions
+; explanation
+(define/contract
+  (explanation-latex content)
+  (-> content? content?)
+  "")
+  ; content)
+
+; answer
+(define (is-no-whitespace? x)
+  (not (or (string=? "\n" x) (string=? "" x))))
+(define ;/contract
+  (answer-latex correct content)
+  (item content))
+  ; ; (-> boolean? (listof content?))
+  ; (filter is-no-whitespace? content))
+
+; question
+(define
+  (question-latex content)
+  (list (centered (car content)) (cdr content)))
+  ; (filter is-no-whitespace? content))
+
+; questionnaire
+(define
+  (questionnaire-latex content)
+  content)
+  ; (decode (list
+  ;   (subsection "Questionnaire")
+  ;   (decode content)
+  ;     ; (latex-solutions content)))
+  ; )))
+
+
+
+
+
 ;;;;;;;;;;;; Exposed Macros
 
 ; questionnaire
 (define
   (questionnaire . questions)
-  (questionnaire-tag questions)
+  (cond-element
+    [html (questionnaire-tag questions)]
+    [latex (questionnaire-latex questions)]
+  )
 )
 
 ; single question
 (define
   (question type . content)
-  (question-tag type
-    content
+  (cond-element
+    [html (question-tag type content)]
+    [latex (question-latex content)] ; todo latex implement. of mc questions
   )
 )
 
 ; answer
 (define
   (answer correct . content)
-  (answer-tag correct ;(equal? correct 1)
-    content
+  (cond-element
+    [html (answer-tag correct content)]
+    [latex (answer-latex correct content)]
   )
 )
 ; explanation
 (define
   (explanation . exp)
-  (explanation-tag exp)
+  (cond-element
+    [html (explanation-tag exp)]
+    [latex (explanation-latex exp)]
+  )
 )
 
+; script-tag to load plugin
 (define setup-questionnaire
   (paragraph
    (style
@@ -106,8 +175,3 @@
              (attributes `((type . "text/javascript")
                            (src . "questionnaire.js" )))))
    '()))
-; TODO: LaTex Output
-; (define (step)
-;   (cond-element
-;     [html (question-tag "singlechoice" "arrow")]
-;     [latex "$\\longrightarrow$"]))

@@ -137,7 +137,9 @@ function renderQuestions(questionnaire: HTMLElement) {
 // question->DOM Manipulation
 // Question Text and CollapseAll-Functionality in question-header
 function buildQuestionHeader(question: HTMLElement) {
-  let text = question.getElementsByTagName("p")[0] as HTMLParagraphElement;
+  let text = document.createElement("p");
+  text.innerHTML = (question.childNodes[0] as Text).data;
+  question.childNodes[0].remove();
   let header: HTMLDivElement = document.createElement("div");
   header.setAttribute("class", "question-header");
   question.prepend(header);

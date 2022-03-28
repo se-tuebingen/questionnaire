@@ -87,6 +87,7 @@ After compiling your HTML output, you need to copy `questionnaire.js` to the out
 - (Linus) CSS-Layout
 - (Linus)TS-Code, damit das ganze tut
 - (Flo)(html passt schon, latex todo) Scribbl-Modul schreiben
+- Scribble-Testcase für arbiträren Fragen/Antwort-Inhalt (Code, Bilder...)
 - Testcases ausbauen: Ungültige Inhalte?
 - Freundliche Fehlermeldungen
 - Continuous Integration via GitHub Workflows

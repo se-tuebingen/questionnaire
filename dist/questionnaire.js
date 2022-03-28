@@ -46,19 +46,25 @@ function renderQuestionaire(questionnaire) {
     renderQuestions(questionnaire);
     renderAnswers(questionnaire);
     // build question footer
-    var footer = makeDiv("question-footer");
-    content.append(footer);
-    //build 2 buttons
-    var prev_button = makeDiv("change-question-button");
-    var next_button = makeDiv("change-question-button");
-    prev_button.setAttribute("id", "prev_button");
-    next_button.setAttribute("id", "next_button");
-    prev_button.setAttribute("style", "visibility:hidden;");
-    prev_button.textContent = "prev";
-    next_button.textContent = "next";
-    prev_button.addEventListener("click", questionChangeHandler);
-    next_button.addEventListener("click", questionChangeHandler);
-    footer.append(prev_button, next_button);
+    // if only one question: DO NOTHING
+    if (children.length == 1) {
+        //Do NOTHING
+    }
+    else {
+        var footer = makeDiv("question-footer");
+        content.append(footer);
+        //build 2 buttons
+        var prev_button = makeDiv("change-question-button");
+        var next_button = makeDiv("change-question-button");
+        prev_button.setAttribute("id", "prev_button");
+        next_button.setAttribute("id", "next_button");
+        prev_button.setAttribute("style", "visibility:hidden;");
+        prev_button.textContent = "prev";
+        next_button.textContent = "next";
+        prev_button.addEventListener("click", questionChangeHandler);
+        next_button.addEventListener("click", questionChangeHandler);
+        footer.append(prev_button, next_button);
+    }
 }
 //questionChangeHandler
 //EventHandler -> DOM Manipulation

@@ -49,22 +49,27 @@ function renderQuestionaire(questionnaire: HTMLElement) {
   renderQuestions(questionnaire);
   renderAnswers(questionnaire);
   // build question footer
-  let footer: HTMLDivElement = makeDiv("question-footer");
-  content.append(footer);
+  // if only one question: DO NOTHING
+  if (children.length == 1) {
+    //Do NOTHING
+  }
+  else {
+    let footer: HTMLDivElement = makeDiv("question-footer");
+    content.append(footer);
 
-  //build 2 buttons
-  let prev_button: HTMLDivElement = makeDiv("change-question-button");
-  let next_button: HTMLDivElement = makeDiv("change-question-button");
-  prev_button.setAttribute("id", "prev_button");
-  next_button.setAttribute("id", "next_button");
-  prev_button.setAttribute("style","visibility:hidden;");
-  prev_button.textContent = "prev";
-  next_button.textContent = "next";
-  prev_button.addEventListener("click", questionChangeHandler);
-  next_button.addEventListener("click", questionChangeHandler);
-  footer.append(prev_button, next_button);
+    //build 2 buttons
+    let prev_button: HTMLDivElement = makeDiv("change-question-button");
+    let next_button: HTMLDivElement = makeDiv("change-question-button");
+    prev_button.setAttribute("id", "prev_button");
+    next_button.setAttribute("id", "next_button");
+    prev_button.setAttribute("style", "visibility:hidden;");
+    prev_button.textContent = "prev";
+    next_button.textContent = "next";
+    prev_button.addEventListener("click", questionChangeHandler);
+    next_button.addEventListener("click", questionChangeHandler);
+    footer.append(prev_button, next_button);
+  }
 }
-
 //questionChangeHandler
 //EventHandler -> DOM Manipulation
 function questionChangeHandler(this: HTMLElement) {

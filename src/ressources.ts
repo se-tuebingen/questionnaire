@@ -73,7 +73,8 @@ export const style = `body {
 }
 
 questionnaire{
-
+  display:block;
+  margin:40px 0 100px ;
 }
 
 .wrapper-content {
@@ -82,12 +83,18 @@ questionnaire{
   flex-direction: column;
   margin: 10px;
   padding: 10px;
+  justify-content: center;
 }
-
-/*.wrapper-content [visible="true"]*/
-question {
+question{
+  display:none;
+}
+.question-overview{
+margin: 0 auto 10px;
+font-size:1.1em;
+}
+question{
   width: 90%;
-  margin: 40px auto;
+  margin: 15px auto 15px;
   font-size: 18pt;
   padding:4vw;
   background-color: #fcfcfc;
@@ -106,7 +113,11 @@ question {
   justify-content: center;
 }
 
-.wrapper-answer, answer [visible="true"] {
+[visible=true]{
+    display:block;
+}
+
+.wrapper-answer, answer [visible=true] {
   border: 1px solid #eee;
   padding: 5px 12px;
   font-size: 14pt;
@@ -137,9 +148,9 @@ explanation {
   /*max-width: 30vw;*/
 }
 
-answer [visible="true"] {
-  display: block;
-  margin: 5px 0 30px;
+answer [visible=true] {
+
+  margin: 5px 0 20px;
   padding: 15px 12px;
   font-size: 12pt;
   word-break: break-word;
@@ -147,7 +158,7 @@ answer [visible="true"] {
   background-color: #fdfdfd;
 }
 
-answer [visible="true"] p {
+answer [visible=true] p {
   border: 0;
 }
 
@@ -155,18 +166,21 @@ img {
   height: auto;
   width: 20px;
 }
-[clicked="true"][correct="true"] .wrapper-answer{
-  background-color:green;
+
+[clicked=true] .wrapper-answer, [clicked=true] .wrapper-answer:hover{
+  background-color:#d30000;
 }
-[clicked="true"] .wrapper-answer, [clicked="true"] .wrapper-answer:hover{
-  background-color:darkred;
+
+[clicked=true][correct=true] .wrapper-answer{
+  background-color:#aceb84;
 }
 
 .change-question-button{
-  padding:20px;
-  margin:30px 30px 0;
+  padding:15px;
+  margin:15px 15px 0;
   border: 4px solid #bbb;
   border-radius: 7px;
+  font-size:1.3em;
 }
 .change-question-button:hover{
   background-color: #bbb;
@@ -174,7 +188,7 @@ img {
 
 @media (min-width: 768px) {
   question {
-    max-width: 800px;
+    max-width: 500px;
   }
 }`;
 }

@@ -16,7 +16,7 @@ function setup() {
     // render every questionnaire in the HTML Document
     for (var i = q_col.length - 1; i >= 0; i--) {
         var questionnaire = q_col[i];
-        renderQuestionaire(questionnaire, i);
+        renderQuestionaire(questionnaire);
     }
 }
 window.onload = setup;
@@ -25,79 +25,100 @@ window.onload = setup;
 // build wrapper-<div> and <img>-icons for
 // - answer
 // - question
-function renderQuestionaire(questionnaire, j) {
+function renderQuestionaire(questionnaire) {
     console.log(questionnaire);
     //build wrapper-content
-    var content = document.createElement("div");
-    content.setAttribute("class", "wrapper-content");
+    var content = makeDiv("wrapper-content");
     var children = questionnaire.children;
+    // prepend question-overview
+    var q_overview = makeDiv("question-overview");
+    q_overview.textContent = "Frage 1" + " von " + children.length;
+    content.prepend(q_overview);
+    // set attributes for QUESTIONNAIRE
+    questionnaire.setAttribute("total_questions", "" + children.length);
+    questionnaire.setAttribute("current_question", "1");
     // access children and append to wrapper-content
     for (var i = children.length - 1; i >= 0; i--) {
         content.append(children[i]);
     }
     questionnaire.prepend(content);
     //render Questions + Answers
-    renderQuestions(questionnaire, j);
+    renderQuestions(questionnaire);
     renderAnswers(questionnaire);
+    // build question footer
+    var footer = makeDiv("question-footer");
+    content.append(footer);
+    //build 2 buttons
+    var prev_button = makeDiv("change-question-button");
+    var next_button = makeDiv("change-question-button");
+    prev_button.setAttribute("id", "prev_button");
+    next_button.setAttribute("id", "next_button");
+    prev_button.setAttribute("style", "visibility:hidden;");
+    prev_button.textContent = "prev";
+    next_button.textContent = "next";
+    prev_button.addEventListener("click", questionChangeHandler);
+    next_button.addEventListener("click", questionChangeHandler);
+    footer.append(prev_button, next_button);
+}
+//questionChangeHandler
+//EventHandler -> DOM Manipulation
+function questionChangeHandler() {
+    var _a, _b, _c, _d;
+    // get Questionnaire attributes
+    var button = this.getAttribute("id");
+    var questionnaire = (_b = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.parentElement;
+    var min_qid = 0;
+    var max_qid = parseInt(questionnaire.getAttribute("total_questions")) - 1;
+    var current_qid = parseInt(questionnaire.getAttribute("current_question")) - 1;
+    var questions = questionnaire.getElementsByTagName("question");
+    // change question
+    if (button == "prev_button") {
+        questions[current_qid].removeAttribute("visible");
+        questions[current_qid - 1].setAttribute("visible", "true");
+        var str_current = current_qid.toString();
+        questionnaire.setAttribute("current_question", str_current);
+        questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
+        //hide button if first question
+        if (current_qid - 1 == min_qid) {
+            this.setAttribute("style", "visibility:hidden;");
+        }
+        (_c = this.nextElementSibling) === null || _c === void 0 ? void 0 : _c.setAttribute("style", "visibility:visible;");
+    }
+    else if (button == "next_button") {
+        questions[current_qid].removeAttribute("visible");
+        questions[current_qid + 1].setAttribute("visible", "true");
+        //change questionnaire attributes
+        var str_current = (current_qid + 2).toString();
+        questionnaire.setAttribute("current_question", str_current);
+        //change question overview
+        questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
+        // hide button if last question
+        if (current_qid + 1 == max_qid) {
+            this.setAttribute("style", "visibility:hidden;");
+        }
+        (_d = this.previousElementSibling) === null || _d === void 0 ? void 0 : _d.setAttribute("style", "visibility:visible;");
+    }
+    else {
+        console.log("No Button caused this EventHandler", button);
+    }
+    // hide buttons, if last / first question
+    console.log(current_qid, max_qid, min_qid);
 }
 // renderQuestions
 // for every question:
 // add <div>-wrapper + <img>-icon (done)
 // add EventListener for CollapseAll-Function
-function renderQuestions(questionnaire, j) {
+function renderQuestions(questionnaire) {
     // get wrapper-content
     var wrapper_content = questionnaire.firstChild;
     var questions = questionnaire.getElementsByTagName("question");
-    questions[1].setAttribute("visible", "true");
-    for (var i = questions.length - 1; i >= 0; i--) {
+    var lastIndex = questions.length - 1;
+    questions[lastIndex].setAttribute("visible", "true");
+    for (var i = lastIndex; i >= 0; i--) {
         var question = questions[i];
         buildQuestionHeader(question);
-        // build question footer
-        var footer = document.createElement("div");
-        footer.setAttribute("class", "question-footer");
-        question.append(footer);
-        //build 2 buttons
-        var prev_button = makeDiv("change-question-button");
-        var next_button = makeDiv("change-question-button");
-        prev_button.setAttribute("id", "prev_button");
-        next_button.setAttribute("id", "next_button");
-        prev_button.textContent = "prev";
-        next_button.textContent = "next";
-        prev_button.addEventListener("click", prevQuestion);
-        next_button.addEventListener("click", nextQuestion);
-        footer.append(prev_button, next_button);
-        //create question_ids
-        question.setAttribute("id", j + "-question_id-" + i);
         //append question to wrapper-content
         wrapper_content.append(question);
-    }
-}
-//previousQuestion
-//EventHandler -> DOM Manipulation
-function prevQuestion() {
-    var _a;
-    var question = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement;
-    var prev_question = question.previousSibling;
-    if (prev_question == null) {
-        //DO NOTHING
-    }
-    else {
-        question.removeAttribute("visible");
-        prev_question.setAttribute("visible", "true");
-    }
-}
-//nextQuestion
-//EventHandler -> DOM Manipulation
-function nextQuestion() {
-    var _a;
-    var question = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement;
-    var next_question = question.nextSibling;
-    if (next_question == null) {
-        //DO NOTHING
-    }
-    else {
-        question.removeAttribute("visible");
-        next_question.setAttribute("visible", "true");
     }
 }
 // question->DOM Manipulation
@@ -217,220 +238,14 @@ function makeDiv(css_name) {
 // function (){
 //
 // }
-var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
-    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
-    return cooked;
-};
 var Ressources;
 (function (Ressources) {
     Ressources.angle_left_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAy\nNTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt\nIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l\nLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp\nY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMTkyIDQ0OGMtOC4xODggMC0xNi4zOC0zLjEyNS0y\nMi42Mi05LjM3NWwtMTYwLTE2MGMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNWwxNjAt\nMTYwYzEyLjUtMTIuNSAzMi43NS0xMi41IDQ1LjI1IDBzMTIuNSAzMi43NSAwIDQ1LjI1TDc3\nLjI1IDI1NmwxMzcuNCAxMzcuNGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1QzIwOC40\nIDQ0NC45IDIwMC4yIDQ0OCAxOTIgNDQ4eiIvPjwvc3ZnPg==\n";
-    Ressources.check_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAg\nCA0\n\n\nDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc2\ntZ\nSAt\n\nIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRh\n\nVzb21l\n\nLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMD\n\nyIEZvbnR\n\nY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDM4LjYgMTA1LjRDNDUxLjEgMTE3\n\njkgNDUxLj\ng\nMTM4LjEgNDM4LjYgMTUwLjZMMTgyLjYgNDA2LjZDMTcwLjEgNDE5LjEgM\n\n5LjkgNDE5L\nEg\nMTM3LjQgNDA2LjZMOS4zNzIgMjc4LjZDLTMuMTI0IDI2Ni4xLTMuMT\nI0\nDI0NS45IDku\nzcy IDIzMy40QzIxLjg3IDIyMC45IDQyLjEzIDIyMC45IDU0LjYzIDI\nMy4\nTDE1OS4xIDMz\nC43 TDM5My40IDEwNS40QzQwNS45IDkyLjg4IDQyNi4xIDkyLjg4IDQzOC\n2IDEwNS40SDQzOC42 eiIvPjwvc3ZnPg==\n";
-    Ressources.circle_regular = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9I\nAgM\nA1 MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdl\n29tZ\nAt IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnR\nd2Vzb\n1l LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMD\nyIEZvb\nRp Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNTEyIDI1NkM1MTIgMzk3LjQgMzk3L\nQgNTEyI\nI1 NiA1MTJDMTE0LjYgNTEyIDAgMzk3LjQgMCAyNTZDMCAxMTQuNiAxMTQuNiAw\nDI1NiAwQ\nM5 Ny40IDAgNTEyIDExNC42IDUxMiAyNTZ6TTI1NiA0OEMxNDEuMSA0OCA0OCA\nNDEuMSA0O\nAy NTZDNDggMzcwLjkgMTQxLjEgNDY0IDI1NiA0NjRDMzcwLjkgNDY0IDQ2NC\nzNzAuOSA0N\nQg MjU2QzQ2NCAxNDEuMSAzNzAuOSA0OCAyNTYgNDh6Ii8+PC9zdmc+\n";
-    e(__makeTemplateObject([";\nexport c\nnst plus_so\nl id = "], [";\nexport c\nnst plus_so\nl id = "]));
-    data: i;
-    mage / svg + xm;
-    l;
-    base64, PHN;
-    2;
-    ZyB4bWxucz0iaHR0;
-    DovL3d;
-    d;
-    53;
-    My5vcmcvMjAw;
-    C;
-    zdmciIHZpZXdCb3g9I;
-    jAgMCA0;
-    NDggNTE;
-    y;
-    Ij48I;
-    0;
-    tISBGb250;
-    I;
-    EF3ZXNvbWUgUHJvIDYuMS4w;
-    I;
-    GJ5IEBmb250YX;
-    dlc29tZSAt;
-    IGh0;
-    H;
-    zOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2Ug;
-    SBodHRwczo;
-    vL2ZvbnRhd2V;
-    zb21l;
-    LmNvbS9saWNlb;
-    n;
-    NlIChDb21tZXJjaW;
-    F;
-    sIExpY2Vuc2U;
-    pIENvcHlyaWdodCAyMDIyIEZvbn;
-    p;
-    Y29ucywgSW5jLier, .question - footAtLT48cGF0aCBkPSJNNDM;
-    y;
-    IDI1NmMwIDE3LjY5LTE0L;
-    j;
-    MzIDMyLjAxLT;
-    y;
-    IDMyLjAxSDI1NnYxND;
-    R;
-    jMCAxNy42OS0xNC4zMyAzMS45OS0zMi;
-    z
-        .question - footer;
-    {
-        M;
-        justify - content;
-        center;
-    }
-    S45OXMtMzItMTQuMy0z;
-    Mi0zMS45OXYtMTQ0SDQ4Yy;
-    0x;
-    Ny42NyAwLTMyLTE0LjMyLT;
-    MyLTMyLjAxczE0LjMzL;
-    T;
-    MxLjk5;
-    IDMyLTMxL;
-    jk5SDE5MnYtMTQ0YzAtMT;
-    c;
-    uNjkgMTQuM;
-    M;
-    MzIuMDEgMz;
-    ItMzIuMDFzMzIgMTQu;
-    MzIgMzIgMzIuMDF2MTQ;
-    0;
-    aDE0NEM0MTcuN;
-    yAyMjQgNDMyIDIzOC4zIDQzM;
-    iAyNTZ6Ii8 + PC9;
-    mc +
-        ";\nexport const xmark_solid ,=.change-question-button:hover  \n";
-    data: image / svg + x;
-    ml;
-    base64, PHN2ZyB4bWxucz0iaH;
-    0;
-    DovL3d3dy53My5vcmcvMjAw;
-    M;
-    C9zdmciIHZpZXdCb3g9IjAg;
-    C;
-    z;
-    MjAgNTEyIj4;
-    8;
-    IS0tISBGb250IE;
-    F3ZXNvbWUgUHJvIDYuMS4;
-    I;
-    J5IEBmb250YXdlc29tZSAt;
-    IG;
-    h;
-    0;
-    dHBzOi8vZm9udG;
-    F;
-    3;
-    ZXNvbWUuY29tIExpY2;
-    Vuc2UgLSBodHRwczovL2;
-    Z;
-    vbnRhd2Vzb21l;
-    Lm;
-    N;
-    vbS9saWNlbnNlIChDb21tZX;
-    JjaWFsIExp;
-    Y2Vuc2UpIENvcHlyaWdodCAyMDI;
-    I;
-    ZvbnRp;
-    Y29ucywgSW5jLiAtLT48;
-    c;
-    GF0aCBkPSJ;
-    M;
-    EwLjY;
-    g;
-    MzYxLjRjMTIuj;
-    OY0MTYgMj2IDQx;
-    t;
-    TYuMzgtMy4xMjUt;
-    MjIuNjItOS4zNzVMMTYwIDMwMS4zTDU0L;
-    j;
-    YzIDQwNi42QzQ4LjM4IDQxM;
-    4[clicked = "true"];
-    5.;
-    wrapper - answer, IDQwLjE5IDQx;
-    NiAzMiA0MTZTMTUuNer: hovjMg;
-    N;
-    DEyLjkgOS4zNzUor: darkred;
+    Ressources.angle_right_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAy\nNTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt\nIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l\nLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp\nY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNjQgNDQ4Yy04LjE4OCAwLTE2LjM4LTMuMTI1LTIy\nLjYyLTkuMzc1Yy0xMi41LTEyLjUtMTIuNS0zMi43NSAwLTQ1LjI1TDE3OC44IDI1Nkw0MS4z\nOCAxMTguNmMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNXMzMi43NS0xMi41IDQ1LjI1\nIDBsMTYwIDE2MGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1bC0xNjAgMTYwQzgwLjM4\nIDQ0NC45IDcyLjE5IDQ0OCA2NCA0NDh6Ii8+PC9zdmc+\n";
+    Ressources.check_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0\nNDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt\nIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l\nLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp\nY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDM4LjYgMTA1LjRDNDUxLjEgMTE3LjkgNDUxLjEg\nMTM4LjEgNDM4LjYgMTUwLjZMMTgyLjYgNDA2LjZDMTcwLjEgNDE5LjEgMTQ5LjkgNDE5LjEg\nMTM3LjQgNDA2LjZMOS4zNzIgMjc4LjZDLTMuMTI0IDI2Ni4xLTMuMTI0IDI0NS45IDkuMzcy\nIDIzMy40QzIxLjg3IDIyMC45IDQyLjEzIDIyMC45IDU0LjYzIDIzMy40TDE1OS4xIDMzOC43\nTDM5My40IDEwNS40QzQwNS45IDkyLjg4IDQyNi4xIDkyLjg4IDQzOC42IDEwNS40SDQzOC42\neiIvPjwvc3ZnPg==\n";
+    Ressources.circle_regular = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1\nMTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt\nIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l\nLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp\nY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNTEyIDI1NkM1MTIgMzk3LjQgMzk3LjQgNTEyIDI1\nNiA1MTJDMTE0LjYgNTEyIDAgMzk3LjQgMCAyNTZDMCAxMTQuNiAxMTQuNiAwIDI1NiAwQzM5\nNy40IDAgNTEyIDExNC42IDUxMiAyNTZ6TTI1NiA0OEMxNDEuMSA0OCA0OCAxNDEuMSA0OCAy\nNTZDNDggMzcwLjkgMTQxLjEgNDY0IDI1NiA0NjRDMzcwLjkgNDY0IDQ2NCAzNzAuOSA0NjQg\nMjU2QzQ2NCAxNDEuMSAzNzAuOSA0OCAyNTYgNDh6Ii8+PC9zdmc+\n";
+    Ressources.minus_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0\nNDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt\nIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l\nLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp\nY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMy\nLTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTMxLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIg\nMzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8+PC9zdmc+\n";
+    Ressources.plus_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0\nNDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt\nIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l\nLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp\nY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDMyIDI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMy\nIDMyLjAxSDI1NnYxNDRjMCAxNy42OS0xNC4zMyAzMS45OS0zMiAzMS45OXMtMzItMTQuMy0z\nMi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5\nIDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQu\nMzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8+PC9z\ndmc+\n";
+    Ressources.xmark_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAz\nMjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt\nIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l\nLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp\nY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIu\nNzUgMCA0NS4yNUMzMDQuNCA0MTIuOSAyOTYuMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUt\nMjIuNjItOS4zNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQx\nNiAzMiA0MTZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1\nIDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1\nIDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41\nLTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1\nLjRMMzEwLjYgMzYxLjR6Ii8+PC9zdmc+\n";
+    Ressources.style = "body {\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  font-family: monospace;\n}\n\nquestionnaire{\n  display:block;\n  margin:40px 0 100px ;\n}\n\n.wrapper-content {\n  display: flex;\n  flex-wrap: wrap;\n  flex-direction: column;\n  margin: 10px;\n  padding: 10px;\n  justify-content: center;\n}\nquestion{\n  display:none;\n}\n.question-overview{\nmargin: 0 auto 10px;\nfont-size:1.1em;\n}\nquestion{\n  width: 90%;\n  margin: 15px auto 15px;\n  font-size: 18pt;\n  padding:4vw;\n  background-color: #fcfcfc;\n}\n\n.question-header, .question-footer, .wrapper-answer {\n  display: inline-flex;\n  width: 100%;\n}\n\n.question-header {\n  justify-content: space-between;\n}\n\n.question-footer{\n  justify-content: center;\n}\n\n[visible=true]{\n    display:block;\n}\n\n.wrapper-answer, answer [visible=true] {\n  border: 1px solid #eee;\n  padding: 5px 12px;\n  font-size: 14pt;\n  margin: 15px 0 10px;\n  width:90%;\n}\n\nanswer p {\n  margin-left: 16px;\n  /*font-size: 12pt;\n  padding: 6px;\n  border: 1px solid #000;\n  width:100%;*/\n}\n\n.wrapper-answer:hover, img:hover, .change-question-button:hover {\n  cursor: pointer;\n  /*background-color: #ddd;*/\n}\n\n.wrapper-answer:hover {\n  background-color: #eee;\n}\n\n\nexplanation {\n  display: none;\n  /*max-width: 30vw;*/\n}\n\nanswer [visible=true] {\n\n  margin: 5px 0 20px;\n  padding: 15px 12px;\n  font-size: 12pt;\n  word-break: break-word;\n  border:0;\n  background-color: #fdfdfd;\n}\n\nanswer [visible=true] p {\n  border: 0;\n}\n\nimg {\n  height: auto;\n  width: 20px;\n}\n\n[clicked=true] .wrapper-answer, [clicked=true] .wrapper-answer:hover{\n  background-color:#d30000;\n}\n\n[clicked=true][correct=true] .wrapper-answer{\n  background-color:#aceb84;\n}\n\n.change-question-button{\n  padding:15px;\n  margin:15px 15px 0;\n  border: 4px solid #bbb;\n  border-radius: 7px;\n  font-size:1.3em;\n}\n.change-question-button:hover{\n  background-color: #bbb;\n}\n\n@media (min-width: 768px) {\n  question {\n    max-width: 500px;\n  }\n}";
 })(Ressources || (Ressources = {}));
-change - question - button;
-{
-    padding: 20;
-    px;
-    margin: 30;
-    px;
-    30;
-    px;
-    0;
-    bgrdeND;
-    4;
-    px;
-    solid;
-    #bbb;
-    borAer - r2dius;
-    7;
-    px;
-}
-change - question - button;
-hoveL;
-{
-    bacjgZound - color;
-    #bbb;
-}
-{
-    question;
-    {
-        max - width;
-        800;
-        pxT;
-        E;
-    }
-    yLjUtMTIuNS0xMi41LTMyLjc1;
-    IDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1;
-    IDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41;
-    LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1;
-    LjRMMzEwLjYgMzYxLjR6Ii8 + PC9zdmc +
-        ";port const minus_solid = ";
-    data: image / svg + xml;
-    base64, PHN2ZyB4bWxucz0iaH;
-    NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt;
-    IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSB;
-    export var plus_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0 Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMy LTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTMxLjk5aDM1MmMxNy42OSAwIDMy\n\nDE0LjMgMzIg MzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8+PC9zdmc+\n";
-    export var plus_solid;
-    export var plus_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0i export const plus_solid = ", data;
-    /svg+xml;base64,PHN2ZyB4bWxucz0iaHR NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp Y29ucyw export const xmark_solid = `data:image/svg + xml;
-    base64, PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAz;
-    Mi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5;
-    IDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQu;
-    MzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8 + PC9z;
-    dmc +
-        ";\nexport const xmark_solid = ";
-    data: image / svg + xml;
-    base64, PHN2ZyB4bW;
-    export var xmark_solid = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0 export const xmark_solid = ", data;
-    /svg+xml;base64,PHN2ZyB4bWxucz0iaH MjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIu NzUgMCA0NS4yNUMzMDQuNCA0MTIuOSAyOTY export const style = `body { width: 100%; margin: 0; padding: 0; font-family: monospace; } questionnaire{ } .wrapper-content { display: flex; flex-wrap: wrap; flex-direction: column; margin: 10px; padding: 10px; } / * .wrapper - content[visible = "true"] * / question { width: 90%; margin: 40px auto; font-size: 18pt; padding:4vw; background-color: #fcfcfc; } .question-header, .wrapper-answer { display: inline-flex; width: 100%; } .question-header { justify-content: space-between; } .wrapper-answer, answer [visible="true"] { border: 1px solid #eee; padding: 5px 12px; font-size: 14pt; margin: 15px 0 10px; width:90%; } answer p { margin-left: 16px; / * font - size;
-    12;
-    pt;
-    padding: 6;
-    px;
-    border: 1;
-    px;
-    solid;
-    #;
-    000;
-    width: 100 % ;
-     * / } .wrapper-answer:hover, img:hover { cursor: pointer; / * background - color;
-    #ddd;
-     * / } .wrapper-answer:hover { background-color: #eee; } explanation { display: none; / * max - width;
-    30;
-    vw;
-     * / } answer [visible="true"] { display: block; margin: 5px 0 30px; padding: 15px 12px; font-size: 12pt; word-break: break-word; border:0; background-color: #fdfdfd; } answer [visible="true"] p { border: 0; } img { height: auto; width: 20px; } @media (min-width: 768px) { question { max-width: 800px; } } [clicked="true"][correct="true"] .wrapper-answer{ background-color:green; } [clicked="true"] .wrapper-answer{ background-color:darkred; } b };
-    {
-        question;
-        {
-            max - width;
-            800;
-            px;
-        }
-    }
-    ";\n}\n";
-}

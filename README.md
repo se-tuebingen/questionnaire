@@ -86,25 +86,8 @@ After compiling your HTML output, you need to copy `questionnaire.js` to the out
 - (beide, done) Entwurf für HTML-Interface überlegen
 - (Linus) CSS-Layout
 - (Linus)TS-Code, damit das ganze tut
-- (Flo) Scribbl-Modul schreiben
-
-<!--
-<questionnaire>
-  <question type="multiplechoice">
-    Thank you for your interest, do you have any questions regarding the questionnaire module?
-    <answer correct="true">
-      Yes
-      <explanation>
-        Feel free to open up an issue and reach out!
-      </explanation>
-    </answer>
-    <answer correct="true">
-      No
-      <explanation>
-        Have a nice day!
-      </explanation>
-    </answer>
-  </question>
-</questionnaire>
-
-<script src="dist/questionnaire.js"></script>-->
+- (Flo)(html passt schon, latex todo) Scribbl-Modul schreiben
+- Testcases ausbauen: Ungültige Inhalte?
+- Freundliche Fehlermeldungen
+- Continuous Integration via GitHub Workflows
+- Bug bei nur einer Frage in Questionnaire entfernen

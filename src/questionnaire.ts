@@ -18,7 +18,7 @@ function setup() {
   // render every questionnaire in the HTML Document
   for (let i = q_col.length - 1; i >= 0; i--) {
     let questionnaire: HTMLElement = q_col[i] as HTMLElement;
-    renderQuestionaire(questionnaire);
+    renderQuestionaire(questionnaire, i);
   }
 }
 window.onload = setup;
@@ -29,7 +29,7 @@ window.onload = setup;
 // - answer
 // - question
 
-function renderQuestionaire(questionnaire: HTMLElement) {
+function renderQuestionaire(questionnaire: HTMLElement, j:number) {
   console.log(questionnaire);
   //build wrapper-content
   let content: HTMLDivElement = document.createElement("div");
@@ -43,7 +43,7 @@ function renderQuestionaire(questionnaire: HTMLElement) {
   questionnaire.prepend(content);
 
   //render Questions + Answers
-  renderQuestions(questionnaire);
+  renderQuestions(questionnaire, j);
   renderAnswers(questionnaire);
 }
 
@@ -51,7 +51,7 @@ function renderQuestionaire(questionnaire: HTMLElement) {
 // for every question:
 // add <div>-wrapper + <img>-icon (done)
 // add EventListener for CollapseAll-Function
-function renderQuestions(questionnaire: HTMLElement) {
+function renderQuestions(questionnaire: HTMLElement, j:number) {
   // get wrapper-content
   let wrapper_content = questionnaire.firstChild as HTMLDivElement;
   let questions: HTMLCollection = questionnaire.getElementsByTagName("question");
@@ -59,7 +59,6 @@ function renderQuestions(questionnaire: HTMLElement) {
   for (let i = questions.length - 1; i >= 0; i--) {
     let question: HTMLElement = questions[i] as HTMLElement;
     buildQuestionHeader(question);
-
     // build question footer
     let footer: HTMLDivElement = document.createElement("div");
     footer.setAttribute("class", "question-footer");
@@ -75,6 +74,8 @@ function renderQuestions(questionnaire: HTMLElement) {
     prev_button.addEventListener("click", prevQuestion);
     next_button.addEventListener("click", nextQuestion);
     footer.append(prev_button, next_button);
+    //create question_ids
+    question.setAttribute("id",j + "-question_id-"+ i);
     //append question to wrapper-content
     wrapper_content.append(question);
   }
@@ -91,6 +92,7 @@ function prevQuestion(this: HTMLElement) {
   else {
     question.removeAttribute("visible");
     prev_question.setAttribute("visible", "true");
+
   }
 }
 //nextQuestion

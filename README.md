@@ -5,7 +5,17 @@
 This is sort of an exchange playground for Linus and Florian to develop
 HTML/JS Modules for use in lecture materials.
 
-## How to compile
+## Development
+
+### Requirements
+
+For the JavaScript module, [TypeScript](https://www.typescriptlang.org/download) is required. Once you have [nodejs](https://nodejs.org/en/download/) installed, you can simply run `npm install -g typescript`.
+
+For the Scribble module, you need to have [Racket](https://download.racket-lang.org/) installed. For PDF-Generation, you also need to have LaTex installed, more specifically on Linux Systems the `texlive-extra` and `texlive-fonts-extra` packages.
+
+For the time being, this repository uses bash for helper scripts, which should work fine on Linux and Mac Systems, for Windows users an emulator like Cygwin or Mingw should do.
+
+### Compilation and Targets
 
 Executing `tsc` in project root creates the single-file drop-in questionnaire module from the `src` folder.
 

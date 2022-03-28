@@ -121,6 +121,6 @@ img {
 
 @media (min-width: 768px) {
   question {
-    max-width: 500px;
+    max-width: 600px;
   }
 }

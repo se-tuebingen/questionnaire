@@ -88,6 +88,9 @@ After compiling your HTML output, you need to copy `questionnaire.js` to the out
 - (Linus)TS-Code, damit das ganze tut
 - (L)Frage mit Typ außerhalb von Text (Image + Text als Frage, Image als Antwort)
 - (L)Code cleanen
+- (L) Feature: Anzeige für ANzahl richtiger Antworten
+- (L) github-workflow bauen
+- (L) Fehlermeldung: built-fail, falsche Syntax bei Fragen ausgeben 
 - (Flo)(html passt schon, latex todo) Scribbl-Modul schreiben
 - Scribble-Testcase für arbiträren Fragen/Antwort-Inhalt (Code, Bilder...)
 - Testcases ausbauen: Ungültige Inhalte?

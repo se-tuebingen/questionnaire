@@ -86,6 +86,8 @@ After compiling your HTML output, you need to copy `questionnaire.js` to the out
 - (beide, done) Entwurf für HTML-Interface überlegen
 - (Linus) CSS-Layout
 - (Linus)TS-Code, damit das ganze tut
+- (L)Frage mit Typ außerhalb von Text (Image + Text als Frage, Image als Antwort)
+- (L)Code cleanen
 - (Flo)(html passt schon, latex todo) Scribbl-Modul schreiben
 - Scribble-Testcase für arbiträren Fragen/Antwort-Inhalt (Code, Bilder...)
 - Testcases ausbauen: Ungültige Inhalte?

@@ -9,8 +9,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Test a shell-script
-        run: sh ./.github/scripts/test.sh
       - name: Install Racket
         uses: Bogdanp/setup-racket@v1.7
         with:

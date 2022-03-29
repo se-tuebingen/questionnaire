@@ -19,7 +19,12 @@ jobs:
           variant: 'CS'
           version: 'stable'
       - run: raco pkg install --deps search-auto scribble-math
+      - name: Install TexLive
+        run: sudo apt install tex-live-extra texlive-fonts-extra
       - name: Install TypeScript
         run: npm install -g typescript
-      - name: Test Scribble-Plugin
-        run: sh ./scribble-plugin/test.sh
+      - name: Copying current version of Questionnaire.js
+        run: cp dist/questionnaire.js .
+      - name: Generate html-files
+        run: raco scribble --htmls --dest output/html scribble-plugin/test.scrbl
+      ##  run: sh ./scribble-plugin/test.sh

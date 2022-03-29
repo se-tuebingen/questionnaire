@@ -20,7 +20,7 @@ jobs:
           version: 'stable'
       - run: raco pkg install --deps search-auto scribble-math
       - name: Install TexLive
-        run: sudo apt install tex-live-extra texlive-fonts-extra
+        run: sudo apt install texlive-extra texlive-fonts-extra
       - name: Install TypeScript
         run: npm install -g typescript
       - name: Copying current version of Questionnaire.js

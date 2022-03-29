@@ -14,23 +14,30 @@
 (define questiontypes (or/c "singlechoice" "multiplechoice"))
  ; one-of does not work with strings
 
-(struct answer-container (correct text explanation))
-;                         boolean content content
+(struct/contract answer-container (
+  [correct boolean?]
+  [text content?]
+  [explanation content?]))
 
-(struct question-container (type text answers))
-;                 questiontypes content (listof answer-container)
+(struct/contract question-container (
+  [type questiontypes]
+  [text content?]
+  [answers (listof answer-container?)]))
+
+(struct/contract questionnaire-container (
+  [questions (listof question-container?)]))
 
 ;;;;;;;;;;; HTML Part
 (define/contract
-  (render-html questions)
-  (-> (listof question-container?) any)
+  (render-html questionnaire)
+  (-> questionnaire-container? any)
   ""
 )
 
 ;;;;;;;;;;; Latex Part
 (define/contract
-  (render-latex questions)
-  (-> (listof question-container?) any)
+  (render-latex questionnnaire)
+  (-> questionnaire-container? any)
   ""
 )
 
@@ -42,19 +49,31 @@
   (answer-container correct text explanation)
 )
 
-(define/contract
-  (question type text answers)
-  (-> questiontypes content? (listof answer-container?) question-container?)
-  (question-container type text answers)
+(define; /contract
+  (question type text . answers)
+  ; (-> questiontypes content? (listof answer-container?) question-container?)
+  (cond
+    [(not (questiontypes type))
+     (raise-argument-error 'type "A valid question type string (singlechoice or multiplechoice)" type)]
+    [(not (content? text))
+     (raise-argument-error 'text "An Element of Type content (no block, like e.g. a table or itemization)" text)]
+    [(not (andmap answer-container? answers))
+     (raise-argument-error 'answers "A list of @answer s (answer-container)" answers)]
+    [else
+     (question-container type text answers)]
+  )
 )
 
-(define/contract
-  (questionnaire questions)
-  (-> (listof question-container?) any)
-  (cond-element
-    [html (render-html questions)]
-    [latex (render-latex questions)]
-  )
+(define ; /contract
+  (questionnaire . questions)
+   ;(-> (listof question-container?) any)
+   (if (andmap question-container? questions)
+       (cond-element
+         [html (render-html (questionnaire-container questions))]
+         [latex (render-latex (questionnaire-container questions))]
+       )
+       (raise-argument-error 'questions "A list of @question s (question-container)" questions)
+   )
 )
 
 ; script-tag to load plugin

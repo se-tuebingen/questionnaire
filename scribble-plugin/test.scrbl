@@ -16,28 +16,25 @@ Questionnaire-Modul testen.
 Test einer Single-Choice-Frage:
 
 @questionnaire[
-  (list
   @question[
     "singlechoice"
     "What is this course about?"
-    (list
-        @answer[
-          #f
-          "Learning to swim"
-          "We do not have a pool"
-        ]
-        @answer[
-          #f
-          "Learning to sing"
-          "Singing is hard with masks on or network latency"
-        ]
-        @answer[
-          #t
-          "Learning to program"
-          "You are sitting at a computer, aren't you?"
-        ]
-    )
-  ])
+    @answer[
+      #f
+      "Learning to swim"
+      "We do not have a pool"
+    ]
+    @answer[
+      #f
+      "Learning to sing"
+      "Singing is hard with masks on or network latency"
+    ]
+    @answer[
+      #t
+      "Learning to program"
+      "You are sitting at a computer, aren't you?"
+    ]
+  ]
 ]
 @setup-questionnaire
 

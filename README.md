@@ -48,31 +48,44 @@ In order to use the JavaScript module, one only needs to create HTML in the corr
 
 ### Scribble-Plugin
 
-Copy the plugin to your source folder and import it with
+Copy the Scribble-Plugin and the JavaScript-Plugin (`questionnaire.rkt` *and* `questionnaire.js`) to your source folder and import it with
 ```scribble
 @(require "questionnaire.rkt")
 ```
 
-You can generate your questions in the same style as in the HTML document:
+You can generate your questions in the same style as in the HTML document (any string can also be something of type content - but be aware you are in Racket mode between angled braces):
 ```scribble
-@questionnaire{
-  @question["singlechoice"]{ @; or multiplechoice
-    Question Text
-    @answer[#t]{
-      correct answer
-      @explanation{Explanation}
-    }
-  }
-}
+@questionnaire[
+  @question[
+    "singlechoice"
+    "Question Text"
+    @answer[#t
+      "correct answer"
+      "Explanation"
+    ]
+    @answer[#f
+      "wrong answer"
+      "Explanation"
+    ]
+  ]
+  @question[
+    "multiplechoice"
+    "Question Text"
+    @answer[#t
+      "correct answer"
+      "Explanation"
+    ]
+    @answer[#f
+      "wrong answer"
+      "Explanation"
+    ]
+    @answer[#t
+      "correct answer"
+      "Explanation"
+    ]
+  ]
+]
 ```
-
-On each page, you need to generate the script tag that loads the JavaScript module:
-```scribble
-@; it does not matter where, as long as it is on the same output page - usually there is one HTML document per section
-@setup-questionnaire
-```
-
-After compiling your HTML output, you need to copy `questionnaire.js` to the output folder.
 
 ## Tests
 
@@ -92,7 +105,7 @@ After compiling your HTML output, you need to copy `questionnaire.js` to the out
 - (L) github-workflow bauen
 - (L) Fehlermeldung: built-fail, falsche Syntax bei Fragen ausgeben 
 - (Flo)(html passt schon, latex todo) Scribbl-Modul schreiben
-- Scribble-Testcase für arbiträren Fragen/Antwort-Inhalt (Code, Bilder...)
+- Scribble-Testcase für Code/Bilder in Fragen/Antworten
 - Testcases ausbauen: Ungültige Inhalte?
 - Freundliche Fehlermeldungen
 - Continuous Integration via GitHub Workflows

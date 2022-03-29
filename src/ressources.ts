@@ -18,7 +18,7 @@ questionnaire{
   margin:40px 0 100px ;
 }
 
-.wrapper-content {
+.content-wrapper {
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
@@ -67,9 +67,9 @@ question{
 }
 
 answer p {
-  margin-left: 16px;
-  /*font-size: 12pt;
+  margin: 0 0 0 16px;
   padding: 6px;
+  /*font-size: 12pt;
   border: 1px solid #000;
   width:100%;*/
 }

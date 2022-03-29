@@ -11,7 +11,7 @@ HTML/JS Modules for use in lecture materials.
 
 For the JavaScript module, [TypeScript](https://www.typescriptlang.org/download) is required. Once you have [nodejs](https://nodejs.org/en/download/) installed, you can simply run `npm install -g typescript`.
 
-For the Scribble module, you need to have [Racket](https://download.racket-lang.org/) installed. For PDF-Generation, you also need to have LaTex installed, more specifically on Linux Systems the `texlive-extra` and `texlive-fonts-extra` packages.
+For the Scribble module, you need to have [Racket](https://download.racket-lang.org/) installed. For PDF-Generation, you also need to have LaTex installed, more specifically on Linux Systems the `texlive-extra` and `texlive-fonts-extra` packages, on Mac Systems via the Homebrew-Installer `texlive`.
 
 For the time being, this repository uses bash for helper scripts, which should work fine on Linux and Mac Systems, for Windows users an emulator like Cygwin or Mingw should do.
 
@@ -99,9 +99,17 @@ You can generate your questions in the same style as in the HTML document (any s
 - (beide, done) Entwurf für HTML-Interface überlegen
 - (Linus) CSS-Layout
 - (Linus)TS-Code, damit das ganze tut
+- (L)Frage mit Typ außerhalb von Text (Image + Text als Frage, Image als Antwort)
+- (L)Code cleanen
+- (L) Feature: Anzeige für ANzahl richtiger Antworten
+- (L) github-workflow bauen
+- (L) Fehlermeldung: built-fail, falsche Syntax bei Fragen ausgeben
 - (Flo)(html passt schon, latex todo) Scribbl-Modul schreiben
 - Scribble-Testcase für Code/Bilder in Fragen/Antworten
 - Testcases ausbauen: Ungültige Inhalte?
 - Freundliche Fehlermeldungen
 - Continuous Integration via GitHub Workflows
 - Bug bei nur einer Frage in Questionnaire entfernen
+
+## MacOS Support
+- Running `raco scribble` instead of `scribble`

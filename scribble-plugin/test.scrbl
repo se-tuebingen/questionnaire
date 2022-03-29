@@ -36,7 +36,6 @@ Test einer Single-Choice-Frage:
     ]
   ]
 ]
-@setup-questionnaire
 
 @section{Multiple-Choice}
 
@@ -59,7 +58,6 @@ Test einer Multiple-Choice-Frage:
     ]
   ]
 ]
-@setup-questionnaire
 
 @section{Block mit mehreren Fragen}
 
@@ -116,4 +114,3 @@ Test eines Blocks mit mehreren Fragen
     ]
   ]
 ]
-@setup-questionnaire

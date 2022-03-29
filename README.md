@@ -48,7 +48,7 @@ In order to use the JavaScript module, one only needs to create HTML in the corr
 
 ### Scribble-Plugin
 
-Copy the plugin to your source folder and import it with
+Copy the Scribble-Plugin and the JavaScript-Plugin (`questionnaire.rkt` *and* `questionnaire.js`) to your source folder and import it with
 ```scribble
 @(require "questionnaire.rkt")
 ```
@@ -86,14 +86,6 @@ You can generate your questions in the same style as in the HTML document (any s
   ]
 ]
 ```
-
-On each page, you need to generate the script tag that loads the JavaScript module:
-```scribble
-@; it does not matter where, as long as it is on the same output page - usually there is one HTML document per section
-@setup-questionnaire
-```
-
-After compiling your HTML output, you need to copy `questionnaire.js` to the output folder.
 
 ## Tests
 

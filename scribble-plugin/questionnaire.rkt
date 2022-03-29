@@ -5,6 +5,7 @@
 (require scribble/core
          scribble/html-properties
          (only-in xml cdata))
+(require scribble/latex-properties)
 (require scribble/base)
 
 (provide questionnaire question answer)
@@ -126,12 +127,21 @@
                        (question-container-answers question)))
   )
 )
+
+(define/contract
+  (render-solutions-latex questionnaire)
+  (-> questionnaire-container? (listof block?))
+  (list (paragraph (style "inbox" '()) "TODO: Lösungen"))
+)
+
 (define/contract
   (render-latex questionnaire)
   (-> questionnaire-container? block?)
-  (nested-flow (style 'vertical-inset '())
-       (apply append (map render-question-latex
-          (questionnaire-container-questions questionnaire))))
+  (nested-flow (style 'vertical-inset (list (tex-addition #"\\newcommand{\\inbox}[1]{{\\color{blue} #1}}")))
+       (append 
+         (apply append (map render-question-latex
+          (questionnaire-container-questions questionnaire)))
+         (render-solutions-latex questionnaire)))
 )
 
 

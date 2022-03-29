@@ -1,4 +1,4 @@
-name: GitHub Actions Demo
+name: Test Workflows
 on:
   push:
     branches:
@@ -10,7 +10,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Test a shell-script
-        run: sh ./.github/scripta/test.sh
+        run: sh ./.github/scripts/test.sh
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code

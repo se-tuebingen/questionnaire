@@ -2,7 +2,7 @@ name: Generate HTML & PDF
 on:
   push:
     branches:
-      - linus
+      - master
 jobs:
   publish:
     runs-on: ubuntu-latest

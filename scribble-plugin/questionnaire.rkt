@@ -6,7 +6,6 @@
          scribble/html-properties
          (only-in xml cdata))
 (require scribble/base)
-(require scribble/decode)
 
 (provide questionnaire question answer)
 

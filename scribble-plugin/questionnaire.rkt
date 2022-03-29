@@ -17,21 +17,103 @@
 (struct/contract answer-container (
   [correct boolean?]
   [text content?]
-  [explanation content?]))
+  [explanation content?])
+  #:transparent
+)
 
 (struct/contract question-container (
   [type questiontypes]
   [text content?]
-  [answers (listof answer-container?)]))
+  [answers (listof answer-container?)])
+  #:transparent
+)
 
 (struct/contract questionnaire-container (
-  [questions (listof question-container?)]))
+  [questions (listof question-container?)])
+  #:transparent
+)
 
 ;;;;;;;;;;; HTML Part
+; questionnaire
+(define
+  questionnaire-tag-wrapper
+  (xexpr-property
+    (cdata #f #f "<questionnaire>")
+    (cdata #f #f "</questionnaire>")))
+
+(define/contract
+  (questionnaire-tag content)
+  (-> content? content?)
+      (element (style #f (list questionnaire-tag-wrapper))
+                content))
+
+;; question
+(define/contract
+  (question-tag-wrapper type)
+  (-> questiontypes xexpr-property?)
+  (xexpr-property
+    (cdata #f #f (string-append
+      "<question type=\"" type "\">"
+      ))
+    (cdata #f #f "</question>")))
+
+(define/contract
+  (question-tag type content)
+  (-> questiontypes content? content?)
+        (element (style #f (list (question-tag-wrapper type)))
+                 content))
+
+;; answer
+(define/contract
+  (answer-tag-wrapper correct)
+  (-> boolean? xexpr-property?)
+  (xexpr-property
+    (cdata #f #f (string-append
+      "<answer correct=\"" (if correct "true" "false") "\">"
+      ))
+    (cdata #f #f "</answer>")))
+
+(define/contract
+  (answer-tag correct content)
+  (-> boolean? content? content?)
+        (element (style #f (list (answer-tag-wrapper correct)))
+                 content))
+
+;; explanation
+(define
+  explanation-tag-wrapper
+  (xexpr-property
+    (cdata #f #f "<explanation>")
+    (cdata #f #f "</explanation>")))
+
+(define/contract
+  (explanation-tag content)
+  (-> content? content?)
+      (element (style #f (list explanation-tag-wrapper))
+                content))
+
+(define
+  (render-answer-html answer)
+  (answer-tag (answer-container-correct answer)
+    (list (answer-container-text answer)
+          (explanation-tag (answer-container-explanation answer)))
+  )
+)
+
+(define
+  (render-question-html question)
+  (question-tag (question-container-type question)
+    (cons (question-container-text question)
+          (map render-answer-html (question-container-answers question)))
+  )
+)
+
 (define/contract
   (render-html questionnaire)
   (-> questionnaire-container? any)
-  ""
+  (questionnaire-tag
+    (map render-question-html
+      (questionnaire-container-questions questionnaire)))
 )
 
 ;;;;;;;;;;; Latex Part

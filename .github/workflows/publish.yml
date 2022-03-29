@@ -12,7 +12,13 @@ jobs:
       - name: Test a shell-script
         run: sh ./.github/scripts/test.sh
       - name: Install Racket
-        run: raco pkg install --deps search-auto scribble-math
+        uses: Bogdanp/setup-racket@v1.7
+        with:
+          architecture: 'x64'
+          distribution: 'full'
+          variant: 'CS'
+          version: 'stable'
+      - run: raco pkg install --deps search-auto scribble-math
       - name: Install TypeScript
         run: npm install -g typescript
       - name: Test Scribble-Plugin

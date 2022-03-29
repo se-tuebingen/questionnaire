@@ -28,96 +28,59 @@ window.onload = setup;
 // - answer
 // - question
 
+// ### RENDER FUNCTIONS ###
+
 function renderQuestionaire(questionnaire: HTMLElement) {
   console.log(questionnaire);
   //build wrapper-content
-  let content: HTMLDivElement = makeDiv("wrapper-content");
-  let children = questionnaire.children as HTMLCollection;
-  let question_number:number = children.length;
-  // prepend question-overview
-  let q_overview: HTMLDivElement = makeDiv("question-overview");
-  q_overview.textContent = "Frage 1" + " von " + question_number;
-  content.prepend(q_overview);
-  // set attributes for QUESTIONNAIRE
-  questionnaire.setAttribute("total_questions", "" + question_number);
-  questionnaire.setAttribute("current_question", "1")
+  let content: HTMLDivElement = makeDiv("content-wrapper");
+  let questions = questionnaire.children as HTMLCollection;
+  let question_number: number = questions.length;
   // access children and append to wrapper-content
-  for (let i = children.length - 1; i >= 0; i--) {
-    content.append(children[i]);
+  for (let i = question_number - 1; i >= 0; i--) {
+    content.append(questions[i]);
   }
   questionnaire.prepend(content);
+  buildQuestionOverview(questionnaire, content, question_number);
   //render Questions + Answers
   renderQuestions(questionnaire);
   renderAnswers(questionnaire);
-  // build question footer
-  // if only one question: DO NOTHING
-  console.log(question_number);
+  buildQuestionnaireFooter(content, question_number);
+}
+function buildQuestionOverview(questionnaire:HTMLElement, content: HTMLDivElement, question_number:number){
+  // question-overview
+  let q_overview: HTMLDivElement = makeDiv("question-overview");
+  q_overview.textContent = "Frage 1" + " von " + question_number;
+  content.prepend(q_overview);
+  // question-current-total initial
+  questionnaire.setAttribute("total_questions", "" + question_number);
+  questionnaire.setAttribute("current_question", "1")
+}
+// build questionnaire footer
+// if only one question: BUILD NO BUTTON
+function buildQuestionnaireFooter(content:HTMLDivElement, question_number:number){
   if (question_number == 1) {
-    //Do NOTHING
+    //BUILD NOTHING
   }
   else {
     let footer: HTMLDivElement = makeDiv("question-footer");
     content.append(footer);
-
-    //build 2 buttons
-    let prev_button: HTMLDivElement = makeDiv("change-question-button");
-    let next_button: HTMLDivElement = makeDiv("change-question-button");
-    prev_button.setAttribute("id", "prev_button");
-    next_button.setAttribute("id", "next_button");
-    prev_button.setAttribute("style", "visibility:hidden;");
-    prev_button.textContent = "prev";
-    next_button.textContent = "next";
-    prev_button.addEventListener("click", questionChangeHandler);
-    next_button.addEventListener("click", questionChangeHandler);
-    footer.append(prev_button, next_button);
+    buildFooterButtons(footer);
   }
 }
-//questionChangeHandler
-//EventHandler -> DOM Manipulation
-function questionChangeHandler(this: HTMLElement) {
-  // get Questionnaire attributes
-  let button = this.getAttribute("id");
-  let questionnaire: HTMLElement = this.parentElement ?.parentElement ?.parentElement as HTMLElement;
-  let min_qid: number = 0;
-  let max_qid: number = parseInt(questionnaire.getAttribute("total_questions") as string) - 1;
-  let current_qid: number = parseInt(questionnaire.getAttribute("current_question") as string) - 1;
-  let questions = questionnaire.getElementsByTagName("question");
 
-  // change question
-  if (button == "prev_button") {
-    questions[current_qid].removeAttribute("visible");
-    questions[current_qid - 1].setAttribute("visible", "true");
-    let str_current = current_qid.toString();
-    questionnaire.setAttribute("current_question", str_current);
-    questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
-    //hide button if first question
-    if (current_qid - 1 == min_qid) {
-      this.setAttribute("style", "visibility:hidden;");
-    }
-    this.nextElementSibling ?.setAttribute("style", "visibility:visible;");
-  }
-
-  else if (button == "next_button") {
-    questions[current_qid].removeAttribute("visible");
-    questions[current_qid + 1].setAttribute("visible", "true");
-    //change questionnaire attributes
-    let str_current = (current_qid + 2).toString();
-    questionnaire.setAttribute("current_question", str_current);
-    //change question overview
-    questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
-    // hide button if last question
-    if (current_qid + 1 == max_qid) {
-      this.setAttribute("style", "visibility:hidden;");
-    }
-    this.previousElementSibling ?.setAttribute("style", "visibility:visible;");
-  }
-  else {
-    console.log("No Button caused this EventHandler", button);
-  }
-
-  // hide buttons, if last / first question
-  console.log(current_qid, max_qid, min_qid);
-
+//build 2 buttons: "prev"-Question, "next"-Question
+function buildFooterButtons(footer: HTMLDivElement) {
+  let prev_button: HTMLDivElement = makeDiv("change-question-button");
+  let next_button: HTMLDivElement = makeDiv("change-question-button");
+  prev_button.setAttribute("id", "prev_button");
+  next_button.setAttribute("id", "next_button");
+  prev_button.setAttribute("style", "visibility:hidden;");
+  prev_button.textContent = "prev";
+  next_button.textContent = "next";
+  prev_button.addEventListener("click", questionChangeHandler);
+  next_button.addEventListener("click", questionChangeHandler);
+  footer.append(prev_button, next_button);
 }
 
 // renderQuestions
@@ -153,7 +116,7 @@ function buildQuestionHeader(question: HTMLElement) {
   // append text and img
   let img = document.createElement("img");
   img.setAttribute("src", Ressources.plus_solid);
-  img.addEventListener("click", ExplanationEventHandler.bind(img, true));
+  img.addEventListener("click", explanationEventHandler.bind(img, true));
   header.append(text, img);
 }
 
@@ -176,20 +139,79 @@ function renderAnswers(questionnaire: HTMLElement) {
     let img = document.createElement("img");
     img.setAttribute("src", Ressources.circle_regular);
     new_div.append(img, text);
-    answer.addEventListener("click", checkAnswer);
-    answer.addEventListener("click", ExplanationEventHandler.bind(answer, false));
+    answer.addEventListener("click", checkAnswerEventHandler);
+    answer.addEventListener("click", explanationEventHandler.bind(answer, false));
   }
 }
+
+// makeDiv
+// ClassName as String -> HTMLDivElement
+function makeDiv(css_name: string) {
+  let new_div = document.createElement("div");
+  new_div.setAttribute("class", css_name);
+  return new_div;
+}
+
+
+// ### EVENT HANDLER FUNCTIONS ###
+
+// EVENT AFTER BUTTON "prev" OR "next" CLICK
+// questionChangeHandler
+// EventHandler -> DOM Manipulation
+function questionChangeHandler(this: HTMLElement) {
+  // get Questionnaire attributes
+  let button = this.getAttribute("id");
+  let questionnaire: HTMLElement = this.parentElement ?.parentElement ?.parentElement as HTMLElement;
+  let min_qid: number = 0;
+  let max_qid: number = parseInt(questionnaire.getAttribute("total_questions") as string) - 1;
+  let current_qid: number = parseInt(questionnaire.getAttribute("current_question") as string) - 1;
+  let questions = questionnaire.getElementsByTagName("question");
+
+  // change question
+  // if button is "prev"
+  if (button == "prev_button") {
+    questions[current_qid].removeAttribute("visible");
+    questions[current_qid - 1].setAttribute("visible", "true");
+    let str_current = current_qid.toString();
+    questionnaire.setAttribute("current_question", str_current);
+    questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
+    //hide button if button to first question is clicked
+    if (current_qid - 1 == min_qid) {
+      // !!! CHANGE CLASS INSTEAD OF STYLE?
+      this.setAttribute("style", "visibility:hidden;");
+    }
+    // show next-Button
+    this.nextElementSibling ?.setAttribute("style", "visibility:visible;");
+  }
+  else if (button == "next_button") {
+    questions[current_qid].removeAttribute("visible");
+    questions[current_qid + 1].setAttribute("visible", "true");
+    //change questionnaire attributes
+    let str_current = (current_qid + 2).toString();
+    questionnaire.setAttribute("current_question", str_current);
+    //change question overview
+    questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
+    // hide button if last question of questionnaire
+    if (current_qid + 1 == max_qid) {
+      this.setAttribute("style", "visibility:hidden;");
+    }
+    this.previousElementSibling ?.setAttribute("style", "visibility:visible;");
+  }
+  else {
+    console.log("No Button caused this EventHandler", button);
+  }
+}
+
 // ExplanationEventHandler
 // Handles Events for shoowing explanation text
-function ExplanationEventHandler(this: HTMLElement, collapse: boolean) {
+function explanationEventHandler(this: HTMLElement, collapse: boolean) {
   if (collapse == true) {
     let question: HTMLElement = this.parentElement ?.parentElement as HTMLElement;
     let answers: HTMLCollection = question.getElementsByTagName("answer") as HTMLCollection;
     //change icons and collapse
     if (this.getAttribute("clicked") == "true") {
       this.setAttribute("src", Ressources.plus_solid);
-      this.setAttribute("clicked", "false");
+      //  this.setAttribute("clicked", "false");
       for (let i = answers.length - 1; i >= 0; i--) {
         let answer = answers[i] as HTMLElement;
         answer.getElementsByTagName("explanation")[0].removeAttribute("visible");
@@ -220,11 +242,11 @@ function showExplanation(answer: HTMLElement) {
   }
 }
 
-// check click for correcct answer
+// check click for correct answer
 // depending on question type show either
 // - for multiplechoice just clicked answer
 // - for singlechoice all answers
-function checkAnswer(this: HTMLElement) {
+function checkAnswerEventHandler(this: HTMLElement) {
   let question_type = this.parentElement ?.getAttribute("type");
   if (question_type == "multiplechoice") {
     showAnswer(this);
@@ -234,14 +256,12 @@ function checkAnswer(this: HTMLElement) {
     for (let i = answers ?.length - 1; i >= 0; i--) {
       let answer: HTMLElement = answers[i] as HTMLElement;
       showAnswer(answer);
-
     }
   }
 }
 
 // showAnswer
 // show icons and highlight answer
-
 function showAnswer(answer: HTMLElement) {
   answer.setAttribute("clicked", "true");
   let img = answer.getElementsByTagName("img")[0];
@@ -253,13 +273,6 @@ function showAnswer(answer: HTMLElement) {
   }
 }
 
-// makeDiv
-// ClassName as String -> HTMLDivElement
-function makeDiv(css_name: string) {
-  let new_div = document.createElement("div");
-  new_div.setAttribute("class", css_name);
-  return new_div;
-}
 
 // swipeEvent
 // const divContainer = document.getElementById("touch-event-test");

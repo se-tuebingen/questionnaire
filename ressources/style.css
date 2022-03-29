@@ -10,7 +10,7 @@ questionnaire{
   margin:40px 0 100px ;
 }
 
-.wrapper-content {
+.content-wrapper {
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;

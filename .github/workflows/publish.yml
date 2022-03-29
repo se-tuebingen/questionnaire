@@ -18,7 +18,7 @@ jobs:
           distribution: 'full'
           variant: 'CS'
           version: 'stable'
-      - run: raco pkg install --deps search-auto scribble-math
+       run: raco pkg install --deps search-auto scribble-math
       - name: Install TypeScript
         run: npm install -g typescript
       - name: build docs (from informatik-1-skript)

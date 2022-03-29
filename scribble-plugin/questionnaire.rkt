@@ -110,17 +110,29 @@
 
 (define/contract
   (render-html questionnaire)
-  (-> questionnaire-container? any)
-  (questionnaire-tag
-    (map render-question-html
-      (questionnaire-container-questions questionnaire)))
+  (-> questionnaire-container? block?)
+  (paragraph (style #f '())
+    (questionnaire-tag
+      (map render-question-html
+        (questionnaire-container-questions questionnaire)))
+  )
 )
 
 ;;;;;;;;;;; Latex Part
 (define/contract
-  (render-latex questionnnaire)
-  (-> questionnaire-container? any)
-  ""
+  (render-question-latex question)
+  (-> question-container? (listof block?))
+  (list (centered (question-container-text question))
+        (itemlist (map (lambda (x) (item (answer-container-text x)))
+                       (question-container-answers question)))
+  )
+)
+(define/contract
+  (render-latex questionnaire)
+  (-> questionnaire-container? block?)
+  (nested-flow (style #f '())
+       (apply append (map render-question-latex
+          (questionnaire-container-questions questionnaire))))
 )
 
 
@@ -150,7 +162,7 @@
   (questionnaire . questions)
    ;(-> (listof question-container?) any)
    (if (andmap question-container? questions)
-       (cond-element
+       (cond-block
          [html (render-html (questionnaire-container questions))]
          [latex (render-latex (questionnaire-container questions))]
        )

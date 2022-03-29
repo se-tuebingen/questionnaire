@@ -1,7 +1,10 @@
 name: GitHub Actions Demo
-on: [push]
+on:
+  push:
+    branches:
+      - linus
 jobs:
-  Explore-GitHub-Actions:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Test a shell-script

@@ -131,14 +131,14 @@
 (define/contract
   (render-solutions-latex questionnaire)
   (-> questionnaire-container? (listof block?))
-  (list (paragraph (style "inbox" '()) "TODO: Lösungen"))
+  (list (paragraph (style "QRotate" '()) "TODO: Lösungen"))
 )
 
 (define/contract
   (render-latex questionnaire)
   (-> questionnaire-container? block?)
-  (nested-flow (style 'vertical-inset (list (tex-addition #"\\newcommand{\\inbox}[1]{{\\color{blue} #1}}")))
-       (append 
+  (nested-flow (style 'vertical-inset (list (tex-addition #"\\newcommand{\\QRotate}[1]{{\\rotatebox[]{180}{#1}}}")))
+       (append
          (apply append (map render-question-latex
           (questionnaire-container-questions questionnaire)))
          (render-solutions-latex questionnaire)))

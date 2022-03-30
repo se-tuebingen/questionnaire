@@ -35,6 +35,8 @@
 )
 
 ;;;;;;;;;;; HTML Part
+
+;;;; Custom HTML tags
 ; questionnaire
 (define
   questionnaire-tag-wrapper
@@ -48,7 +50,7 @@
       (element (style #f (list questionnaire-tag-wrapper))
                 content))
 
-;; question
+; question
 (define/contract
   (question-tag-wrapper type)
   (-> questiontypes xexpr-property?)
@@ -64,7 +66,7 @@
         (element (style #f (list (question-tag-wrapper type)))
                  content))
 
-;; answer
+; answer
 (define/contract
   (answer-tag-wrapper correct)
   (-> boolean? xexpr-property?)
@@ -80,7 +82,7 @@
         (element (style #f (list (answer-tag-wrapper correct)))
                  content))
 
-;; explanation
+; explanation
 (define
   explanation-tag-wrapper
   (xexpr-property
@@ -93,6 +95,7 @@
       (element (style #f (list explanation-tag-wrapper))
                 content))
 
+;;;; Render-Functions for each struct
 (define
   (render-answer-html answer)
   (answer-tag (answer-container-correct answer)
@@ -122,6 +125,7 @@
 ;;;;;;;;;;; Latex Part
 
 ;;; question part
+; single question
 (define/contract
   (render-question-latex question)
   (-> question-container? (listof block?))
@@ -132,6 +136,7 @@
   )
 )
 
+; list of questions
 (define/contract
   (render-questions-latex questions)
   (-> (listof question-container?) block?)
@@ -142,13 +147,16 @@
 )
 
 ;;; solution part
-; enumeration helpers
+;; enumeration helpers
+
+; turn letter into character
 (define/contract
   (enumerate-letter n)
   (-> exact-integer? string?)
   (string (integer->char (+ (char->integer #\a) (- n 1))))
 )
 
+; like map, but with index (starting at 1) as first function argument
 (define ;/contract
   (map-number #:current [current 1] f xs)
   ;(-> (-> exact-integer? %a %b) (listof %a) (listof %b))
@@ -157,6 +165,7 @@
         (map-number #:current (+ current 1) f (cdr xs))))
 )
 
+; solution for single answer
 (define/contract
   (latex-explanation n answer)
   (-> exact-integer? answer-container? content?)
@@ -172,6 +181,7 @@
   )
 )
 
+; solution for a question
 (define/contract
   (latex-solution n question)
   (-> exact-integer? question-container? content?)
@@ -184,6 +194,7 @@
   )
 )
 
+; solution part
 (define/contract
   (render-solutions-latex questionnaire solstyle)
   (-> questionnaire-container? texsolutionstyles block?)
@@ -199,6 +210,7 @@
   )
 )
 
+; helper for generating latex macros
 (define/contract
   (solutions-style version)
   (-> texsolutionstyles bytes?)
@@ -209,6 +221,7 @@
   )
 )
 
+;; top-level latex renderer for questionnaire
 (define/contract
   (render-latex questionnaire solstyle)
   (-> questionnaire-container? texsolutionstyles block?)
@@ -222,12 +235,14 @@
 
 
 ;;;;;;;;;;; Exposed API
+; answer
 (define/contract
   (answer correct text explanation)
   (-> boolean? content? content? answer-container?)
   (answer-container correct text explanation)
 )
 
+; question
 (define; /contract
   (question type text . answers)
   ; (-> questiontypes content? (listof answer-container?) question-container?)
@@ -243,6 +258,7 @@
   )
 )
 
+; questionnaire
 (define ; /contract
   (questionnaire #:texsolutionstyle [style "margin"] . questions)
    ;(-> (listof question-container?) any)

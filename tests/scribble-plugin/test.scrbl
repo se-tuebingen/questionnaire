@@ -3,17 +3,16 @@
 @(require "questionnaire.rkt")
 @(require pict) @; for testing picture rendering
 
-@title[#:version ""]{Test-Seite für Questionnaire-Plugin}
+@title[#:version ""]{Questionnaire test manual}
 @author["Florian Kellner"]
 
-Diese Seite soll die Funktionen des Scribble-Plugins für das
-Questionnaire-Modul testen.
+This manual aims to cover most possible valid configurations.
 
 @table-of-contents[]
 
-@section{Single-Choice}
+@section{Single-Choice and Multiple Choice}
 
-Test einer Single-Choice-Frage:
+Single-Choice Question:
 
 @questionnaire[
   @question[
@@ -37,9 +36,7 @@ Test einer Single-Choice-Frage:
   ]
 ]
 
-@section{Multiple-Choice}
-
-Test einer Multiple-Choice-Frage:
+Multiple-Choice-Question (in the pdf, the solution should be below and not in the margin, here):
 
 @questionnaire[ #:texsolutionstyle "inline"
   @question["multiplechoice"
@@ -59,9 +56,9 @@ Test einer Multiple-Choice-Frage:
   ]
 ]
 
-@section{Block mit mehreren Fragen}
+@section{More than one Question}
 
-Test eines Blocks mit mehreren Fragen
+Questionnaire with several questions:
 
 @questionnaire[
 @question["multiplechoice"

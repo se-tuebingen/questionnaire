@@ -2,7 +2,7 @@ name: Generate HTML & PDF
 on:
   push:
     branches:
-      - linus
+      - master
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -21,10 +21,15 @@ jobs:
         run: sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
       - name: Install TypeScript
         run: npm install -g typescript
+      - name: Bundle-Ressources to Ressources.ts
+        run: sh ./bundle-ressources.sh
+      - name: Compile TypeScript
+        run: tsc
       - name: Copying current version of Questionnaire.js
         run: cp dist/questionnaire.js .
       - name: Generate HTML
         run: raco scribble --htmls --dest output/html scribble-plugin/test.scrbl
       - name: Generate PDF
         run: raco scribble --pdf --dest output/pdf scribble-plugin/test.scrbl
-      ##  run: sh ./scribble-plugin/test.sh
+        ## - name: Generate Output
+          ##  run: sh ./scribble-plugin/test.sh

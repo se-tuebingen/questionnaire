@@ -5,8 +5,8 @@
 (require scribble/core
          scribble/html-properties
          (only-in xml cdata))
+(require scribble/latex-properties)
 (require scribble/base)
-(require scribble/decode)
 
 (provide questionnaire question answer)
 
@@ -119,20 +119,83 @@
 )
 
 ;;;;;;;;;;; Latex Part
+
+;;; question part
 (define/contract
   (render-question-latex question)
   (-> question-container? (listof block?))
-  (list (centered (question-container-text question))
-        (itemlist (map (lambda (x) (item (answer-container-text x)))
+  (list (paragraph (style #f '()) (bold (question-container-text question)))
+        (itemlist #:style 'ordered
+        (map (lambda (x) (item (answer-container-text x)))
                        (question-container-answers question)))
   )
 )
+
+(define/contract
+  (render-questions-latex questions)
+  (-> (listof question-container?) block?)
+  (itemlist #:style 'ordered
+   (map (lambda (x) (item (render-question-latex x)))
+        questions
+   ))
+)
+
+;;; solution part
+; enumeration helpers
+(define/contract
+  (enumerate-letter n)
+  (-> exact-integer? string?)
+  (string (integer->char (+ (char->integer #\a) (- n 1))))
+)
+
+(define ;/contract
+  (map-number #:current [current 1] f xs)
+  ;(-> (-> exact-integer? %a %b) (listof %a) (listof %b))
+  (if (null? xs) xs
+  (cons (f current (car xs))
+        (map-number #:current (+ current 1) f (cdr xs))))
+)
+
+(define/contract
+  (latex-explanation n answer)
+  (-> exact-integer? answer-container? content?)
+  (let ([correct (answer-container-correct answer)]
+        [explanation (answer-container-explanation answer)]
+        [letter (enumerate-letter n)])
+    (element #f (list
+      (if correct (bold letter) letter)
+      ")"
+      explanation
+      " "
+    ))
+  )
+)
+
+(define/contract
+  (latex-solution n question)
+  (-> exact-integer? question-container? content?)
+  (let ([answers (question-container-answers question)]
+        [numeral (string-append (number->string n) ".")])
+    (element 'newline (cons numeral (append (map-number latex-explanation answers))))
+  )
+)
+
+(define/contract
+  (render-solutions-latex questionnaire)
+  (-> questionnaire-container? block?)
+  (paragraph (style "QRotate" '()) (map-number latex-solution
+    (questionnaire-container-questions questionnaire)))
+)
+
 (define/contract
   (render-latex questionnaire)
   (-> questionnaire-container? block?)
-  (nested-flow (style 'vertical-inset '())
-       (apply append (map render-question-latex
-          (questionnaire-container-questions questionnaire))))
+  (nested-flow
+    (style 'vertical-inset (list (tex-addition #"\\newcommand{\\QRotate}[1]{{\\rotatebox[]{180}{#1}}}")))
+    (list
+     (render-questions-latex
+      (questionnaire-container-questions questionnaire))
+     (render-solutions-latex questionnaire)))
 )
 
 

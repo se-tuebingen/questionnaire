@@ -101,8 +101,8 @@ You can generate your questions in the same style as in the HTML document (any s
 - (Linus)TS-Code, damit das ganze tut
 - (L)Frage mit Typ außerhalb von Text (Image + Text als Frage, Image als Antwort)
 - (L)Code cleanen
-- (L) Feature: Anzeige für ANzahl richtiger Antworten
-- (L) github-workflow bauen
+- (L) Feature: Anzeige für Anzahl richtiger Antworten
+- (L) github-workflow tut
 - (L) Fehlermeldung: built-fail, falsche Syntax bei Fragen ausgeben
 - (Flo)(html passt schon, latex todo) Scribbl-Modul schreiben
 - Scribble-Testcase für Code/Bilder in Fragen/Antworten

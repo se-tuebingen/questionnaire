@@ -186,14 +186,15 @@
 (define/contract
   (render-solutions-latex questionnaire)
   (-> questionnaire-container? block?)
+  (margin-note
   (paragraph (style "QRotate" '())
     (smaller
       (map-number latex-solution
-       (questionnaire-container-questions questionnaire))))
+       (questionnaire-container-questions questionnaire)))))
 )
 
 (define solutions-style
-  #"\\newcommand{\\QRotate}[1]{{\\rotatebox{180}{\\parbox{\\textwidth}{#1}}}}"
+  #"\\newcommand{\\QRotate}[1]{{\\rotatebox{180}{\\parbox{\\marginparwidth}{#1}}}}"
 )
 
 (define/contract

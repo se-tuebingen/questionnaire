@@ -36,7 +36,31 @@ Test einer Single-Choice-Frage:
     ]
   ]
 ]
+@section{Error-Throw-Test}
 
+Fail Test of a singlechoice question:
+
+@questionnaire[
+  @question[
+    "singlechoice"
+    "What is this fail about?"
+    @answer[
+      #f
+      "Learning to swim"
+      "We do not have a pool"
+    ]
+    @answer[
+      #f
+      "Learning to sing"
+      "Singing is hard with masks on or network latency"
+    ]
+    @answer[
+      #f
+      "Learning to program"
+      "You are sitting at a computer, aren't you?"
+    ]
+  ]
+]
 @section{Multiple-Choice}
 
 Test einer Multiple-Choice-Frage:

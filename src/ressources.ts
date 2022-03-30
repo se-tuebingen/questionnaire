@@ -90,7 +90,6 @@ explanation {
 }
 
 answer [visible=true] {
-
   margin: 5px 0 20px;
   padding: 15px 12px;
   font-size: 12pt;

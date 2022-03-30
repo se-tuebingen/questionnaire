@@ -8,14 +8,14 @@
 echo "module Ressources {" > src/ressources.ts
 
 # SVG icons
-cd ressources/icons
+cd src/ressources/icons
 for i in *; do
-  echo "export const $(basename $i .svg | sed s/-/_/g) = \`data:image/svg+xml;base64,$(base64 --wrap=0 $i)\`;" >> ../../src/ressources.ts;
+  echo "export const $(basename $i .svg | sed s/-/_/g) = \`data:image/svg+xml;base64,$(base64 --wrap=0 $i)\`;" >> ../../ressources.ts;
 done;
 
 # css style
 cd ..
 
-echo "export const style = \`$(cat style.css)\`;" >> ../src/ressources.ts
+echo "export const style = \`$(cat style.css)\`;" >> ../ressources.ts
 
-echo "}" >> ../src/ressources.ts
+echo "}" >> ../ressources.ts

@@ -24,11 +24,12 @@ jobs:
       - name: Bundle-Ressources to Ressources.ts
         run: sh ./bundle-ressources.sh
       - name: Compile TypeScript
-        run: tsc -w
+        run: tsc
       - name: Copying current version of Questionnaire.js
         run: cp dist/questionnaire.js .
       - name: Generate HTML
         run: raco scribble --htmls --dest output/html scribble-plugin/test.scrbl
       - name: Generate PDF
         run: raco scribble --pdf --dest output/pdf scribble-plugin/test.scrbl
-      ##  run: sh ./scribble-plugin/test.sh
+        ## - name: Generate Output
+          ##  run: sh ./scribble-plugin/test.sh

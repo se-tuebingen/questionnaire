@@ -192,7 +192,7 @@ a:hover {
 
 .navsettop {
     position: fixed;
-    z-index: 2;
+    z-index: 1;
     background: #a7b0be;
     top: 0;
     left: 0;
@@ -234,6 +234,7 @@ a:hover {
 
 
 .navright {
+    height: 2rem;
     white-space: nowrap;
 }
 
@@ -413,7 +414,6 @@ a:hover {
 
 .tocset {
     position: fixed;
-    z-index: 2;
     overflow-y: scroll;
     float: none;
     left: 0;
@@ -701,21 +701,12 @@ blockquote > blockquote.SVInsetFlow {
         @media all and (max-width:520px){html {font-size: 10px;}}
 
         .navsettop, .navsetbottom {
-            display: flex;
+            display: block;
             position: absolute;
             width: 100%;
             height: 4rem;
             border: 0;
             background-color: hsl(216, 15%, 70%);
-            align-items: center;
-        }
-
-        .tocsetoverlay .navsettop {
-            position: fixed;
-        }
-
-        .navleft {
-            flex: 1;
         }
 
         .searchform {
@@ -723,17 +714,10 @@ blockquote > blockquote.SVInsetFlow {
             border: 0;
         }
 
-        .searchbox {
-            margin-top: 0;
-            margin-bottom: 0;
-        }
-
-        .navleft .tocsettoggle {
-            display: initial;
-        }
-
         .navright {
-            margin-right: 1.3rem;
+            position: absolute;
+            right: 1.5rem;
+            margin-top: 1rem;
             border: 0px solid red;
         }
 
@@ -744,17 +728,24 @@ blockquote > blockquote.SVInsetFlow {
 
         .tocset {
             display: none;
-            border-top-width: 4rem;
         }
 
-        .tocsetoverlay .tocset {
-            display: block;
+        .tocset table, .tocset tbody, .tocset tr, .tocset td {
+            display: inline;
+        }
+
+        .tocview {
+            display: none;
+        }
+
+        .tocsub .tocsubtitle {
+            display: none;
         }
 
         .versionbox {
             top: 4.5rem;
             left: 1rem; /* same distance as main-column */
-            z-index: 1;
+            z-index: 11000;
             height: 2em;
             font-size: 70%;
             font-weight: lighter;

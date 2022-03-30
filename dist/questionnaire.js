@@ -149,11 +149,11 @@ function validateQuestionnaireStructure(first_level, sec_level) {
 function renderError(questionnaire, message) {
     var wrapper = makeDiv("error-wrapper");
     var header = makeDiv("error-header");
-    header.textContent = "<h2>Why do I see this error?</h2>";
+    header.innerHTML = "<h2>Why do I see this error?</h2>";
     var box = makeDiv("error-box");
-    box.textContent = "<p>There was a syntax error in the programming module, probably caused by a wrong syntax.</p>";
+    box.innerHTML = "<p>There was a syntax error in the programming module, probably caused by a wrong syntax.</p>";
     var msg = makeDiv("error-message");
-    msg.textContent = "<p>" + message + "</p>";
+    msg.innerHTML = "<p>" + message + "</p>";
     // msg.setAttribute("id","error_msg");
     wrapper.append(header, box, msg);
     questionnaire.replaceChildren(wrapper);

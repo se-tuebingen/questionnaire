@@ -87,6 +87,8 @@ You can generate your questions in the same style as in the HTML document (any s
 ]
 ```
 
+When you render your Questionnaire to PDF, the solution will be added as a block of rotated text in the margin beside the quiz. If you want to have it below the text instead, you can add the keyword argument `#:texsolutionstyle "inline"` before your questions in the `@questionnaire`.
+
 ## Tests
 
 - `questionnaire-test.html` loads the JavaScript plugin into a plain HTML page.

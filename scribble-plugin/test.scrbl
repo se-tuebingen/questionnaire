@@ -41,7 +41,7 @@ Test einer Single-Choice-Frage:
 
 Test einer Multiple-Choice-Frage:
 
-@questionnaire[
+@questionnaire[ #:texsolutionstyle "inline"
   @question["multiplechoice"
     "What does TS stand for?"
     @answer[#t

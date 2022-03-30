@@ -12,6 +12,7 @@
 
 ;;;;;;;;;;; Type Definitions
 (define questiontypes (or/c "singlechoice" "multiplechoice"))
+(define texsolutionstyles (or/c "inline" "margin"))
  ; one-of does not work with strings
 
 (struct/contract answer-container (
@@ -184,28 +185,39 @@
 )
 
 (define/contract
-  (render-solutions-latex questionnaire)
-  (-> questionnaire-container? block?)
-  (margin-note
-  (paragraph (style "QRotate" '())
-    (smaller
-      (map-number latex-solution
-       (questionnaire-container-questions questionnaire)))))
-)
-
-(define solutions-style
-  #"\\newcommand{\\QRotate}[1]{{\\rotatebox{180}{\\parbox{\\marginparwidth}{#1}}}}"
+  (render-solutions-latex questionnaire solstyle)
+  (-> questionnaire-container? texsolutionstyles block?)
+  (let
+    ([rotatedtext
+      (paragraph (style (string-append "QRotate" solstyle) '())
+        (smaller
+          (map-number latex-solution
+           (questionnaire-container-questions questionnaire))))
+    ])
+  (cond [(string=? solstyle "inline") rotatedtext]
+        [(string=? solstyle "margin") (margin-note rotatedtext)])
+  )
 )
 
 (define/contract
-  (render-latex questionnaire)
-  (-> questionnaire-container? block?)
+  (solutions-style version)
+  (-> texsolutionstyles bytes?)
+  (cond [(string=? version "inline")
+         #"\\newcommand{\\QRotateinline}[1]{{\\rotatebox{180}{\\parbox{\\textwidth}{#1}}}}"]
+        [(string=? version "margin")
+          #"\\newcommand{\\QRotatemargin}[1]{{\\rotatebox{180}{\\parbox{\\marginparwidth}{#1}}}}"]
+  )
+)
+
+(define/contract
+  (render-latex questionnaire solstyle)
+  (-> questionnaire-container? texsolutionstyles block?)
   (nested-flow
-    (style 'vertical-inset (list (tex-addition solutions-style)))
+    (style 'vertical-inset (list (tex-addition (solutions-style solstyle))))
     (list
      (render-questions-latex
       (questionnaire-container-questions questionnaire))
-      (render-solutions-latex questionnaire)))
+      (render-solutions-latex questionnaire solstyle)))
 )
 
 
@@ -232,13 +244,17 @@
 )
 
 (define ; /contract
-  (questionnaire . questions)
+  (questionnaire #:texsolutionstyle [style "margin"] . questions)
    ;(-> (listof question-container?) any)
-   (if (andmap question-container? questions)
-       (cond-block
-         [html (render-html (questionnaire-container questions))]
-         [latex (render-latex (questionnaire-container questions))]
-       )
-       (raise-argument-error 'questions "A list of @question s (question-container)" questions)
+   (cond [(not (andmap question-container? questions))
+          (raise-argument-error 'questions "A list of @question s (question-container)" questions)]
+         [(not (texsolutionstyles style))
+          (raise-argument-error 'texsolutionstyle "A valid layout option for the solutions in latex (margin or inline)" style)]
+         [else
+         (cond-block
+           [html (render-html (questionnaire-container questions))]
+           [latex (render-latex (questionnaire-container questions) style)]
+         )
+         ]
    )
 )

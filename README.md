@@ -1,5 +1,7 @@
 # interactive-textbooks
 
+[![Generate HTML & PDF](https://github.com/se-tuebingen/interactive-textbooks/actions/workflows/publish.yml/badge.svg)](https://github.com/se-tuebingen/interactive-textbooks/actions/workflows/publish.yml)
+
 ## What is this Repository?
 
 This is sort of an exchange playground for Linus and Florian to develop
@@ -100,8 +102,6 @@ When you render your Questionnaire to PDF, the solution will be added as a block
 - Executing `make test` or running `test.sh` in the `scribble-plugin` folder tests the Scribble plugin and generates PDF- and HTML output.
 
 ## Ressources
-
-[Installing GNU Utils on MacOS](https://ryanparman.com/posts/2019/using-gnu-command-line-tools-in-macos-instead-of-freebsd-tools/)
 
 [Overview of Scribble Document Types](https://docs.racket-lang.org/scribble/core.html#%28part._parts%29) - Everything Scribble-Related should be in the same documentation.
 

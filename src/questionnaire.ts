@@ -148,10 +148,14 @@ function renderAnswers(questionnaire: HTMLElement) {
 
 // validateAttributes
 function validateAttributes(el:HTMLElement, attr:string){
-
+if (el.getAttribute(attr) == null){
+  let msg = "Necessary attribute is missing at" + el;
+  let questionnaire = getQuestionnaireRecursive(el);
+  renderError(el, msg);
+}
 }
 // ValidateQuestionnaireStructure
-function ValidateQuestionnaireStructure(first_level:HTMLElement, sec_level:HTMLElement){
+function validateQuestionnaireStructure(first_level:HTMLElement, sec_level:HTMLElement){
 
 }
 
@@ -178,6 +182,21 @@ function makeDiv(css_name: string) {
   return new_div;
 }
 
+// getQuestionnaireRecursive from a child element
+// if element has TagName
+// return;
+// else: retry with parentElement
+
+function getQuestionnaireRecursive(el:HTMLElement){
+  if (el.tagName == "QUESTIONNAIRE"){
+    return el;
+  }
+  else{
+    let parent:HTMLElement = el.parentElement as HTMLElement;
+    getQuestionnaireRecursive(parent);
+  }
+}
+
 // ### EVENT HANDLER FUNCTIONS ###
 
 // EVENT AFTER BUTTON "prev" OR "next" CLICK
@@ -186,7 +205,7 @@ function makeDiv(css_name: string) {
 function questionChangeHandler(this: HTMLElement) {
   // get Questionnaire attributes
   let button = this.getAttribute("id");
-  let questionnaire: HTMLElement = this.parentElement ?.parentElement ?.parentElement as HTMLElement;
+  let questionnaire: HTMLElement = getQuestionnaireRecursive(this) as HTMLElement;
   let min_qid: number = 0;
   let max_qid: number = parseInt(questionnaire.getAttribute("total_questions") as string) - 1;
   let current_qid: number = parseInt(questionnaire.getAttribute("current_question") as string) - 1;

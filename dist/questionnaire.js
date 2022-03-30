@@ -42,15 +42,17 @@ function renderQuestionaire(questionnaire) {
     renderQuestions(questionnaire);
     renderAnswers(questionnaire);
     buildQuestionnaireFooter(content, question_number);
+    renderError(questionnaire, "TEST ERROR");
 }
 function buildQuestionOverview(questionnaire, content, question_number) {
     // question-overview
     var q_overview = makeDiv("question-overview");
-    q_overview.textContent = "Frage 1" + " von " + question_number;
+    q_overview.textContent = "Question 1" + " of " + question_number;
     content.prepend(q_overview);
     // question-current-total initial
     questionnaire.setAttribute("total_questions", "" + question_number);
     questionnaire.setAttribute("current_question", "1");
+    questionnaire.setAttribute("correct_answers", "0");
 }
 // build questionnaire footer
 // if only one question: BUILD NO BUTTON
@@ -131,6 +133,25 @@ function renderAnswers(questionnaire) {
         answer.addEventListener("click", checkAnswerEventHandler);
         answer.addEventListener("click", explanationEventHandler.bind(answer, false));
     }
+}
+// validateAttributes
+function validateAttributes(el, attr) {
+}
+// ValidateQuestionnaireStructure
+function ValidateQuestionnaireStructure(first_level, sec_level) {
+}
+// renderError
+function renderError(questionnaire, message) {
+    var wrapper = makeDiv("error-wrapper");
+    var header = makeDiv("error-header");
+    header.textContent = "<h2>Why do I see this error?</h2>";
+    var box = makeDiv("error-box");
+    box.textContent = "<p>There was a syntax error in the programming module, probably caused by a wrong syntax.</p>";
+    var msg = makeDiv("error-message");
+    msg.textContent = "<p>" + message + "</p>";
+    // msg.setAttribute("id","error_msg");
+    wrapper.append(header, box, msg);
+    questionnaire.replaceChildren(wrapper);
 }
 // makeDiv
 // ClassName as String -> HTMLDivElement

@@ -46,15 +46,17 @@ function renderQuestionaire(questionnaire: HTMLElement) {
   renderQuestions(questionnaire);
   renderAnswers(questionnaire);
   buildQuestionnaireFooter(content, question_number);
+  renderError(questionnaire, "TEST ERROR");
 }
 function buildQuestionOverview(questionnaire:HTMLElement, content: HTMLDivElement, question_number:number){
   // question-overview
   let q_overview: HTMLDivElement = makeDiv("question-overview");
-  q_overview.textContent = "Frage 1" + " von " + question_number;
+  q_overview.textContent = "Question 1" + " of " + question_number;
   content.prepend(q_overview);
   // question-current-total initial
   questionnaire.setAttribute("total_questions", "" + question_number);
-  questionnaire.setAttribute("current_question", "1")
+  questionnaire.setAttribute("current_question", "1");
+  questionnaire.setAttribute("correct_answers", "0");
 }
 // build questionnaire footer
 // if only one question: BUILD NO BUTTON
@@ -144,6 +146,30 @@ function renderAnswers(questionnaire: HTMLElement) {
   }
 }
 
+// validateAttributes
+function validateAttributes(el:HTMLElement, attr:string){
+
+}
+// ValidateQuestionnaireStructure
+function ValidateQuestionnaireStructure(first_level:HTMLElement, sec_level:HTMLElement){
+
+}
+
+// renderError
+function renderError(questionnaire:HTMLElement, message:string){
+let wrapper = makeDiv("error-wrapper");
+let header = makeDiv("error-header");
+header.textContent = "<h2>Why do I see this error?</h2>";
+let box = makeDiv("error-box");
+box.textContent = "<p>There was a syntax error in the programming module, probably caused by a wrong syntax.</p>";
+let msg = makeDiv("error-message");
+msg.textContent ="<p>" + message + "</p>";
+// msg.setAttribute("id","error_msg");
+wrapper.append(header, box, msg);
+
+questionnaire.replaceChildren(wrapper);
+}
+
 // makeDiv
 // ClassName as String -> HTMLDivElement
 function makeDiv(css_name: string) {
@@ -151,7 +177,6 @@ function makeDiv(css_name: string) {
   new_div.setAttribute("class", css_name);
   return new_div;
 }
-
 
 // ### EVENT HANDLER FUNCTIONS ###
 

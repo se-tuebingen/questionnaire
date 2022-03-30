@@ -23,6 +23,11 @@ Because the goal is to provide on single JavaScript file, Styles and SVG icons a
 This module is generated from the contents of the `ressources` folder (`style.css` and the `svg`-files in the `icons` folder) by running `bundle-ressources.sh`.
 So any changes in those files are only applied after running this script!
 
+For ease of use, there is also a Makefile, so you can simply
+run
+- `make all` to bundle ressources and compile the JavaScript plugin, and
+- `make test` to execute the tests - currently this only compiles a scribble test document in pdf and html
+
 
 ## How to use
 
@@ -92,7 +97,21 @@ When you render your Questionnaire to PDF, the solution will be added as a block
 ## Tests
 
 - `questionnaire-test.html` loads the JavaScript plugin into a plain HTML page.
-- Running `test.sh` in the `scribble-plugin` folder tests the Scribble plugin and generates PDF- and HTML output.
+- Executing `make test` or running `test.sh` in the `scribble-plugin` folder tests the Scribble plugin and generates PDF- and HTML output.
+
+## Ressources
+
+[Installing GNU Utils on MacOS](https://ryanparman.com/posts/2019/using-gnu-command-line-tools-in-macos-instead-of-freebsd-tools/)
+
+[Overview of Scribble Document Types](https://docs.racket-lang.org/scribble/core.html#%28part._parts%29) - Everything Scribble-Related should be in the same documentation.
+
+[Racket Documentation about Pairs and Lists](https://docs.racket-lang.org/guide/pairs.html) - for anything else it should suffice to enter the function name into the search box.
+
+[Variable Arity Expressions in Racket](https://stackoverflow.com/questions/65873698/using-variable-arity-function-on-values-expression)
+
+[Keyword Arguments in Racket](https://riptutorial.com/racket/example/8681/keyword-arguments)
+
+
 
 ## Todos
 
@@ -106,12 +125,10 @@ When you render your Questionnaire to PDF, the solution will be added as a block
 - (L) Feature: Anzeige für ANzahl richtiger Antworten
 - (L) github-workflow bauen
 - (L) Fehlermeldung: built-fail, falsche Syntax bei Fragen ausgeben
-- (Flo)(html passt schon, latex todo) Scribbl-Modul schreiben
+- (Flo)(html passt schon, latex passt schon) Scribbl-Modul schreiben
 - Scribble-Testcase für Code/Bilder in Fragen/Antworten
 - Testcases ausbauen: Ungültige Inhalte?
 - Freundliche Fehlermeldungen
-- Continuous Integration via GitHub Workflows
-- Bug bei nur einer Frage in Questionnaire entfernen
 
 ## MacOS Support
 - Running `raco scribble` instead of `scribble`

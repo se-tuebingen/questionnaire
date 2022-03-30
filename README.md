@@ -96,8 +96,8 @@ When you render your Questionnaire to PDF, the solution will be added as a block
 
 ## Tests
 
-- `questionnaire-test.html` loads the JavaScript plugin into a plain HTML page.
-- Executing `make test` or running `test.sh` in the `scribble-plugin` folder tests the Scribble plugin and generates PDF- and HTML output.
+- [`questionnaire-test.html`](tests/javascript-plugin/questionnaire-test.html) loads the JavaScript plugin into a plain HTML page.
+- Executing `make test` or running `test.sh` in the `scribble-plugin` folder tests the Scribble plugin and generates [PDF](tests/scribble-plugin/output/pdf/test.pdf)- and [HTML](tests/scribble-plugin/output/html/test/index.html) output.
 
 ## Ressources
 

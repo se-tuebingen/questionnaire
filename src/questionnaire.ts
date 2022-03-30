@@ -159,11 +159,11 @@ function ValidateQuestionnaireStructure(first_level:HTMLElement, sec_level:HTMLE
 function renderError(questionnaire:HTMLElement, message:string){
 let wrapper = makeDiv("error-wrapper");
 let header = makeDiv("error-header");
-header.textContent = "<h2>Why do I see this error?</h2>";
+header.innerHTML = "<h2>Why do I see this error?</h2>";
 let box = makeDiv("error-box");
-box.textContent = "<p>There was a syntax error in the programming module, probably caused by a wrong syntax.</p>";
+box.innerHTML = "<p>There was a syntax error in the programming module, probably caused by a wrong syntax.</p>";
 let msg = makeDiv("error-message");
-msg.textContent ="<p>" + message + "</p>";
+msg.innerHTML ="<p>" + message + "</p>";
 // msg.setAttribute("id","error_msg");
 wrapper.append(header, box, msg);
 

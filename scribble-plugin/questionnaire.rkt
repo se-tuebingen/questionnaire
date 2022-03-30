@@ -176,26 +176,35 @@
   (-> exact-integer? question-container? content?)
   (let ([answers (question-container-answers question)]
         [numeral (string-append (number->string n) ".")])
-    (element 'newline (cons numeral (append (map-number latex-explanation answers))))
+
+      (cons numeral
+        (append (map-number latex-explanation answers)
+                (list (element 'newline '()))))
   )
 )
 
 (define/contract
   (render-solutions-latex questionnaire)
   (-> questionnaire-container? block?)
-  (paragraph (style "QRotate" '()) (map-number latex-solution
-    (questionnaire-container-questions questionnaire)))
+  (paragraph (style "QRotate" '())
+    (smaller
+      (map-number latex-solution
+       (questionnaire-container-questions questionnaire))))
+)
+
+(define solutions-style
+  #"\\newcommand{\\QRotate}[1]{{\\rotatebox{180}{\\parbox{\\textwidth}{#1}}}}"
 )
 
 (define/contract
   (render-latex questionnaire)
   (-> questionnaire-container? block?)
   (nested-flow
-    (style 'vertical-inset (list (tex-addition #"\\newcommand{\\QRotate}[1]{{\\rotatebox[]{180}{#1}}}")))
+    (style 'vertical-inset (list (tex-addition solutions-style)))
     (list
      (render-questions-latex
       (questionnaire-container-questions questionnaire))
-     (render-solutions-latex questionnaire)))
+      (render-solutions-latex questionnaire)))
 )
 
 

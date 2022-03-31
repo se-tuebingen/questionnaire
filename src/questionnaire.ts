@@ -16,13 +16,13 @@ type Questiontype = "singlechoice" | "multiplechoice";
 
 interface Question {
   type: Questiontype;
-  text: HTMLElement[];
+  text: Node[];
   answers: Answer[];
 };
 
 interface Answer {
   correct: boolean;
-  text: HTMLElement[];
+  text: Node[];
   explanation?: HTMLElement;
 }
 
@@ -37,9 +37,8 @@ function parseQuestionnaire(questionnaire: HTMLElement) : Questionnaire {
 
 function parseQuestion(question: HTMLElement): Question {
   const type = question.getAttribute('type') as Questiontype;
-  const text = Array.from(question.children as HTMLCollection)
-    .filter(x => (x as HTMLElement).tagName != 'answer')
-    .map(x => x as HTMLElement);
+  const text = Array.from(question.childNodes as NodeList)
+    .filter(x => (x as HTMLElement).tagName != 'ANSWER');
   const answers = Array.from(question.getElementsByTagName('answer') as HTMLCollection);
   return {
     type: type,
@@ -50,9 +49,8 @@ function parseQuestion(question: HTMLElement): Question {
 
 function parseAnswer(answer: HTMLElement): Answer {
   const correct = (answer.getAttribute('correct') as string) == 'true';
-  const text = Array.from(answer.children as HTMLCollection)
-    .filter(x => (x as HTMLElement).tagName != 'explanation')
-    .map(x => x as HTMLElement);
+  const text = Array.from(answer.childNodes as NodeList)
+    .filter(x => (x as HTMLElement).tagName != 'EXPLANATION');
   const explanation = answer.getElementsByTagName('explanation')[0] as HTMLElement;
   return {
     correct: correct,
@@ -71,6 +69,7 @@ function setup() {
   for (let i = q_col.length - 1; i >= 0; i--) {
     const questionnaire: HTMLElement = q_col[i] as HTMLElement;
     const r = parseQuestionnaire(questionnaire);
+    console.log(r);
     renderQuestionnaire(r);
   }
 }
@@ -90,9 +89,9 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
   root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
-        Question 1 of $(questionnaire.questions.length)
+        Question 1 of ${questionnaire.questions.length}
       </div>
-      $(questionnaire.questions.reverse().map(renderQuestion))
+      ${questionnaire.questions.reverse().map(renderQuestion)}
       <div class="question-footer">
         <div class="change-question-button"
              id="prev_button"
@@ -171,10 +170,10 @@ function renderQuestion(question: Question, index: number) {
   return `
     <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
       <div class="question-header">
-        <p>${question.text}</p>
+        <p>${question.text.map(nodeOuterHTML).join('')}</p>
         <img src="${Ressources.plus_solid}" onclick="explanationEventHandler.bind(event.target.el, true)">
       </div>
-      ${question.answers.map(renderAnswer)}
+      ${question.answers.map(renderAnswer).join('')}
     </question>
   `;
 }
@@ -212,14 +211,28 @@ function renderQuestion(question: Question, index: number) {
 // }
 function renderAnswer(answer: Answer) {
   return `
-    <div class="wrapper-answer">
-      <img src="${Ressources.circle_regular}" onclick="clickAnswerHandler(event.target.el)">
+  <answer correct="${answer.correct ? 'true' : 'false'}">
+    <div class="wrapper-answer" onclick="clickAnswerHandler(this)">
+      <img src="${Ressources.circle_regular}">
       <p>
-        ${answer.text}
+        ${answer.text.map(nodeOuterHTML).join('')}
       </p>
-      ${answer.explanation}
+      ${answer.explanation?.outerHTML}
     </div>
+  </answer>
   `;
+}
+
+function nodeOuterHTML(x: Node) {
+  const outerHTML = (x as HTMLElement).outerHTML;
+  if(outerHTML == undefined) {
+    const data = (x as Text).data;
+    if(data == undefined) {
+      return '';
+    }
+    return data;
+  }
+  return outerHTML;
 }
 
 // // questionnaire->DOM Manipulation
@@ -347,9 +360,15 @@ function showExplanation(answer: HTMLElement) {
 
 // unified click on answer event handler
 function clickAnswerHandler(this: HTMLElement) {
-  checkAnswerEventHandler.bind(this);
-  explanationEventHandler.bind(this, false);
-}
+  console.log(this);
+} //: Event) {
+  // console.log('clicked clickAnswerHandler');
+  // console.log(this);
+  // const el = this.target as HTMLElement;
+  // console.log(el);
+  // checkAnswerEventHandler.bind(el);
+  // explanationEventHandler.bind(el, false);
+//}
 
 // check click for correct answer
 // depending on question type show either

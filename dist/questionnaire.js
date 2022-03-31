@@ -12,9 +12,8 @@ function parseQuestionnaire(questionnaire) {
 }
 function parseQuestion(question) {
     const type = question.getAttribute('type');
-    const text = Array.from(question.children)
-        .filter(x => x.tagName != 'answer')
-        .map(x => x);
+    const text = Array.from(question.childNodes)
+        .filter(x => x.tagName != 'ANSWER');
     const answers = Array.from(question.getElementsByTagName('answer'));
     return {
         type: type,
@@ -24,9 +23,8 @@ function parseQuestion(question) {
 }
 function parseAnswer(answer) {
     const correct = answer.getAttribute('correct') == 'true';
-    const text = Array.from(answer.children)
-        .filter(x => x.tagName != 'explanation')
-        .map(x => x);
+    const text = Array.from(answer.childNodes)
+        .filter(x => x.tagName != 'EXPLANATION');
     const explanation = answer.getElementsByTagName('explanation')[0];
     return {
         correct: correct,
@@ -44,6 +42,7 @@ function setup() {
     for (let i = q_col.length - 1; i >= 0; i--) {
         const questionnaire = q_col[i];
         const r = parseQuestionnaire(questionnaire);
+        console.log(r);
         renderQuestionnaire(r);
     }
 }
@@ -61,9 +60,9 @@ function renderQuestionnaire(questionnaire) {
     root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
-        Question 1 of $(questionnaire.questions.length)
+        Question 1 of ${questionnaire.questions.length}
       </div>
-      $(questionnaire.questions.reverse().map(renderQuestion))
+      ${questionnaire.questions.reverse().map(renderQuestion)}
       <div class="question-footer">
         <div class="change-question-button"
              id="prev_button"
@@ -139,10 +138,10 @@ function renderQuestion(question, index) {
     return `
     <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
       <div class="question-header">
-        <p>${question.text}</p>
+        <p>${question.text.map(nodeOuterHTML).join('')}</p>
         <img src="${Ressources.plus_solid}" onclick="explanationEventHandler.bind(event.target.el, true)">
       </div>
-      ${question.answers.map(renderAnswer)}
+      ${question.answers.map(renderAnswer).join('')}
     </question>
   `;
 }
@@ -179,15 +178,29 @@ function renderQuestion(question, index) {
 //   header.append(text, img);
 // }
 function renderAnswer(answer) {
+    var _a;
     return `
-    <div class="wrapper-answer">
-      <img src="${Ressources.circle_regular}" onclick="clickAnswerHandler(event.target.el)">
+  <answer correct="${answer.correct ? 'true' : 'false'}">
+    <div class="wrapper-answer" onclick="clickAnswerHandler(this)">
+      <img src="${Ressources.circle_regular}">
       <p>
-        ${answer.text}
+        ${answer.text.map(nodeOuterHTML).join('')}
       </p>
-      ${answer.explanation}
+      ${(_a = answer.explanation) === null || _a === void 0 ? void 0 : _a.outerHTML}
     </div>
+  </answer>
   `;
+}
+function nodeOuterHTML(x) {
+    const outerHTML = x.outerHTML;
+    if (outerHTML == undefined) {
+        const data = x.data;
+        if (data == undefined) {
+            return '';
+        }
+        return data;
+    }
+    return outerHTML;
 }
 // // questionnaire->DOM Manipulation
 // function renderAnswers(questionnaire: HTMLElement) {
@@ -310,9 +323,15 @@ function showExplanation(answer) {
 }
 // unified click on answer event handler
 function clickAnswerHandler() {
-    checkAnswerEventHandler.bind(this);
-    explanationEventHandler.bind(this, false);
-}
+    console.log(this);
+} //: Event) {
+// console.log('clicked clickAnswerHandler');
+// console.log(this);
+// const el = this.target as HTMLElement;
+// console.log(el);
+// checkAnswerEventHandler.bind(el);
+// explanationEventHandler.bind(el, false);
+//}
 // check click for correct answer
 // depending on question type show either
 // - for multiplechoice just clicked answer

@@ -7,6 +7,56 @@
 //     <answer correct="true|false">
 //       Answer Text
 //       <explanation>Explanation Text
+interface Questionnaire {
+  questions: Question[];
+};
+
+type Questiontype = "singlechoice" | "multiplechoice";
+
+interface Question {
+  type: Questiontype;
+  text: HTMLElement[];
+  answers: Answer[];
+};
+
+interface Answer {
+  correct: boolean;
+  text: HTMLElement[];
+  explanation?: HTMLElement;
+}
+
+function parseQuestionnaire(questionnaire: HTMLElement) : Questionnaire {
+  return {
+    questions: Array.from(questionnaire.children as HTMLCollection).map(x => parseQuestion(x as HTMLElement))
+  };
+}
+
+function parseQuestion(question: HTMLElement): Question {
+  const type = question.getAttribute('type') as Questiontype;
+  const text = Array.from(question.children as HTMLCollection)
+    .filter(x => (x as HTMLElement).tagName != 'answer')
+    .map(x => x as HTMLElement);
+  const answers = Array.from(question.getElementsByTagName('answer') as HTMLCollection);
+  return {
+    type: type,
+    text: text,
+    answers: answers.map(x => parseAnswer(x as HTMLElement))
+  };
+}
+
+function parseAnswer(answer: HTMLElement): Answer {
+  const correct = (answer.getAttribute('correct') as string) == 'true';
+  const text = Array.from(answer.children as HTMLCollection)
+    .filter(x => (x as HTMLElement).tagName != 'explanation')
+    .map(x => x as HTMLElement);
+  const explanation = answer.getElementsByTagName('explanation')[0] as HTMLElement;
+  return {
+    correct: correct,
+    text: text,
+    explanation: explanation
+  };
+}
+
 
 function setup() {
   // setup style

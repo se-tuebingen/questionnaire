@@ -5,20 +5,14 @@ export const check_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3
 export const circle_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNTEyIDI1NkM1MTIgMzk3LjQgMzk3LjQgNTEyIDI1NiA1MTJDMTE0LjYgNTEyIDAgMzk3LjQgMCAyNTZDMCAxMTQuNiAxMTQuNiAwIDI1NiAwQzM5Ny40IDAgNTEyIDExNC42IDUxMiAyNTZ6TTI1NiA0OEMxNDEuMSA0OCA0OCAxNDEuMSA0OCAyNTZDNDggMzcwLjkgMTQxLjEgNDY0IDI1NiA0NjRDMzcwLjkgNDY0IDQ2NCAzNzAuOSA0NjQgMjU2QzQ2NCAxNDEuMSAzNzAuOSA0OCAyNTYgNDh6Ii8+PC9zdmc+`;
 export const minus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTMxLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIgMzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8+PC9zdmc+`;
 export const plus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDMyIDI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMyIDMyLjAxSDI1NnYxNDRjMCAxNy42OS0xNC4zMyAzMS45OS0zMiAzMS45OXMtMzItMTQuMy0zMi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5IDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQuMzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8+PC9zdmc+`;
+export const square_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzg0IDMyQzQxOS4zIDMyIDQ0OCA2MC42NSA0NDggOTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42NSA0ODAgMCA0NTEuMyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMzg0IDgwSDY0QzU1LjE2IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0MzIgNjQgNDMySDM4NEMzOTIuOCA0MzIgNDAwIDQyNC44IDQwMCA0MTZWOTZDNDAwIDg3LjE2IDM5Mi44IDgwIDM4NCA4MHoiLz48L3N2Zz4=`;
 export const xmark_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIuNzUgMCA0NS4yNUMzMDQuNCA0MTIuOSAyOTYuMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUtMjIuNjItOS4zNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQxNiAzMiA0MTZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1IDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1IDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1LjRMMzEwLjYgMzYxLjR6Ii8+PC9zdmc+`;
-export const style = `body {
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: monospace;
+export const style = `questionnaire {
+  display: block;
+  margin: 40px 0 100px ;
 }
 
-questionnaire{
-  display:block;
-  margin:40px 0 100px ;
-}
-
-.content-wrapper {
+questionnaire .content-wrapper {
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
@@ -26,47 +20,48 @@ questionnaire{
   padding: 10px;
   justify-content: center;
 }
-question{
+questionnaire question{
   display:none;
 }
-.question-overview{
+questionnaire .question-overview{
 margin: 0 auto 10px;
 font-size:1.1em;
 }
-question{
+questionnaire question{
   width: 90%;
-  margin: 15px auto 15px;
+  margin: 0 auto;
   font-size: 18pt;
   padding:4vw;
   background-color: #fcfcfc;
 }
 
-.question-header, .question-footer, .wrapper-answer {
+questionnaire .question-header, questionnaire .question-footer, questionnaire .wrapper-answer {
   display: inline-flex;
   width: 100%;
 }
 
-.question-header {
+questionnaire .question-header {
   justify-content: space-between;
+  margin-bottom: 0.5em;
 }
 
-.question-footer{
+questionnaire .question-footer{
   justify-content: center;
 }
 
-[visible=true]{
+questionnaire [visible=true]{
     display:block;
 }
 
-.wrapper-answer, answer [visible=true] {
+questionnaire .wrapper-answer {
   border: 1px solid #eee;
   padding: 5px 12px;
   font-size: 14pt;
-  margin: 15px 0 10px;
+  margin: 15px 0 0;
   width:90%;
 }
 
-answer p {
+questionnaire answer p {
   margin: 0 0 0 16px;
   padding: 6px;
   /*font-size: 12pt;
@@ -74,23 +69,23 @@ answer p {
   width:100%;*/
 }
 
-.wrapper-answer:hover, img:hover, .change-question-button:hover {
+questionnaire .wrapper-answer:hover, questionnaire img:hover, questionnaire .change-question-button:hover {
   cursor: pointer;
   /*background-color: #ddd;*/
 }
 
-.wrapper-answer:hover {
+questionnaire .wrapper-answer:hover {
   background-color: #eee;
 }
 
 
-explanation {
+questionnaire explanation {
   display: none;
   /*max-width: 30vw;*/
 }
 
-answer [visible=true] {
-  margin: 5px 0 20px;
+questionnaire answer [visible=true] {
+  margin: 5px 0;
   padding: 15px 12px;
   font-size: 12pt;
   word-break: break-word;
@@ -98,36 +93,41 @@ answer [visible=true] {
   background-color: #fdfdfd;
 }
 
-answer [visible=true] p {
+questionnaire answer [visible=true] p {
   border: 0;
 }
 
-img {
-  height: auto;
-  width: 20px;
+questionnaire img {
+  height: 1em;
+  align-self: center;
 }
 
-[clicked=true] .wrapper-answer, [clicked=true] .wrapper-answer:hover{
+questionnaire p {
+  margin: 0;
+  align-self: center;
+}
+
+questionnaire [clicked=true] .wrapper-answer, questionnaire [clicked=true] .wrapper-answer:hover{
   background-color:#d30000;
 }
 
-[clicked=true][correct=true] .wrapper-answer{
+questionnaire [clicked=true][correct=true] .wrapper-answer{
   background-color:#aceb84;
 }
 
-.change-question-button{
+questionnaire .change-question-button{
   padding:15px;
-  margin:15px 15px 0;
+  margin:0 15px;
   border: 4px solid #bbb;
   border-radius: 7px;
   font-size:1.3em;
 }
-.change-question-button:hover{
+questionnaire .change-question-button:hover{
   background-color: #bbb;
 }
 
 @media (min-width: 768px) {
-  question {
+  questionnaire question {
     max-width: 600px;
   }
 }`;

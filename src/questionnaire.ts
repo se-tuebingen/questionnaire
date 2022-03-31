@@ -137,7 +137,8 @@ function renderAnswers(questionnaire: HTMLElement) {
     answer.prepend(new_div);
     //append text and img
     let img = document.createElement("img");
-    img.setAttribute("src", Ressources.circle_regular);
+    const mode = answer.parentElement?.getAttribute("type");
+    img.setAttribute("src", mode === 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular);
     new_div.append(img, text);
     answer.addEventListener("click", checkAnswerEventHandler);
     answer.addEventListener("click", explanationEventHandler.bind(answer, false));

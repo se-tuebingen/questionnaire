@@ -25,3 +25,5 @@ jobs:
         run: make all
       - name: Execute Tests
         run: make test
+      # - name: Check that tests have been run locally before uploading
+      #   run: git diff --exit-code

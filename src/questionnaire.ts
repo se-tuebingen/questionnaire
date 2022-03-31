@@ -8,6 +8,7 @@
 //       Answer Text
 //       <explanation>Explanation Text
 interface Questionnaire {
+  rootElement: HTMLElement;
   questions: Question[];
 };
 
@@ -25,8 +26,11 @@ interface Answer {
   explanation?: HTMLElement;
 }
 
+// ########### PARSE METHODS
+
 function parseQuestionnaire(questionnaire: HTMLElement) : Questionnaire {
   return {
+    rootElement: questionnaire,
     questions: Array.from(questionnaire.children as HTMLCollection).map(x => parseQuestion(x as HTMLElement))
   };
 }
@@ -57,7 +61,6 @@ function parseAnswer(answer: HTMLElement): Answer {
   };
 }
 
-
 function setup() {
   // setup style
   const styleNode = document.createElement('style');
@@ -66,8 +69,9 @@ function setup() {
   const q_col: HTMLCollection = document.getElementsByTagName("questionnaire") as HTMLCollection;
   // render every questionnaire in the HTML Document
   for (let i = q_col.length - 1; i >= 0; i--) {
-    let questionnaire: HTMLElement = q_col[i] as HTMLElement;
-    renderQuestionaire(questionnaire);
+    const questionnaire: HTMLElement = q_col[i] as HTMLElement;
+    const r = parseQuestionnaire(questionnaire);
+    renderQuestionnaire(r);
   }
 }
 window.onload = setup;
@@ -79,122 +83,170 @@ window.onload = setup;
 // - question
 
 // ### RENDER FUNCTIONS ###
+function renderQuestionnaire(questionnaire: Questionnaire) {
+  const root = questionnaire.rootElement;
+  root.setAttribute("total_questions", "" + questionnaire.questions.length);
+  root.setAttribute("current_question", "1");
+  root.innerHTML = `
+    <div class="content-wrapper">
+      <div class="question-overview">
+        Question 1 of $(questionnaire.questions.length)
+      </div>
+      $(questionnaire.questions.reverse().map(renderQuestion))
+      <div class="question-footer">
+        <div class="change-question-button"
+             id="prev_button"
+             style="visibility:hidden;"
+             onclick="questionChangeHandler">
+             prev
+        </div>
+        <div class="change-question-button"
+             id="next_button"
+             onclick="questionChangeHandler">
+             next
+        </div>
+      </div>
+    </div>
+  `;
+}
 
-function renderQuestionaire(questionnaire: HTMLElement) {
-  console.log(questionnaire);
-  //build wrapper-content
-  let content: HTMLDivElement = makeDiv("content-wrapper");
-  let questions = questionnaire.children as HTMLCollection;
-  let question_number: number = questions.length;
-  // access children and append to wrapper-content
-  for (let i = question_number - 1; i >= 0; i--) {
-    content.append(questions[i]);
-  }
-  questionnaire.prepend(content);
-  buildQuestionOverview(questionnaire, content, question_number);
-  //render Questions + Answers
-  renderQuestions(questionnaire);
-  renderAnswers(questionnaire);
-  buildQuestionnaireFooter(content, question_number);
-}
-function buildQuestionOverview(questionnaire:HTMLElement, content: HTMLDivElement, question_number:number){
-  // question-overview
-  let q_overview: HTMLDivElement = makeDiv("question-overview");
-  q_overview.textContent = "Frage 1" + " von " + question_number;
-  content.prepend(q_overview);
-  // question-current-total initial
-  questionnaire.setAttribute("total_questions", "" + question_number);
-  questionnaire.setAttribute("current_question", "1")
-}
-// build questionnaire footer
-// if only one question: BUILD NO BUTTON
-function buildQuestionnaireFooter(content:HTMLDivElement, question_number:number){
-  if (question_number == 1) {
-    //BUILD NOTHING
-  }
-  else {
-    let footer: HTMLDivElement = makeDiv("question-footer");
-    content.append(footer);
-    buildFooterButtons(footer);
-  }
-}
+// function renderQuestionaire(questionnaire: HTMLElement) {
+//   console.log(questionnaire);
+//   //build wrapper-content
+//   let content: HTMLDivElement = makeDiv("content-wrapper");
+//   let questions = questionnaire.children as HTMLCollection;
+//   let question_number: number = questions.length;
+//   // access children and append to wrapper-content
+//   for (let i = question_number - 1; i >= 0; i--) {
+//     content.append(questions[i]);
+//   }
+//   questionnaire.prepend(content);
+//   buildQuestionOverview(questionnaire, content, question_number);
+//   //render Questions + Answers
+//   renderQuestions(questionnaire);
+//   renderAnswers(questionnaire);
+//   buildQuestionnaireFooter(content, question_number);
+// }
+// function buildQuestionOverview(questionnaire:HTMLElement, content: HTMLDivElement, question_number:number){
+//   // question-overview
+//   let q_overview: HTMLDivElement = makeDiv("question-overview");
+//   q_overview.textContent = "Frage 1" + " von " + question_number;
+//   content.prepend(q_overview);
+//   // question-current-total initial
+//   questionnaire.setAttribute("total_questions", "" + question_number);
+//   questionnaire.setAttribute("current_question", "1")
+// }
+// // build questionnaire footer
+// // if only one question: BUILD NO BUTTON
+// function buildQuestionnaireFooter(content:HTMLDivElement, question_number:number){
+//   if (question_number == 1) {
+//     //BUILD NOTHING
+//   }
+//   else {
+//     let footer: HTMLDivElement = makeDiv("question-footer");
+//     content.append(footer);
+//     buildFooterButtons(footer);
+//   }
+// }
 
 //build 2 buttons: "prev"-Question, "next"-Question
-function buildFooterButtons(footer: HTMLDivElement) {
-  let prev_button: HTMLDivElement = makeDiv("change-question-button");
-  let next_button: HTMLDivElement = makeDiv("change-question-button");
-  prev_button.setAttribute("id", "prev_button");
-  next_button.setAttribute("id", "next_button");
-  prev_button.setAttribute("style", "visibility:hidden;");
-  prev_button.textContent = "prev";
-  next_button.textContent = "next";
-  prev_button.addEventListener("click", questionChangeHandler);
-  next_button.addEventListener("click", questionChangeHandler);
-  footer.append(prev_button, next_button);
-}
+// function buildFooterButtons(footer: HTMLDivElement) {
+//   let prev_button: HTMLDivElement = makeDiv("change-question-button");
+//   let next_button: HTMLDivElement = makeDiv("change-question-button");
+//   prev_button.setAttribute("id", "prev_button");
+//   next_button.setAttribute("id", "next_button");
+//   prev_button.setAttribute("style", "visibility:hidden;");
+//   prev_button.textContent = "prev";
+//   next_button.textContent = "next";
+//   prev_button.addEventListener("click", questionChangeHandler);
+//   next_button.addEventListener("click", questionChangeHandler);
+//   footer.append(prev_button, next_button);
+// }
 
 // renderQuestions
 // for every question:
 // add <div>-wrapper + <img>-icon (done)
 // add EventListener for CollapseAll-Function
-function renderQuestions(questionnaire: HTMLElement) {
-  // get wrapper-content
-  let wrapper_content = questionnaire.firstChild as HTMLDivElement;
-  let questions: HTMLCollection = questionnaire.getElementsByTagName("question");
-  let lastIndex = questions.length - 1;
-  questions[lastIndex].setAttribute("visible", "true");
-
-  for (let i = lastIndex; i >= 0; i--) {
-    let question: HTMLElement = questions[i] as HTMLElement;
-    buildQuestionHeader(question);
-
-    //append question to wrapper-content
-    wrapper_content.append(question);
-  }
+function renderQuestion(question: Question, index: number) {
+  return `
+    <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
+      <div class="question-header">
+        <p>${question.text}</p>
+        <img src="${Ressources.plus_solid}" onclick="explanationEventHandler.bind(event.target.el, true)">
+      </div>
+      ${question.answers.map(renderAnswer)}
+    </question>
+  `;
+}
+// function renderQuestions(questionnaire: HTMLElement) {
+//   // get wrapper-content
+//   let wrapper_content = questionnaire.firstChild as HTMLDivElement;
+//   let questions: HTMLCollection = questionnaire.getElementsByTagName("question");
+//   let lastIndex = questions.length - 1;
+//   questions[lastIndex].setAttribute("visible", "true");
+//
+//   for (let i = lastIndex; i >= 0; i--) {
+//     let question: HTMLElement = questions[i] as HTMLElement;
+//     buildQuestionHeader(question);
+//
+//     //append question to wrapper-content
+//     wrapper_content.append(question);
+//   }
+// }
+//
+//
+// // question->DOM Manipulation
+// // Question Text and CollapseAll-Functionality in question-header
+// function buildQuestionHeader(question: HTMLElement) {
+//   let text = document.createElement("p");
+//   text.innerHTML = (question.childNodes[0] as Text).data;
+//   question.childNodes[0].remove();
+//   let header: HTMLDivElement = document.createElement("div");
+//   header.setAttribute("class", "question-header");
+//   question.prepend(header);
+//   // append text and img
+//   let img = document.createElement("img");
+//   img.setAttribute("src", Ressources.plus_solid);
+//   img.addEventListener("click", explanationEventHandler.bind(img, true));
+//   header.append(text, img);
+// }
+function renderAnswer(answer: Answer) {
+  return `
+    <div class="wrapper-answer">
+      <img src="${Ressources.circle_regular}" onclick="clickAnswerHandler(event.target.el)">
+      <p>
+        ${answer.text}
+      </p>
+      ${answer.explanation}
+    </div>
+  `;
 }
 
-
-// question->DOM Manipulation
-// Question Text and CollapseAll-Functionality in question-header
-function buildQuestionHeader(question: HTMLElement) {
-  let text = document.createElement("p");
-  text.innerHTML = (question.childNodes[0] as Text).data;
-  question.childNodes[0].remove();
-  let header: HTMLDivElement = document.createElement("div");
-  header.setAttribute("class", "question-header");
-  question.prepend(header);
-  // append text and img
-  let img = document.createElement("img");
-  img.setAttribute("src", Ressources.plus_solid);
-  img.addEventListener("click", explanationEventHandler.bind(img, true));
-  header.append(text, img);
-}
-
-// questionnaire->DOM Manipulation
-function renderAnswers(questionnaire: HTMLElement) {
-  let answers: HTMLCollection = questionnaire.getElementsByTagName("answer");
-  //for every answer:
-  // add <div> wrapper + <img>-icon (done)
-  // add EventListener for AnswerClickEvents (done)
-  for (let i = answers.length - 1; i >= 0; i--) {
-    let answer: HTMLElement = answers[i] as HTMLElement;
-    // build div-wrapper
-    let new_div: HTMLDivElement = document.createElement("div");
-    let text = document.createElement("p");
-    text.innerHTML = (answer.childNodes[0] as Text).data;
-    answer.childNodes[0].remove();
-    new_div.setAttribute("class", "wrapper-answer");
-    answer.prepend(new_div);
-    //append text and img
-    let img = document.createElement("img");
-    const mode = answer.parentElement?.getAttribute("type");
-    img.setAttribute("src", mode === 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular);
-    new_div.append(img, text);
-    answer.addEventListener("click", checkAnswerEventHandler);
-    answer.addEventListener("click", explanationEventHandler.bind(answer, false));
-  }
-}
-
+// // questionnaire->DOM Manipulation
+// function renderAnswers(questionnaire: HTMLElement) {
+//   let answers: HTMLCollection = questionnaire.getElementsByTagName("answer");
+//   //for every answer:
+//   // add <div> wrapper + <img>-icon (done)
+//   // add EventListener for AnswerClickEvents (done)
+//   for (let i = answers.length - 1; i >= 0; i--) {
+//     let answer: HTMLElement = answers[i] as HTMLElement;
+//     // build div-wrapper
+//     let new_div: HTMLDivElement = document.createElement("div");
+//     let text = document.createElement("p");
+//     text.innerHTML = (answer.childNodes[0] as Text).data;
+//     answer.childNodes[0].remove();
+//     new_div.setAttribute("class", "wrapper-answer");
+//     answer.prepend(new_div);
+//     //append text and img
+//     let img = document.createElement("img");
+//     const mode = answer.parentElement?.getAttribute("type");
+//     img.setAttribute("src", mode === 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular);
+//     new_div.append(img, text);
+//     answer.addEventListener("click", checkAnswerEventHandler);
+//     answer.addEventListener("click", explanationEventHandler.bind(answer, false));
+//   }
+// }
+//
 // makeDiv
 // ClassName as String -> HTMLDivElement
 function makeDiv(css_name: string) {
@@ -291,6 +343,12 @@ function showExplanation(answer: HTMLElement) {
   else {
     explanation.setAttribute("visible", "true");
   }
+}
+
+// unified click on answer event handler
+function clickAnswerHandler(this: HTMLElement) {
+  checkAnswerEventHandler.bind(this);
+  explanationEventHandler.bind(this, false);
 }
 
 // check click for correct answer

@@ -18,7 +18,12 @@ function setup() {
   // render every questionnaire in the HTML Document
   for (let i = q_col.length - 1; i >= 0; i--) {
     let questionnaire: HTMLElement = q_col[i] as HTMLElement;
-    renderQuestionaire(questionnaire);
+    if (validateQuestionnaireStructure(questionnaire) == true) {
+      renderQuestionaire(questionnaire);
+    }
+    else {
+      break;
+    }
   }
 }
 window.onload = setup;
@@ -38,13 +43,9 @@ function renderQuestionaire(questionnaire: HTMLElement) {
   let question_number: number = questions.length;
   // access children and append to wrapper-content
   for (let i = question_number - 1; i >= 0; i--) {
-    if (validateQuestionnaireStructure(questions[i] as HTMLElement) == true) {
-      content.append(questions[i]);
-    }
-    else {
-      return;
-    }
+    content.append(questions[i]);
   }
+
   questionnaire.prepend(content);
   buildQuestionOverview(questionnaire, content, question_number);
   //render Questions + Answers
@@ -141,28 +142,29 @@ function renderAnswers(question: HTMLElement) {
   // add EventListener for AnswerClickEvents (done)
   for (let i = answers.length - 1; i >= 0; i--) {
     let answer: HTMLElement = answers[i] as HTMLElement;
-      // build div-wrapper
-      let new_div: HTMLDivElement = document.createElement("div");
-      let text = document.createElement("p");
-      text.innerHTML = (answer.childNodes[0] as Text).data;
-      answer.childNodes[0].remove();
-      new_div.setAttribute("class", "wrapper-answer");
-      answer.prepend(new_div);
-      //append text and image
-      let img = document.createElement("img");
-      img.setAttribute("src", Ressources.circle_regular);
-      new_div.append(img, text);
-      answer.addEventListener("click", checkAnswerEventHandler);
-      answer.addEventListener("click", explanationEventHandler.bind(answer, false));
+    // build div-wrapper
+    let new_div: HTMLDivElement = document.createElement("div");
+    let text = document.createElement("p");
+    text.innerHTML = (answer.childNodes[0] as Text).data;
+    answer.childNodes[0].remove();
+    new_div.setAttribute("class", "wrapper-answer");
+    answer.prepend(new_div);
+    //append text and image
+    let img = document.createElement("img");
+    img.setAttribute("src", Ressources.circle_regular);
+    new_div.append(img, text);
+    answer.addEventListener("click", checkAnswerEventHandler);
+    answer.addEventListener("click", explanationEventHandler.bind(answer, false));
 
-      //validate explanation tag
-      let explanation = answer.getElementsByTagName("explanation");
-      if (explanation.length > 1){
-        let msg = "More than one <explanation> matches an answer: "+ answer.innerHTML;
-        renderError(answer, msg);
-      }
+    //validate explanation tag
+    let explanation = answer.getElementsByTagName("explanation");
+    if (explanation.length > 1) {
+      let msg = "More than one <explanation> matches an answer: " + answer.innerHTML;
+      renderError(answer, msg);
+      return;
     }
   }
+}
 
 // validateAttributes
 // check <question> attribute singlechoice | multiplechoice
@@ -191,7 +193,6 @@ function validateAttribute(question: HTMLElement) {
       return x;
     }
   }
-  console.log(correct_answers);
   // if attr value does not exist
   if (val == null) {
     let msg = "Necessary attribute" + attr + "is missing at: " + question;
@@ -229,11 +230,43 @@ function validateAttribute(question: HTMLElement) {
 
 
 //else if (val == "singlechoice" && )
+// validateQuestionnaireStructure
+// checks if all necessary tags in questionnaire have the correct parentElement
+function validateQuestionnaireStructure(questionnaire: HTMLElement) {
+  let questions: HTMLCollection = questionnaire.getElementsByTagName("question");
+  let answers: HTMLCollection = questionnaire.getElementsByTagName("answer");
+  let explanation: HTMLCollection = questionnaire.getElementsByTagName("explanation");
+  // validate given html tag elements
+  let x = 0;
+  let i = 0;
 
-// ValidateQuestionnaireStructure
+  if (validateHtmlTagElements(x, i, questions) == true
+    && validateHtmlTagElements(x, i, answers) == true
+    && validateHtmlTagElements(x, i, explanation) == true) {
+      return true;
+  }
+  else{
+    return false;
+  }
+  function validateHtmlTagElements(x: number, i: number, col: HTMLCollection) {
+    if (i >= 0) {
+      let validated = validateStructure(col[i] as HTMLElement);
+      if (validated == true) {
+        let bool = validateHtmlTagElements(x, i - 1, col) as boolean;
+        return bool;
+      }
+      else {
+        return false;
+      }
+    } else {
+      return true;
+    }
+  }
+}
+// ValidateStructure
 // <questionnaire> -> <question> -> at least 2 <answer> -> <explanation>
 // return either messageString or Boolean: True
-function validateQuestionnaireStructure(el: HTMLElement) {
+function validateStructure(el: HTMLElement) {
   let html_tag = el.tagName;
   let parent = el.parentElement as HTMLElement | null;
 
@@ -242,11 +275,11 @@ function validateQuestionnaireStructure(el: HTMLElement) {
     return parentHasToBe(parent, "QUESTIONNAIRE");
   }
   else if (html_tag == "ANSWER") {
-    // child has to be an explanation
+    // parent has to be a QUESTION
     return parentHasToBe(parent, "QUESTION");
   }
   else if (html_tag == "EXPLANATION") {
-    // necessarily no children allowed for explanation
+    // parent has to be an ANSWER
     return parentHasToBe(parent, "ANSWER");
   }
   function parentHasToBe(parent: HTMLElement | null, tag: string) {

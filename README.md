@@ -98,8 +98,8 @@ When you render your Questionnaire to PDF, the solution will be added as a block
 
 ## Tests
 
-- [`questionnaire-test.html`](tests/javascript-plugin/questionnaire-test.html) loads the JavaScript plugin into a plain HTML page.
-- Executing `make test` or running `test.sh` in the `scribble-plugin` folder tests the Scribble plugin and generates [PDF](tests/scribble-plugin/output/pdf/test.pdf)- and [HTML](tests/scribble-plugin/output/html/test/index.html) output.
+- `questionnaire-test.html` loads the JavaScript plugin into a plain HTML page.
+- Executing `make test` or running `test.sh` in the `scribble-plugin` folder tests the Scribble plugin and generates PDF- and HTML output.
 
 ## Ressources
 
@@ -130,5 +130,10 @@ When you render your Questionnaire to PDF, the solution will be added as a block
 - Testcases ausbauen: Ungültige Inhalte?
 - Freundliche Fehlermeldungen
 
+## Todos 31.03.2022
+- Refactoring
+- change <answer> to either <solution> or <distractor>
+- change AnswerClick functionality: Statt bisherigem Clickverhalten auf eine Answer(Click -> checkAnswer + showExplanation) soll bei einem Click zuerst die Auswahl der Antworten angezeigt werden und dann die Explanation extra ausgewählt werden
+- onclick-EventHandler zum Laufen bringen
 ## MacOS Support
 - Running `raco scribble` instead of `scribble`

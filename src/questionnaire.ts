@@ -83,10 +83,11 @@ window.onload = setup;
 
 // ### RENDER FUNCTIONS ###
 function renderQuestionnaire(questionnaire: Questionnaire) {
+  const range = document.createRange();
   const root = questionnaire.rootElement;
   root.setAttribute("total_questions", "" + questionnaire.questions.length);
   root.setAttribute("current_question", "1");
-  root.innerHTML = `
+  const root_string = `
     <div class="content-wrapper">
       <div class="question-overview">
         Question 1 of ${questionnaire.questions.length}
@@ -107,8 +108,9 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
       </div>
     </div>
   `;
+  const doc_frag= range.createContextualFragment(root_string);
+  root.appendChild(doc_frag);
 }
-
 // function renderQuestionaire(questionnaire: HTMLElement) {
 //   console.log(questionnaire);
 //   //build wrapper-content

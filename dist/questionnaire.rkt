@@ -8,7 +8,7 @@
 (require scribble/latex-properties)
 (require scribble/base)
 
-(provide questionnaire question answer)
+(provide questionnaire question answer texquestions)
 
 ;;;;;;;;;;; Type Definitions
 (define questiontypes (or/c "singlechoice" "multiplechoice"))
@@ -233,6 +233,37 @@
       (render-solutions-latex questionnaire solstyle)))
 )
 
+; helper for saving questionnaire latex
+(define ;/contract
+  (save-as as)
+  ; (-> string? style?)
+  (tex-addition
+    (string->bytes/utf-8
+      (string-append
+        "\\newcommand{\\QSaveAs" as "}[1]{{\\def\\QRetrieve" as "{#1} }}"
+      ))
+  )
+)
+
+; save latex questionnaire
+(define/contract
+  (save-latex questionnaire solstyle location)
+  (-> questionnaire-container? texsolutionstyles string? block?)
+  (nested-flow
+    (style
+      (string-append "QSaveAs" location)
+      (list (save-as location)))
+    (list (render-latex questionnaire solstyle))
+  )
+)
+
+; retrieve latex questionnaire
+(define/contract
+  (retrieve-latex location)
+  (-> string? block?)
+  (nested-flow (style (string-append "QRetrieve" location) '()) '())
+)
+
 
 ;;;;;;;;;;; Exposed API
 ; answer
@@ -258,19 +289,40 @@
   )
 )
 
+; helper for "nothing"
+(define nothing (nested-flow (style #f '()) '()))
+
 ; questionnaire
 (define ; /contract
-  (questionnaire #:texsolutionstyle [style "margin"] . questions)
+  (questionnaire #:texsolutionstyle [style "margin"] #:key [key "DefaultQuestionnaire"] #:nolatex [nolatex #f] . questions)
    ;(-> (listof question-container?) any)
    (cond [(not (andmap question-container? questions))
           (raise-argument-error 'questions "A list of @question s (question-container)" questions)]
          [(not (texsolutionstyles style))
           (raise-argument-error 'texsolutionstyle "A valid layout option for the solutions in latex (margin or inline)" style)]
+         [(not (string? key))
+          (raise-argument-error 'key "A string key for retrieving the questionnaire with @texquestions" key)]
+         [(not (boolean? nolatex))
+          (raise-argument-error 'nolatex "A boolean flag whether to suppress latex rendering" nolatex)]
          [else
          (cond-block
            [html (render-html (questionnaire-container questions))]
-           [latex (render-latex (questionnaire-container questions) style)]
+           [latex (if nolatex
+                      nothing
+                      (save-latex (questionnaire-container questions) style key))]
          )
          ]
    )
+)
+
+; latex print location
+(define
+  (texquestions #:key [key "DefaultQuestionnaire"])
+  (cond [(not (string? key))
+         (raise-argument-error 'key "A string key for retrieving the questionnaire with @texquestions" key)]
+        [else (cond-block
+                [latex (retrieve-latex key)]
+                [html nothing]
+              )]
+  )
 )

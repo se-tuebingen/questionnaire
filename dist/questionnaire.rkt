@@ -295,7 +295,7 @@
 
 ;;;;;;;;;;; Exposed API
 ; helper for being able to put arbitrary content in answers
-(define (q x) x)
+(define (q . x) x)
 
 ; helper for assigning explanations to answers
 (define/contract

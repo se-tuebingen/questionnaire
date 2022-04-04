@@ -17,8 +17,8 @@ Single-Choice Question:
 @questionnaire[#:key "singlechoicetest"
 @question[
   "singlechoice"
-  @q{What is this course about?}
-  
+  @q{What is this @bold{course} @italic{about?}}
+
   @distractor{Learning to swim}
   @explanation{We do not have a pool}
 

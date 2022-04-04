@@ -1,5 +1,5 @@
 # interactive-textbooks
-
+[Etherpad](http://160.uk.to/pad/p/interactive-textbooks)
 [![Generate HTML & PDF](https://github.com/se-tuebingen/interactive-textbooks/actions/workflows/publish.yml/badge.svg)](https://github.com/se-tuebingen/interactive-textbooks/actions/workflows/publish.yml)
 
 ## What is this Repository?
@@ -113,27 +113,8 @@ When you render your Questionnaire to PDF, the solution will be added as a block
 
 
 
-## Todos
+## Next Meeting
+Dienstag 14:00 Uhr
 
-- (beide, done) Scribbl installieren
-- (beide, done) TypeScript installieren
-- (beide, done) Entwurf für HTML-Interface überlegen
-- (Linus) CSS-Layout
-- (Linus)TS-Code, damit das ganze tut
-- (L)Frage mit Typ außerhalb von Text (Image + Text als Frage, Image als Antwort)
-- (L)Code cleanen
-- (L) Feature: Anzeige für ANzahl richtiger Antworten
-- (L) github-workflow bauen
-- (L) Fehlermeldung: built-fail, falsche Syntax bei Fragen ausgeben
-- (Flo)(html passt schon, latex passt schon) Scribbl-Modul schreiben
-- Scribble-Testcase für Code/Bilder in Fragen/Antworten
-- Testcases ausbauen: Ungültige Inhalte?
-- Freundliche Fehlermeldungen
-
-## Todos 31.03.2022
-- Refactoring
-- change <answer> to either <solution> or <distractor>
-- change AnswerClick functionality: Statt bisherigem Clickverhalten auf eine Answer(Click -> checkAnswer + showExplanation) soll bei einem Click zuerst die Auswahl der Antworten angezeigt werden und dann die Explanation extra ausgewählt werden
-- onclick-EventHandler zum Laufen bringen
 ## MacOS Support
 - Running `raco scribble` instead of `scribble`

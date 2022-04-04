@@ -18,10 +18,13 @@ Single-Choice Question:
 @question[
   "singlechoice"
   @q{What is this course about?}
+  
   @distractor{Learning to swim}
   @explanation{We do not have a pool}
+
   @distractor{Learning to sing}
   @explanation{Singing is hard with masks on or network latency}
+
   @solution{Learning to program}
   @explanation{You are sitting at a computer, aren't you?}
 ]
@@ -32,6 +35,7 @@ Multiple-Choice-Question (in the pdf, the solution should be below and not in th
 @questionnaire[ #:texsolutionstyle "inline"
 @question["multiplechoice"
   @q{What does TS stand for?}
+
   @solution{TeamSpeak}
   @distractor{Torus Examination}
   @solution{TypeScript}
@@ -49,27 +53,36 @@ Questionnaire with several questions:
 @questionnaire[
 @question["multiplechoice"
   @q{What does TS stand for?}
+
   @solution{TeamSpeak}
+
   @distractor{Torus Examination}
   @explanation{although technically...}
+
   @solution{TypeScript}
 ]
 @question[
   "singlechoice"
   @q{What is this course about?}
+
   @distractor{Learning to swim}
   @explanation{We do not have a pool}
+
   @distractor{Learning to sing}
   @explanation{Singing is hard with masks on or network latency}
+
   @solution{Learning to program}
   @explanation{You are sitting at a computer, aren't you?}
 ]
   @question["singlechoice"
     @q{Why is this happening?}
+
     @distractor{Yes}
     @explanation{But actually no}
+
     @distractor{No}
     @explanation{But actually yes}
+
     @solution{Goat}
     @explanation{Whatever floats your goat}
   ]
@@ -85,6 +98,7 @@ In the pdf version, we should see the "What is this course about?" question here
 @questionnaire[ #:nolatex #t
   @question["multiplechoice"
     @q{What does TS stand for?}
+
     @solution{TeamSpeak}
     @distractor{Torus Examination}
     @solution{TypeScript}

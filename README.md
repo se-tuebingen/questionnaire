@@ -60,36 +60,26 @@ Copy the Scribble-Plugin and the JavaScript-Plugin (`questionnaire.rkt` *and* `q
 @(require "questionnaire.rkt")
 ```
 
-You can generate your questions in the same style as in the HTML document (any string can also be something of type content - but be aware you are in Racket mode between angled braces):
+You can generate your questions much in the same style as in the HTML document. The `@q` helper does not change the input, but enables you to use content notation while producing a racket argument (more on that [here](https://docs.racket-lang.org/scribble/reader.html)).
 ```scribble
 @questionnaire[
   @question[
     "singlechoice"
     "Question Text"
-    @answer[#t
-      "correct answer"
-      "Explanation"
-    ]
-    @answer[#f
-      "wrong answer"
-      "Explanation"
-    ]
+    @solution{correct answer}
+    @distractor{wrong answer}
   ]
   @question[
     "multiplechoice"
-    "Question Text"
-    @answer[#t
-      "correct answer"
-      "Explanation"
-    ]
-    @answer[#f
-      "wrong answer"
-      "Explanation"
-    ]
-    @answer[#t
-      "correct answer"
-      "Explanation"
-    ]
+    @q{Question Text with some @italic{formatting}}
+
+    @solution{correct answer}
+    @explanation{optional explanation for correct answer}
+
+    @distractor{wrong answer}
+
+    @explanation{optional explanation for wrong answer}
+    @solution{another correct solution}
   ]
 ]
 @texquestions[]

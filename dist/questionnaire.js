@@ -261,16 +261,31 @@ function makeDiv(css_name) {
     new_div.setAttribute("class", css_name);
     return new_div;
 }
+// getTagRecursive from a child element
+// if element has TagName
+// return;
+// else: retry with parentElement
+function getTagRecursive(el, tag) {
+    console.log(el);
+    if (el.tagName == tag.toUpperCase()) {
+        return el;
+    }
+    else {
+        let parent = el.parentElement;
+        let result = getTagRecursive(parent, tag);
+        return result;
+    }
+}
 // ### EVENT HANDLER FUNCTIONS ###
 // EVENT AFTER BUTTON "prev" OR "next" CLICK
 // questionChangeHandler
 // EventHandler -> DOM Manipulation
 function questionChangeHandler(event) {
-    var _a, _b, _c, _d;
+    var _a, _b;
     // get Questionnaire attributes
     let el = event.target;
     let button = el.getAttribute("id");
-    let questionnaire = (_b = (_a = el.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.parentElement;
+    let questionnaire = getTagRecursive(el, "questionnaire");
     let total_questions = parseInt(questionnaire.getAttribute("total_questions"));
     let current_question = parseInt(questionnaire.getAttribute("current_question"));
     let questions = questionnaire.getElementsByTagName("question");
@@ -293,7 +308,7 @@ function questionChangeHandler(event) {
                 el.setAttribute("style", "visibility:hidden;");
             }
             // show next-Button
-            (_c = el.nextElementSibling) === null || _c === void 0 ? void 0 : _c.setAttribute("style", "visibility:visible;");
+            (_a = el.nextElementSibling) === null || _a === void 0 ? void 0 : _a.setAttribute("style", "visibility:visible;");
             break;
         case "next_button":
             let next_qid = qid + 1;
@@ -307,7 +322,7 @@ function questionChangeHandler(event) {
                 el.setAttribute("style", "visibility:hidden;");
             }
             //show prev_button
-            (_d = el.previousElementSibling) === null || _d === void 0 ? void 0 : _d.setAttribute("style", "visibility:visible;");
+            (_b = el.previousElementSibling) === null || _b === void 0 ? void 0 : _b.setAttribute("style", "visibility:visible;");
             break;
         default:
             console.log("No Button caused this EventHandler", button);
@@ -316,14 +331,13 @@ function questionChangeHandler(event) {
 }
 // ExplanationEventHandler
 // Handles Events for shoowing explanation text
-function explanationEventHandler(collapse) {
-    var _a;
+function explanationEventHandler(el, collapse) {
     if (collapse == true) {
-        let question = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement;
+        let question = getTagRecursive(el, "question");
         let answers = question.getElementsByTagName("answer");
         //change icons and collapse
-        if (this.getAttribute("clicked") == "true") {
-            this.setAttribute("src", Ressources.plus_solid);
+        if (el.getAttribute("clicked") == "true") {
+            el.setAttribute("src", Ressources.plus_solid);
             //  this.setAttribute("clicked", "false");
             for (let i = answers.length - 1; i >= 0; i--) {
                 let answer = answers[i];
@@ -331,8 +345,8 @@ function explanationEventHandler(collapse) {
             }
         }
         else {
-            this.setAttribute("src", Ressources.minus_solid);
-            this.setAttribute("clicked", "true");
+            el.setAttribute("src", Ressources.minus_solid);
+            el.setAttribute("clicked", "true");
             for (let i = answers.length - 1; i >= 0; i--) {
                 let answer = answers[i];
                 answer.getElementsByTagName("explanation")[0].setAttribute("visible", "true");
@@ -340,7 +354,8 @@ function explanationEventHandler(collapse) {
         }
     }
     else {
-        showExplanation(this);
+        let answer = getTagRecursive(el, "answer");
+        showExplanation(answer);
     }
 }
 // show <explanation>
@@ -356,8 +371,9 @@ function showExplanation(answer) {
 }
 // unified click on answer event handler
 function clickAnswerHandler(event) {
-    console.log(event.target);
     const el = event.target;
+    checkAnswerEventHandler(el);
+    explanationEventHandler(el, false);
 } //: Event) {
 // console.log('clicked clickAnswerHandler');
 // console.log(this);
@@ -370,14 +386,14 @@ function clickAnswerHandler(event) {
 // depending on question type show either
 // - for multiplechoice just clicked answer
 // - for singlechoice all answers
-function checkAnswerEventHandler() {
-    var _a, _b;
-    let question_type = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.getAttribute("type");
+function checkAnswerEventHandler(el) {
+    let question_type = getTagRecursive(el, "question").getAttribute("type");
     if (question_type == "multiplechoice") {
-        showAnswer(this);
+        let answer = getTagRecursive(el, "answer");
+        showAnswer(answer);
     }
     else if (question_type == "singlechoice") {
-        let answers = (_b = this.parentElement) === null || _b === void 0 ? void 0 : _b.getElementsByTagName("answer");
+        let answers = getTagRecursive(el, "question").getElementsByTagName("answer");
         for (let i = (answers === null || answers === void 0 ? void 0 : answers.length) - 1; i >= 0; i--) {
             let answer = answers[i];
             showAnswer(answer);

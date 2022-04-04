@@ -297,7 +297,22 @@ function makeDiv(css_name: string) {
   new_div.setAttribute("class", css_name);
   return new_div;
 }
+// getTagRecursive from a child element
+// if element has TagName
+// return;
+// else: retry with parentElement
 
+function getTagRecursive(el: HTMLElement, tag:string) {
+  console.log(el);
+  if (el.tagName == tag.toUpperCase()) {
+    return el;
+  }
+  else {
+    let parent: HTMLElement = el.parentElement as HTMLElement;
+    let result = getTagRecursive(parent, tag) as HTMLElement;
+    return result;
+  }
+}
 
 // ### EVENT HANDLER FUNCTIONS ###
 
@@ -308,7 +323,7 @@ function questionChangeHandler(event: Event) {
   // get Questionnaire attributes
   let el: HTMLElement = event.target as HTMLElement;
   let button = el.getAttribute("id");
-  let questionnaire: HTMLElement = el.parentElement ?.parentElement ?.parentElement as HTMLElement;
+  let questionnaire: HTMLElement = getTagRecursive(el, "questionnaire") as HTMLElement;
   let total_questions: number = parseInt(questionnaire.getAttribute("total_questions") as string);
   let current_question: number = parseInt(questionnaire.getAttribute("current_question") as string);
   let questions = questionnaire.getElementsByTagName("question");
@@ -361,13 +376,13 @@ function questionChangeHandler(event: Event) {
 
 // ExplanationEventHandler
 // Handles Events for shoowing explanation text
-function explanationEventHandler(this: HTMLElement, collapse: boolean) {
+function explanationEventHandler(el: HTMLElement, collapse: boolean) {
   if (collapse == true) {
-    let question: HTMLElement = this.parentElement ?.parentElement as HTMLElement;
+    let question: HTMLElement = getTagRecursive(el, "question") as HTMLElement;
     let answers: HTMLCollection = question.getElementsByTagName("answer") as HTMLCollection;
     //change icons and collapse
-    if (this.getAttribute("clicked") == "true") {
-      this.setAttribute("src", Ressources.plus_solid);
+    if (el.getAttribute("clicked") == "true") {
+      el.setAttribute("src", Ressources.plus_solid);
       //  this.setAttribute("clicked", "false");
       for (let i = answers.length - 1; i >= 0; i--) {
         let answer = answers[i] as HTMLElement;
@@ -375,8 +390,8 @@ function explanationEventHandler(this: HTMLElement, collapse: boolean) {
       }
     }
     else {
-      this.setAttribute("src", Ressources.minus_solid);
-      this.setAttribute("clicked", "true");
+      el.setAttribute("src", Ressources.minus_solid);
+      el.setAttribute("clicked", "true");
       for (let i = answers.length - 1; i >= 0; i--) {
         let answer = answers[i] as HTMLElement;
         answer.getElementsByTagName("explanation")[0].setAttribute("visible", "true");
@@ -384,7 +399,8 @@ function explanationEventHandler(this: HTMLElement, collapse: boolean) {
     }
   }
   else {
-    showExplanation(this);
+    let answer = getTagRecursive(el, "answer");
+    showExplanation(answer);
   }
 }
 // show <explanation>
@@ -401,8 +417,9 @@ function showExplanation(answer: HTMLElement) {
 
 // unified click on answer event handler
 function clickAnswerHandler(event: Event) {
-  console.log(event.target);
-  const el = event.target;
+  const el = event.target as HTMLElement;
+  checkAnswerEventHandler(el);
+  explanationEventHandler(el, false);
 } //: Event) {
 // console.log('clicked clickAnswerHandler');
 // console.log(this);
@@ -416,13 +433,14 @@ function clickAnswerHandler(event: Event) {
 // depending on question type show either
 // - for multiplechoice just clicked answer
 // - for singlechoice all answers
-function checkAnswerEventHandler(this: HTMLElement) {
-  let question_type = this.parentElement ?.getAttribute("type");
+function checkAnswerEventHandler(el: HTMLElement) {
+  let question_type = getTagRecursive(el, "question").getAttribute("type");
   if (question_type == "multiplechoice") {
-    showAnswer(this);
+    let answer = getTagRecursive(el, "answer");
+    showAnswer(answer);
   }
   else if (question_type == "singlechoice") {
-    let answers = this.parentElement ?.getElementsByTagName("answer") as HTMLCollection;
+    let answers = getTagRecursive(el, "question").getElementsByTagName("answer") as HTMLCollection;
     for (let i = answers ?.length - 1; i >= 0; i--) {
       let answer: HTMLElement = answers[i] as HTMLElement;
       showAnswer(answer);

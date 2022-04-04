@@ -57,32 +57,46 @@ function renderQuestionnaire(questionnaire) {
     const root = questionnaire.rootElement;
     root.setAttribute("total_questions", "" + questionnaire.questions.length);
     root.setAttribute("current_question", "1");
-    // if only one question exists, ignore "prev", "next" buttons.
-    const f = () => {
-        if (questionnaire.questions.length == 1) {
-            return "";
-        }
-        else {
-            return `
-          <div class="change-question-button"
-               id="prev_button"
-               style="visibility:hidden;"
-               onclick="questionChangeHandler(event)">
-               prev
-          </div>
-          <div class="change-question-button"
-               id="next_button"
-               onclick="questionChangeHandler(event)">
-               next
-          </div>
-          `;
+    const f = (pos) => {
+        switch (pos) {
+            // if only one question exists, ignore question overview text
+            case "overview_text":
+                if (questionnaire.questions.length == 1) {
+                    return "";
+                }
+                else {
+                    return `Question 1 of ${questionnaire.questions.length}`;
+                }
+            // if only one question exists, ignore "prev", "next" buttons.
+            case "buttons":
+                if (questionnaire.questions.length == 1) {
+                    return "";
+                }
+                else {
+                    return `
+            <div class="change-question-button"
+                 id="prev_button"
+                 style="visibility:hidden;"
+                 onclick="questionChangeHandler(event)">
+                 prev
+            </div>
+            <div class="change-question-button"
+                 id="next_button"
+                 onclick="questionChangeHandler(event)">
+                 next
+            </div>
+            `;
+                }
+            default:
+                break;
         }
     };
-    const buttons = f();
+    const overview_text = f("overview_text");
+    const buttons = f("buttons");
     root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
-        Question 1 of ${questionnaire.questions.length}
+      ${overview_text}
       </div>
       ${questionnaire.questions.reverse().map(renderQuestion)}
       <div class="question-footer">

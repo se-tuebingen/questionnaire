@@ -97,12 +97,12 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
         <div class="change-question-button"
              id="prev_button"
              style="visibility:hidden;"
-             onclick="questionChangeHandler">
+             onclick="questionChangeHandler(event)">
              prev
         </div>
         <div class="change-question-button"
              id="next_button"
-             onclick="questionChangeHandler">
+             onclick="questionChangeHandler(event)">
              next
         </div>
       </div>
@@ -214,7 +214,7 @@ function renderQuestion(question: Question, index: number) {
 function renderAnswer(answer: Answer) {
   return `
   <answer correct="${answer.correct ? 'true' : 'false'}">
-    <div class="wrapper-answer" onclick="clickAnswerHandler(this)">
+    <div class="wrapper-answer" onclick="clickAnswerHandler(event)">
       <img src="${Ressources.circle_regular}">
       <p>
         ${answer.text.map(nodeOuterHTML).join('')}
@@ -276,10 +276,11 @@ function makeDiv(css_name: string) {
 // EVENT AFTER BUTTON "prev" OR "next" CLICK
 // questionChangeHandler
 // EventHandler -> DOM Manipulation
-function questionChangeHandler(this: HTMLElement) {
+function questionChangeHandler(event: Event) {
   // get Questionnaire attributes
-  let button = this.getAttribute("id");
-  let questionnaire: HTMLElement = this.parentElement ?.parentElement ?.parentElement as HTMLElement;
+  let el:HTMLElement = event.target as HTMLElement;
+  let button = el.getAttribute("id");
+  let questionnaire: HTMLElement = el.parentElement ?.parentElement ?.parentElement as HTMLElement;
   let min_qid: number = 0;
   let max_qid: number = parseInt(questionnaire.getAttribute("total_questions") as string) - 1;
   let current_qid: number = parseInt(questionnaire.getAttribute("current_question") as string) - 1;
@@ -296,10 +297,10 @@ function questionChangeHandler(this: HTMLElement) {
     //hide button if button to first question is clicked
     if (current_qid - 1 == min_qid) {
       // !!! CHANGE CLASS INSTEAD OF STYLE?
-      this.setAttribute("style", "visibility:hidden;");
+      el.setAttribute("style", "visibility:hidden;");
     }
     // show next-Button
-    this.nextElementSibling ?.setAttribute("style", "visibility:visible;");
+    el.nextElementSibling ?.setAttribute("style", "visibility:visible;");
   }
   else if (button == "next_button") {
     questions[current_qid].removeAttribute("visible");
@@ -311,9 +312,9 @@ function questionChangeHandler(this: HTMLElement) {
     questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
     // hide button if last question of questionnaire
     if (current_qid + 1 == max_qid) {
-      this.setAttribute("style", "visibility:hidden;");
+      el.setAttribute("style", "visibility:hidden;");
     }
-    this.previousElementSibling ?.setAttribute("style", "visibility:visible;");
+    el.previousElementSibling ?.setAttribute("style", "visibility:visible;");
   }
   else {
     console.log("No Button caused this EventHandler", button);
@@ -361,8 +362,9 @@ function showExplanation(answer: HTMLElement) {
 }
 
 // unified click on answer event handler
-function clickAnswerHandler(this: HTMLElement) {
-  console.log(this);
+function clickAnswerHandler(event:Event) {
+  console.log(event.target);
+  const el = event.target;
 } //: Event) {
   // console.log('clicked clickAnswerHandler');
   // console.log(this);

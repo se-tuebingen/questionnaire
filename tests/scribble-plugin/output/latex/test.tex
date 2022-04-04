@@ -152,7 +152,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Tables
 
-% The `stabular' environment seems to be the lesser of evils among
+% The `stabular' environment seems to be the lesser of evils among 
 %  page-breaking table environments (and we've made a copy as ``pltstabular'
 %  to make sure that it doesn't change).
 
@@ -178,15 +178,15 @@
 % Changed internal commands: \@mkpream, \@addamp, \@xhline
 %
 % Provides new commands in tabular (used after command \\):
-% \emptyrow[#1]
+% \emptyrow[#1] 
 % -------------
-%    Adds empty row, #1 - height of the row
+%    Adds empty row, #1 - height of the row 
 %
-% \tabrow{#1}[#2]
+% \tabrow{#1}[#2] 
 % ---------------
 %    Adds row of natural height: #1\\[#2]
 %
-% Provides new environments: pltstabular and pltstabular*
+% Provides new environments: pltstabular and pltstabular* 
 %                            --------     ---------
 %            One more multi-page version of tabular
 %
@@ -457,7 +457,7 @@
 %  ... document content ...
 %  \postDoc
 %  \end{document}
-\newenvironment{\QSaveAsDefaultQuestionnaire}{\def\QRetrieveDefaultQuestionnaire\{}{\}} }}\newcommand{\QRotatemargin}[1]{{\rotatebox{180}{\parbox{\marginparwidth}{#1}}}}\newcommand{\QRotateinline}[1]{{\rotatebox{180}{\parbox{\textwidth}{#1}}}}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\QRotatemargin}[1]{{\rotatebox{180}{\parbox{\marginparwidth}{#1}}}}\newcommand{\QRotateinline}[1]{{\rotatebox{180}{\parbox{\textwidth}{#1}}}}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Re-definitions for the PLT Scheme manual style
 
 \renewcommand{\sectionNewpage}{\newpage}
@@ -485,7 +485,16 @@ This manual aims to cover most possible valid configurations.
 
 Single{-}Choice Question:
 
-\begin{QSaveAsDefaultQuestionnaire}\begin{SVInsetFlow}\begin{enumerate}\atItemizeStart
+
+
+Multiple{-}Choice{-}Question (in the pdf, the solution should be below and not in the margin, here):
+
+
+
+In latex, the questions should be rendered below:
+
+
+\noindent \begin{SVInsetFlow}\begin{enumerate}\atItemizeStart
 
 \item \textbf{What is this course about?}
 
@@ -497,11 +506,9 @@ Single{-}Choice Question:
 
 \item Learning to program\end{enumerate}\end{enumerate}
 
-\refpara{\begin{refcolumn}\begin{refcontent}\QRotatemargin{\Smaller{1.a)We do not have a pool b)Singing is hard with masks on or network latency \textbf{c})You are sitting at a computer, aren{\textquotesingle}t you? \hspace*{\fill}\\}}\end{refcontent}\end{refcolumn}}\end{SVInsetFlow}\end{QSaveAsDefaultQuestionnaire}
+\refpara{\begin{refcolumn}\begin{refcontent}\QRotatemargin{\Smaller{1.a)We do not have a pool b)Singing is hard with masks on or network latency \textbf{c})You are sitting at a computer, aren{\textquotesingle}t you? \hspace*{\fill}\\}}\end{refcontent}\end{refcolumn}}\end{SVInsetFlow}
 
-Multiple{-}Choice{-}Question (in the pdf, the solution should be below and not in the margin, here):
-
-\begin{QSaveAsDefaultQuestionnaire}\begin{SVInsetFlow}\begin{enumerate}\atItemizeStart
+\noindent \begin{SVInsetFlow}\begin{enumerate}\atItemizeStart
 
 \item \textbf{What does TS stand for?}
 
@@ -513,7 +520,7 @@ Multiple{-}Choice{-}Question (in the pdf, the solution should be below and not i
 
 \item TypeScript\end{enumerate}\end{enumerate}
 
-\QRotateinline{\Smaller{1.\textbf{a})etc b)although technically... \textbf{c})Yup \hspace*{\fill}\\}}\end{SVInsetFlow}\end{QSaveAsDefaultQuestionnaire}
+\QRotateinline{\Smaller{1.\textbf{a})etc b)although technically... \textbf{c})Yup \hspace*{\fill}\\}}\end{SVInsetFlow}
 
 \sectionNewpage
 
@@ -521,7 +528,9 @@ Multiple{-}Choice{-}Question (in the pdf, the solution should be below and not i
 
 Questionnaire with several questions:
 
-\begin{QSaveAsDefaultQuestionnaire}\begin{SVInsetFlow}\begin{enumerate}\atItemizeStart
+
+
+\begin{SVInsetFlow}\begin{enumerate}\atItemizeStart
 
 \item \textbf{What does TS stand for?}
 
@@ -553,7 +562,29 @@ Questionnaire with several questions:
 
 \item Goat\end{enumerate}\end{enumerate}
 
-\refpara{\begin{refcolumn}\begin{refcontent}\QRotatemargin{\Smaller{1.\textbf{a})etc b)although technically... \textbf{c})Yup \hspace*{\fill}\\2.a)We do not have a pool b)Singing is hard with masks on or network latency \textbf{c})You are sitting at a computer, aren{\textquotesingle}t you? \hspace*{\fill}\\3.a)But actually no b)But actually yes \textbf{c})Whatever floats your goat \hspace*{\fill}\\}}\end{refcontent}\end{refcolumn}}\end{SVInsetFlow}\end{QSaveAsDefaultQuestionnaire}
+\refpara{\begin{refcolumn}\begin{refcontent}\QRotatemargin{\Smaller{1.\textbf{a})etc b)although technically... \textbf{c})Yup \hspace*{\fill}\\2.a)We do not have a pool b)Singing is hard with masks on or network latency \textbf{c})You are sitting at a computer, aren{\textquotesingle}t you? \hspace*{\fill}\\3.a)But actually no b)But actually yes \textbf{c})Whatever floats your goat \hspace*{\fill}\\}}\end{refcontent}\end{refcolumn}}\end{SVInsetFlow}
+
+\sectionNewpage
+
+\Ssection{Moving questions to another section}{Moving questions to another section}\label{t:x28part_x22Movingx5fquestionsx5ftox5fanotherx5fsectionx22x29}
+
+In the pdf version, we should see the "What is this course about?" question here again, in the HTML version, it is "What does TS stand for":
+
+\begin{SVInsetFlow}\begin{enumerate}\atItemizeStart
+
+\item \textbf{What is this course about?}
+
+\noindent \begin{enumerate}\atItemizeStart
+
+\item Learning to swim
+
+\item Learning to sing
+
+\item Learning to program\end{enumerate}\end{enumerate}
+
+\refpara{\begin{refcolumn}\begin{refcontent}\QRotatemargin{\Smaller{1.a)We do not have a pool b)Singing is hard with masks on or network latency \textbf{c})You are sitting at a computer, aren{\textquotesingle}t you? \hspace*{\fill}\\}}\end{refcontent}\end{refcolumn}}\end{SVInsetFlow}
+
+\noindent \begin{Subflow}\end{Subflow}
 
 \postDoc
 \end{document}

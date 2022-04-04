@@ -92,9 +92,18 @@ You can generate your questions in the same style as in the HTML document (any s
     ]
   ]
 ]
+@texquestions[]
 ```
 
-When you render your Questionnaire to PDF, the solution will be added as a block of rotated text in the margin beside the quiz. If you want to have it below the text instead, you can add the keyword argument `#:texsolutionstyle "inline"` before your questions in the `@questionnaire`.
+For your questions to show up in a PDF, you need to specify where they should be rendered.
+- A simple `@texquestions[]` renders the last `@questionnaire` that was defined above it.
+- If you have several questionnaires and want to e.g. move them to a separate section at the end, you need to specify a key as a keyword argument to both commands: `@texquestions[#:key "intro"]` renders what has been defined in `@questionnaire[#:key "intro" ...]`.
+- If you explicitly want to suppress the code for latex rendering, you can add `#:nolatex true` to a `@questionnaire`. However, questionnaires without any corresponding `@texquestions[]` call will never produce any LaTex output.
+
+There a is also a style option that can be passed to `@questionnaire` as keyword argument:
+
+- `#:texsolutionstyle "margin"` (default) adds the solutions as a block of rotated text in the margin beside the questions.
+- `#:texsolutionstyle "inline"` adds the solutions as a block of rotated text below the questions.
 
 ## Tests
 

@@ -14,7 +14,7 @@ This manual aims to cover most possible valid configurations.
 
 Single-Choice Question:
 
-@questionnaire[
+@questionnaire[#:key "singlechoicetest"
   @question[
     "singlechoice"
     "What is this course about?"
@@ -55,6 +55,10 @@ Multiple-Choice-Question (in the pdf, the solution should be below and not in th
     ]
   ]
 ]
+
+In latex, the questions should be rendered below:
+@texquestions[#:key "singlechoicetest"]
+@texquestions[]
 
 @section{More than one Question}
 
@@ -108,6 +112,31 @@ Questionnaire with several questions:
     @answer[#t
       "Goat"
       "Whatever floats your goat"
+    ]
+  ]
+]
+
+@texquestions[]
+
+@section{Moving questions to another section}
+
+In the pdf version, we should see the "What is this course about?" question here again, in the HTML version, it is "What does TS stand for":
+
+@texquestions[#:key "singlechoicetest"]
+@questionnaire[ #:nolatex #t
+  @question["multiplechoice"
+    "What does TS stand for?"
+    @answer[#t
+      "TeamSpeak"
+      "etc"
+    ]
+    @answer[#f
+      "Torus Examination"
+      "although technically..."
+    ]
+    @answer[#t
+      "TypeScript"
+      "Yup"
     ]
   ]
 ]

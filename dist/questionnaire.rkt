@@ -233,35 +233,32 @@
       (render-solutions-latex questionnaire solstyle)))
 )
 
-; helper for saving questionnaire latex
-(define ;/contract
-  (save-as as)
-  ; (-> string? style?)
-  (tex-addition
-    (string->bytes/utf-8
-      (string-append
-        "\\newenvironment{QSaveAs" as "}{\\def\\QRetrieve" as "\{}{\}}"
-      ))
-  )
-)
-
 ; save latex questionnaire
 (define/contract
-  (save-latex questionnaire solstyle location)
-  (-> questionnaire-container? texsolutionstyles string? block?)
-  (nested-flow
-    (style
-      (string-append "QSaveAs" location)
-      (list (save-as location)))
-    (list (render-latex questionnaire solstyle))
-  )
+  (save-latex location content)
+  (-> string? block? block?)
+  (paragraph (style #f '()) (list
+    (collect-element
+      (style #f '())
+      '()
+      (lambda (ci)
+        (collect-put!
+          ci
+          (list (string->symbol (string-append "Questionnaire" location)) #t)
+          content
+        )
+      )
+    )))
 )
 
 ; retrieve latex questionnaire
 (define/contract
   (retrieve-latex location)
-  (-> string? block?)
-  (nested-flow (style (string-append "QRetrieve" location) '()) '())
+  (-> string? delayed-block?)
+  (delayed-block
+    (lambda (r p ri)
+      (resolve-get p ri (list (string->symbol (string-append "Questionnaire" location)) #t)))
+  )
 )
 
 
@@ -309,7 +306,8 @@
            [html (render-html (questionnaire-container questions))]
            [latex (if nolatex
                       nothing
-                      (save-latex (questionnaire-container questions) style key))]
+                      (save-latex key
+                        (render-latex (questionnaire-container questions) style)))]
          )
          ]
    )

@@ -103,6 +103,8 @@ When you render your Questionnaire to PDF, the solution will be added as a block
 
 ## Ressources
 
+### Scribble etc
+
 [Overview of Scribble Document Types](https://docs.racket-lang.org/scribble/core.html#%28part._parts%29) - Everything Scribble-Related should be in the same documentation.
 
 [Racket Documentation about Pairs and Lists](https://docs.racket-lang.org/guide/pairs.html) - for anything else it should suffice to enter the function name into the search box.
@@ -110,6 +112,9 @@ When you render your Questionnaire to PDF, the solution will be added as a block
 [Variable Arity Expressions in Racket](https://stackoverflow.com/questions/65873698/using-variable-arity-function-on-values-expression)
 
 [Keyword Arguments in Racket](https://riptutorial.com/racket/example/8681/keyword-arguments)
+
+For moving document parts around in Scribble, see e.g. the
+[delayed block](https://docs.racket-lang.org/scribble/core.html#%28def._%28%28lib._scribble%2Fcore..rkt%29._delayed-block%29%29) documentation. Saving stuff in a LaTex variable and accessing it later is impossible because the Top Scribble Document Element needs to be a block, which translates Custom Latex Properties to an environment, which cannot generate a `\def\variable{}` command.
 
 
 

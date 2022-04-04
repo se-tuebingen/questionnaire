@@ -1,2 +1,0 @@
-\contentsline {section}{\numberline {1}Single{-}Choice and Multiple Choice}{3}{section.1}%
-\contentsline {section}{\numberline {2}More than one Question}{4}{section.2}%

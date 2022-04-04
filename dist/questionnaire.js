@@ -54,33 +54,42 @@ window.onload = setup;
 // - question
 // ### RENDER FUNCTIONS ###
 function renderQuestionnaire(questionnaire) {
-    const range = document.createRange();
     const root = questionnaire.rootElement;
     root.setAttribute("total_questions", "" + questionnaire.questions.length);
     root.setAttribute("current_question", "1");
-    const root_string = `
+    // if only one question exists, ignore "prev", "next" buttons.
+    const f = () => {
+        if (questionnaire.questions.length == 1) {
+            return "";
+        }
+        else {
+            return `
+          <div class="change-question-button"
+               id="prev_button"
+               style="visibility:hidden;"
+               onclick="questionChangeHandler(event)">
+               prev
+          </div>
+          <div class="change-question-button"
+               id="next_button"
+               onclick="questionChangeHandler(event)">
+               next
+          </div>
+          `;
+        }
+    };
+    const buttons = f();
+    root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
         Question 1 of ${questionnaire.questions.length}
       </div>
       ${questionnaire.questions.reverse().map(renderQuestion)}
       <div class="question-footer">
-        <div class="change-question-button"
-             id="prev_button"
-             style="visibility:hidden;"
-             onclick="questionChangeHandler(event)">
-             prev
-        </div>
-        <div class="change-question-button"
-             id="next_button"
-             onclick="questionChangeHandler(event)">
-             next
-        </div>
+      ${buttons}
       </div>
     </div>
   `;
-    const doc_frag = range.createContextualFragment(root_string);
-    root.appendChild(doc_frag);
 }
 // function renderQuestionaire(questionnaire: HTMLElement) {
 //   console.log(questionnaire);
@@ -203,6 +212,7 @@ function nodeOuterHTML(x) {
         }
         return data;
     }
+    console.log("outerHTML:" + outerHTML);
     return outerHTML;
 }
 // // questionnaire->DOM Manipulation
@@ -247,42 +257,47 @@ function questionChangeHandler(event) {
     let el = event.target;
     let button = el.getAttribute("id");
     let questionnaire = (_b = (_a = el.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.parentElement;
-    let min_qid = 0;
-    let max_qid = parseInt(questionnaire.getAttribute("total_questions")) - 1;
-    let current_qid = parseInt(questionnaire.getAttribute("current_question")) - 1;
+    let total_questions = parseInt(questionnaire.getAttribute("total_questions"));
+    let current_question = parseInt(questionnaire.getAttribute("current_question"));
     let questions = questionnaire.getElementsByTagName("question");
+    let min_qid = 0;
+    let max_qid = total_questions - 1;
+    let qid = current_question - 1;
     // change question
     // if button is "prev"
-    if (button == "prev_button") {
-        questions[current_qid].removeAttribute("visible");
-        questions[current_qid - 1].setAttribute("visible", "true");
-        let str_current = current_qid.toString();
-        questionnaire.setAttribute("current_question", str_current);
-        questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
-        //hide button if button to first question is clicked
-        if (current_qid - 1 == min_qid) {
-            // !!! CHANGE CLASS INSTEAD OF STYLE?
-            el.setAttribute("style", "visibility:hidden;");
-        }
-        // show next-Button
-        (_c = el.nextElementSibling) === null || _c === void 0 ? void 0 : _c.setAttribute("style", "visibility:visible;");
-    }
-    else if (button == "next_button") {
-        questions[current_qid].removeAttribute("visible");
-        questions[current_qid + 1].setAttribute("visible", "true");
-        //change questionnaire attributes
-        let str_current = (current_qid + 2).toString();
-        questionnaire.setAttribute("current_question", str_current);
-        //change question overview
-        questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
-        // hide button if last question of questionnaire
-        if (current_qid + 1 == max_qid) {
-            el.setAttribute("style", "visibility:hidden;");
-        }
-        (_d = el.previousElementSibling) === null || _d === void 0 ? void 0 : _d.setAttribute("style", "visibility:visible;");
-    }
-    else {
-        console.log("No Button caused this EventHandler", button);
+    switch (button) {
+        case "prev_button":
+            let prev_qid = current_question - 1;
+            // change visibility to the previous question
+            questions[qid].removeAttribute("visible");
+            questions[qid - 1].setAttribute("visible", "true");
+            // change question overview text
+            questionnaire.setAttribute("current_question", prev_qid.toString());
+            questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + prev_qid.toString() + " of " + total_questions;
+            //hide button if button to first question
+            if (prev_qid - 1 == min_qid) {
+                el.setAttribute("style", "visibility:hidden;");
+            }
+            // show next-Button
+            (_c = el.nextElementSibling) === null || _c === void 0 ? void 0 : _c.setAttribute("style", "visibility:visible;");
+            break;
+        case "next_button":
+            let next_qid = qid + 1;
+            questions[qid].removeAttribute("visible");
+            questions[next_qid].setAttribute("visible", "true");
+            //change question overview text
+            questionnaire.setAttribute("current_question", (current_question + 1).toString());
+            questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + (current_question + 1).toString() + " of " + total_questions;
+            // hide button if button to last question
+            if (next_qid == max_qid) {
+                el.setAttribute("style", "visibility:hidden;");
+            }
+            //show prev_button
+            (_d = el.previousElementSibling) === null || _d === void 0 ? void 0 : _d.setAttribute("style", "visibility:visible;");
+            break;
+        default:
+            console.log("No Button caused this EventHandler", button);
+            break;
     }
 }
 // ExplanationEventHandler

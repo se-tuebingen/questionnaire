@@ -8,27 +8,52 @@
 (require scribble/latex-properties)
 (require scribble/base)
 
-(provide questionnaire question answer texquestions)
+(provide questionnaire question solution distractor explanation texquestions)
 
 ;;;;;;;;;;; Type Definitions
 (define questiontypes (or/c "singlechoice" "multiplechoice"))
 (define texsolutionstyles (or/c "inline" "margin"))
  ; one-of does not work with strings
 
-(struct/contract answer-container (
-  [correct boolean?]
-  [text content?]
+; general answer for easy accessor
+(struct/contract answer (
+  [text content?])
+  #:transparent
+)
+
+; solution and distractor
+(struct/contract solution answer ()
+  #:transparent
+)
+(struct/contract distractor answer ()
+  #:transparent
+)
+
+; same but with explanation
+(struct/contract solution/e solution (
+  [explanation content?])
+  #:transparent
+)
+(struct/contract distractor/e distractor (
   [explanation content?])
   #:transparent
 )
 
-(struct/contract question-container (
-  [type questiontypes]
-  [text content?]
-  [answers (listof answer-container?)])
+; explanation
+(struct/contract explanation (
+  [text content?])
   #:transparent
 )
 
+; question
+(struct/contract question-container (
+  [type questiontypes]
+  [text content?]
+  [answers (listof answer?)])
+  #:transparent
+)
+
+; quiz
 (struct/contract questionnaire-container (
   [questions (listof question-container?)])
   #:transparent
@@ -71,10 +96,8 @@
   (answer-tag-wrapper correct)
   (-> boolean? xexpr-property?)
   (xexpr-property
-    (cdata #f #f (string-append
-      "<answer correct=\"" (if correct "true" "false") "\">"
-      ))
-    (cdata #f #f "</answer>")))
+    (cdata #f #f (if correct "<solution>" "<distractor>"))
+    (cdata #f #f (if correct "</solution>" "</distractor>"))))
 
 (define/contract
   (answer-tag correct content)
@@ -98,9 +121,14 @@
 ;;;; Render-Functions for each struct
 (define
   (render-answer-html answer)
-  (answer-tag (answer-container-correct answer)
-    (list (answer-container-text answer)
-          (explanation-tag (answer-container-explanation answer)))
+  (answer-tag (solution? answer)
+    (cons (answer-text answer)
+          (cond
+            [(solution/e? answer)
+             (list (explanation-tag (solution/e-explanation answer)))]
+            [(distractor/e? answer)
+             (list (explanation-tag (distractor/e-explanation answer)))]
+            [else '()]))
   )
 )
 
@@ -131,7 +159,7 @@
   (-> question-container? (listof block?))
   (list (paragraph (style #f '()) (bold (question-container-text question)))
         (itemlist #:style 'ordered
-        (map (lambda (x) (item (answer-container-text x)))
+        (map (lambda (x) (item (answer-text x)))
                        (question-container-answers question)))
   )
 )
@@ -168,9 +196,12 @@
 ; solution for single answer
 (define/contract
   (latex-explanation n answer)
-  (-> exact-integer? answer-container? content?)
-  (let ([correct (answer-container-correct answer)]
-        [explanation (answer-container-explanation answer)]
+  (-> exact-integer? answer? content?)
+  (let ([correct (solution? answer)]
+        [explanation (cond
+          [(solution/e? answer) (solution/e-explanation answer)]
+          [(distractor/e? answer) (distractor/e-explanation answer)]
+          [else ""])]
         [letter (enumerate-letter n)])
     (element #f (list
       (if correct (bold letter) letter)
@@ -263,26 +294,41 @@
 
 
 ;;;;;;;;;;; Exposed API
-; answer
+; answer building blocks
 (define/contract
-  (answer correct text explanation)
-  (-> boolean? content? content? answer-container?)
-  (answer-container correct text explanation)
+  (merge-explanations xs)
+  (-> (listof (or/c answer? explanation?)) (listof answer?))
+  (if (pair? xs)
+      (if (pair? (cdr xs))
+          (let ([a (car xs)]
+                [b (car (cdr xs))]
+                [xxs (cdr (cdr xs))])
+            (cond
+              [(and (distractor? a) (explanation? b))
+               (cons (distractor/e (answer-text a) (explanation-text b)) (merge-explanations xxs))]
+              [(and (solution? a) (explanation? b))
+               (cons (solution/e (answer-text a) (explanation-text b)) (merge-explanations xxs))]
+              [else (cons a (merge-explanations (cdr xs)))]
+            )
+          )
+          xs
+      )
+      xs
+  )
 )
 
 ; question
-(define; /contract
+(define
   (question type text . answers)
-  ; (-> questiontypes content? (listof answer-container?) question-container?)
   (cond
     [(not (questiontypes type))
      (raise-argument-error 'type "A valid question type string (singlechoice or multiplechoice)" type)]
     [(not (content? text))
      (raise-argument-error 'text "An Element of Type content (no block, like e.g. a table or itemization)" text)]
-    [(not (andmap answer-container? answers))
-     (raise-argument-error 'answers "A list of @answer s (answer-container)" answers)]
+    [(not (andmap (or/c answer? explanation?) answers))
+     (raise-argument-error 'answers "A list of @solution|@distractor|@explanation" answers)]
     [else
-     (question-container type text answers)]
+     (question-container type text (merge-explanations answers))]
   )
 )
 
@@ -290,9 +336,8 @@
 (define nothing (nested-flow (style #f '()) '()))
 
 ; questionnaire
-(define ; /contract
+(define
   (questionnaire #:texsolutionstyle [style "margin"] #:key [key "DefaultQuestionnaire"] #:nolatex [nolatex #f] . questions)
-   ;(-> (listof question-container?) any)
    (cond [(not (andmap question-container? questions))
           (raise-argument-error 'questions "A list of @question s (question-container)" questions)]
          [(not (texsolutionstyles style))

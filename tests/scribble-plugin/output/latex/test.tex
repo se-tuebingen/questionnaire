@@ -152,7 +152,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Tables
 
-% The `stabular' environment seems to be the lesser of evils among 
+% The `stabular' environment seems to be the lesser of evils among
 %  page-breaking table environments (and we've made a copy as ``pltstabular'
 %  to make sure that it doesn't change).
 
@@ -178,15 +178,15 @@
 % Changed internal commands: \@mkpream, \@addamp, \@xhline
 %
 % Provides new commands in tabular (used after command \\):
-% \emptyrow[#1] 
+% \emptyrow[#1]
 % -------------
-%    Adds empty row, #1 - height of the row 
+%    Adds empty row, #1 - height of the row
 %
-% \tabrow{#1}[#2] 
+% \tabrow{#1}[#2]
 % ---------------
 %    Adds row of natural height: #1\\[#2]
 %
-% Provides new environments: pltstabular and pltstabular* 
+% Provides new environments: pltstabular and pltstabular*
 %                            --------     ---------
 %            One more multi-page version of tabular
 %
@@ -457,7 +457,7 @@
 %  ... document content ...
 %  \postDoc
 %  \end{document}
-\newcommand{\QSaveAsDefaultQuestionnaire}[1]{{\def\QRetrieveDefaultQuestionnaire{#1} }}\newcommand{\QRotatemargin}[1]{{\rotatebox{180}{\parbox{\marginparwidth}{#1}}}}\newcommand{\QRotateinline}[1]{{\rotatebox{180}{\parbox{\textwidth}{#1}}}}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newenvironment{\QSaveAsDefaultQuestionnaire}{\def\QRetrieveDefaultQuestionnaire\{}{\}} }}\newcommand{\QRotatemargin}[1]{{\rotatebox{180}{\parbox{\marginparwidth}{#1}}}}\newcommand{\QRotateinline}[1]{{\rotatebox{180}{\parbox{\textwidth}{#1}}}}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Re-definitions for the PLT Scheme manual style
 
 \renewcommand{\sectionNewpage}{\newpage}

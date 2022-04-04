@@ -240,7 +240,7 @@
   (tex-addition
     (string->bytes/utf-8
       (string-append
-        "\\newcommand{\\QSaveAs" as "}[1]{{\\def\\QRetrieve" as "{#1} }}"
+        "\\newenvironment{QSaveAs" as "}{\\def\\QRetrieve" as "\{}{\}}"
       ))
   )
 )

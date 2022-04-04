@@ -8,7 +8,7 @@
 (require scribble/latex-properties)
 (require scribble/base)
 
-(provide questionnaire question solution distractor explanation texquestions)
+(provide questionnaire question solution distractor explanation texquestions q)
 
 ;;;;;;;;;;; Type Definitions
 (define questiontypes (or/c "singlechoice" "multiplechoice"))
@@ -294,7 +294,10 @@
 
 
 ;;;;;;;;;;; Exposed API
-; answer building blocks
+; helper for being able to put arbitrary content in answers
+(define (q x) x)
+
+; helper for assigning explanations to answers
 (define/contract
   (merge-explanations xs)
   (-> (listof (or/c answer? explanation?)) (listof answer?))

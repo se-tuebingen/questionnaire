@@ -230,31 +230,144 @@ function nodeOuterHTML(x) {
     console.log("outerHTML:" + outerHTML);
     return outerHTML;
 }
-// // questionnaire->DOM Manipulation
-// function renderAnswers(questionnaire: HTMLElement) {
-//   let answers: HTMLCollection = questionnaire.getElementsByTagName("answer");
-//   //for every answer:
-//   // add <div> wrapper + <img>-icon (done)
-//   // add EventListener for AnswerClickEvents (done)
-//   for (let i = answers.length - 1; i >= 0; i--) {
-//     let answer: HTMLElement = answers[i] as HTMLElement;
-//     // build div-wrapper
-//     let new_div: HTMLDivElement = document.createElement("div");
-//     let text = document.createElement("p");
-//     text.innerHTML = (answer.childNodes[0] as Text).data;
-//     answer.childNodes[0].remove();
-//     new_div.setAttribute("class", "wrapper-answer");
-//     answer.prepend(new_div);
-//     //append text and img
-//     let img = document.createElement("img");
-//     const mode = answer.parentElement?.getAttribute("type");
-//     img.setAttribute("src", mode === 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular);
-//     new_div.append(img, text);
-//     answer.addEventListener("click", checkAnswerEventHandler);
-//     answer.addEventListener("click", explanationEventHandler.bind(answer, false));
-//   }
-// }
-//
+// validateAttributes
+// check <question> attribute singlechoice | multiplechoice
+// check multiple <answer> attributes for at least (for multiplechoice) 1 correct answer
+// returns true (for successful validation) or false (fail)
+function validateAttribute(question) {
+    let attr = "type";
+    let val = question.getAttribute(attr);
+    let answers = question.children;
+    let i = answers.length - 1;
+    let x = 0;
+    let correct_answers = getCorrectAnswer(x, i);
+    // get all correct answers to this question
+    function getCorrectAnswer(x, i) {
+        if (i >= 0) {
+            let correct = answers[i].getAttribute("correct");
+            if (correct == "true") {
+                x = getCorrectAnswer(x + 1, i - 1);
+                return x;
+            }
+            else {
+                x = getCorrectAnswer(x, i - 1);
+                return x;
+            }
+        }
+        else {
+            return x;
+        }
+    }
+    // if attr value does not exist
+    if (val == null) {
+        let msg = "Necessary attribute" + attr + "is missing at: " + question;
+        renderError(question, msg);
+        return false;
+    }
+    // if value exists, but is not correctly assigned
+    else if (val != "singlechoice" && val != "multiplechoice") {
+        let msg = "Necessary attribute" + attr + "with value: " + val + "is not 'singlechoice' nor 'multiplechoice': " + question;
+        renderError(question, msg);
+        return false;
+    }
+    // if only 1 or less answer exists
+    else if (answers.length < 2) {
+        let msg = "You need to provide at least two answers for one question: " + question + ", " + answers;
+        renderError(question, msg);
+        return false;
+    }
+    else if (correct_answers == 0) {
+        let msg = "There is no correct answer in this question: " + question + ", " + answers;
+        renderError(question, msg);
+        return false;
+    }
+    // if question attr is singlechoice, but more than one correct answer exists
+    else if (val == "singlechoice" && correct_answers > 1) {
+        let msg = "There is more than one correct answer, but your question type is 'singlechoice': " + question + ", " + answers;
+        renderError(question, msg);
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+//else if (val == "singlechoice" && )
+// validateQuestionnaireStructure
+// checks if all necessary tags in questionnaire have the correct parentElement
+function validateQuestionnaireStructure(questionnaire) {
+    let questions = questionnaire.getElementsByTagName("question");
+    let answers = questionnaire.getElementsByTagName("answer");
+    let explanation = questionnaire.getElementsByTagName("explanation");
+    // validate given html tag elements
+    let x = 0;
+    let i = 0;
+    if (validateHtmlTagElements(x, i, questions) == true
+        && validateHtmlTagElements(x, i, answers) == true
+        && validateHtmlTagElements(x, i, explanation) == true) {
+        return true;
+    }
+    else {
+        return false;
+    }
+    function validateHtmlTagElements(x, i, col) {
+        if (i >= 0) {
+            let validated = validateStructure(col[i]);
+            if (validated == true) {
+                let bool = validateHtmlTagElements(x, i - 1, col);
+                return bool;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return true;
+        }
+    }
+}
+// ValidateStructure
+// <questionnaire> -> <question> -> at least 2 <answer> -> <explanation>
+// return either messageString or Boolean: True
+function validateStructure(el) {
+    let html_tag = el.tagName;
+    let parent = el.parentElement;
+    if (html_tag == "QUESTION") {
+        // parent has to be a QUESTIONNAIRE
+        return parentHasToBe(parent, "QUESTIONNAIRE");
+    }
+    else if (html_tag == "ANSWER") {
+        // parent has to be a QUESTION
+        return parentHasToBe(parent, "QUESTION");
+    }
+    else if (html_tag == "EXPLANATION") {
+        // parent has to be an ANSWER
+        return parentHasToBe(parent, "ANSWER");
+    }
+    function parentHasToBe(parent, tag) {
+        if ((parent === null || parent === void 0 ? void 0 : parent.tagName) == tag) {
+            return true;
+        }
+        else {
+            let msg = "HTML structure is invalid: Please check your input at: " + el.innerHTML;
+            renderError(el, msg);
+            return false;
+        }
+    }
+}
+// renderError
+function renderError(current_el, message) {
+    let questionnaire = getQuestionnaireRecursive(current_el);
+    let wrapper = makeDiv("error-wrapper");
+    let header = makeDiv("error-header");
+    header.innerHTML = "<h2>Why do I see this error?</h2>";
+    let box = makeDiv("error-box");
+    box.innerHTML = "<p>There was a syntax error in the programming module, probably caused by a wrong syntax.</p>";
+    let msg = makeDiv("error-message");
+    msg.innerHTML = "<p>" + current_el + ", Error:" + message + "</p>";
+    // msg.setAttribute("id","error_msg");
+    wrapper.append(header, box, msg);
+    questionnaire.replaceChildren(wrapper);
+}
 // makeDiv
 // ClassName as String -> HTMLDivElement
 function makeDiv(css_name) {
@@ -636,7 +749,26 @@ questionnaire  aler;
   background-color:#d30000;
 }
 
-questionnaire questi15pxnnair 0e [clicked=true][correct=true] .wrapper-answer{
+q
+.error-wrapper{
+  display:block;
+  max-width: 600px;
+  border: 5px solid red;
+   margin: 0 auto;
+  padding:0 20px;
+}
+.error-header{
+
+}
+.error-box{
+font-size:16pt;
+line-height:1.5em;
+}
+
+.error-message{
+  font-family:monospace;
+  font-size:12pt;
+}uestionnaire questi15pxnnair 0e [clicked=true][correct=true] .wrapper-answer{
   background-color:#aceb84;
 }
  .change-question-button{

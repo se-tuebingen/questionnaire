@@ -87,43 +87,8 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
   root.setAttribute("total_questions", "" + questionnaire.questions.length);
   root.setAttribute("current_question", "1");
 
-  const f = (pos: string) => {
-    switch (pos) {
-      // if only one question exists, ignore question overview text
-      case "overview_text":
-        if (questionnaire.questions.length == 1){
-          return "";
-        }
-        else{
-          return `Question 1 of ${questionnaire.questions.length}`;
-        }
-      // if only one question exists, ignore "prev", "next" buttons.
-      case "buttons":
-        if (questionnaire.questions.length == 1) {
-          return "";
-        }
-        else {
-          return `
-            <div class="change-question-button"
-                 id="prev_button"
-                 style="visibility:hidden;"
-                 onclick="questionChangeHandler(event)">
-                 prev
-            </div>
-            <div class="change-question-button"
-                 id="next_button"
-                 onclick="questionChangeHandler(event)">
-                 next
-            </div>
-            `;
-        }
-      default:
-        break;
-    }
-
-  };
-  const overview_text = f("overview_text");
-  const buttons = f("buttons");
+  const overview_text = hideContext("overview_text");
+  const buttons = hideContext("buttons");
 
   root.innerHTML = `
     <div class="content-wrapper">
@@ -136,7 +101,41 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
       </div>
     </div>
   `;
-
+// Local functions
+  function hideContext(pos: string) {
+    switch (pos) {
+      // if only one question exists, ignore question overview text
+      case "overview_text":
+        if (questionnaire.questions.length == 1) {
+          return "";
+        }
+        else {
+          return `Question 1 of ${questionnaire.questions.length}`;
+        }
+      // if only one question exists, ignore "prev", "next" buttons.
+      case "buttons":
+        if (questionnaire.questions.length == 1) {
+          return "";
+        }
+        else {
+          return `
+          <div class="change-question-button"
+               id="prev_button"
+               style="visibility:hidden;"
+               onclick="questionChangeHandler(event)">
+               prev
+          </div>
+          <div class="change-question-button"
+               id="next_button"
+               onclick="questionChangeHandler(event)">
+               next
+          </div>
+          `;
+        }
+      default:
+        break;
+    }
+  }
 }
 // function renderQuestionaire(questionnaire: HTMLElement) {
 //   console.log(questionnaire);
@@ -302,7 +301,7 @@ function makeDiv(css_name: string) {
 // return;
 // else: retry with parentElement
 
-function getTagRecursive(el: HTMLElement, tag:string) {
+function getTagRecursive(el: HTMLElement, tag: string) {
   console.log(el);
   if (el.tagName == tag.toUpperCase()) {
     return el;

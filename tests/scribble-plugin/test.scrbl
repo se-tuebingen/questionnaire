@@ -33,11 +33,8 @@ Multiple-Choice-Question (in the pdf, the solution should be below and not in th
 @question["multiplechoice"
   @q{What does TS stand for?}
   @solution{TeamSpeak}
-  @explanation{etc}
   @distractor{Torus Examination}
-  @explanation{although technically...}
   @solution{TypeScript}
-  @explanation{Yup}
 ]
 ]
 
@@ -53,11 +50,9 @@ Questionnaire with several questions:
 @question["multiplechoice"
   @q{What does TS stand for?}
   @solution{TeamSpeak}
-  @explanation{etc}
   @distractor{Torus Examination}
   @explanation{although technically...}
   @solution{TypeScript}
-  @explanation{Yup}
 ]
 @question[
   "singlechoice"
@@ -91,10 +86,7 @@ In the pdf version, we should see the "What is this course about?" question here
   @question["multiplechoice"
     @q{What does TS stand for?}
     @solution{TeamSpeak}
-    @explanation{etc}
     @distractor{Torus Examination}
-    @explanation{although technically...}
     @solution{TypeScript}
-    @explanation{Yup}
   ]
 ]

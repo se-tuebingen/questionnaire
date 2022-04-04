@@ -311,6 +311,8 @@
                (cons (distractor/e (answer-text a) (explanation-text b)) (merge-explanations xxs))]
               [(and (solution? a) (explanation? b))
                (cons (solution/e (answer-text a) (explanation-text b)) (merge-explanations xxs))]
+              [(explanation? a)
+               (raise-argument-error 'xs "A solution or distractor before every explanation, at most one explanation per solution/distractor" xs)]
               [else (cons a (merge-explanations (cdr xs)))]
             )
           )

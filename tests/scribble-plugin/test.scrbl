@@ -18,16 +18,12 @@ Single-Choice Question:
 @question[
   "singlechoice"
   "What is this course about?"
-  @distractor["Learning to swim"]
-  @explanation["We do not have a pool"
-  ]
-  @distractor["Learning to sing"]
-  @explanation["Singing is hard with masks on or network latency"
-  ]
-  @solution[
-    "Learning to program"]
-    @explanation["You are sitting at a computer, aren't you?"
-  ]
+  @distractor{Learning to swim}
+  @explanation{We do not have a pool}
+  @distractor{Learning to sing}
+  @explanation{Singing is hard with masks on or network latency}
+  @solution{Learning to program}
+  @explanation{You are sitting at a computer, aren't you?}
 ]
 ]
 
@@ -36,12 +32,12 @@ Multiple-Choice-Question (in the pdf, the solution should be below and not in th
 @questionnaire[ #:texsolutionstyle "inline"
 @question["multiplechoice"
   "What does TS stand for?"
-  @solution["TeamSpeak"]
-  @explanation["etc"]
-  @distractor["Torus Examination"]
-  @explanation["although technically..."]
-  @solution["TypeScript"]
-  @explanation["Yup"]
+  @solution{TeamSpeak}
+  @explanation{etc}
+  @distractor{Torus Examination}
+  @explanation{although technically...}
+  @solution{TypeScript}
+  @explanation{Yup}
 ]
 ]
 
@@ -56,38 +52,31 @@ Questionnaire with several questions:
 @questionnaire[
 @question["multiplechoice"
   "What does TS stand for?"
-  @solution["TeamSpeak"]
-  @explanation["etc"]
-  @distractor["Torus Examination"]
-  @explanation["although technically..."]
-  @solution["TypeScript"]
-  @explanation["Yup"]
+  @solution{TeamSpeak}
+  @explanation{etc}
+  @distractor{Torus Examination}
+  @explanation{although technically...}
+  @solution{TypeScript}
+  @explanation{Yup}
 ]
 @question[
   "singlechoice"
   "What is this course about?"
-  @distractor["Learning to swim"]
-  @explanation["We do not have a pool"
-  ]
-  @distractor["Learning to sing"]
-  @explanation["Singing is hard with masks on or network latency"
-  ]
-  @solution[
-    "Learning to program"]
-    @explanation["You are sitting at a computer, aren't you?"
-  ]
+  @distractor{Learning to swim}
+  @explanation{We do not have a pool}
+  @distractor{Learning to sing}
+  @explanation{Singing is hard with masks on or network latency}
+  @solution{Learning to program}
+  @explanation{You are sitting at a computer, aren't you?}
 ]
   @question["singlechoice"
     "Why is this happening?"
-    @distractor["Yes"]
-    @explanation["But actually no"
-    ]
-    @distractor["No"]
-    @explanation["But actually yes"
-    ]
-    @solution["Goat"]
-    @explanation["Whatever floats your goat"
-    ]
+    @distractor{Yes}
+    @explanation{But actually no}
+    @distractor{No}
+    @explanation{But actually yes}
+    @solution{Goat}
+    @explanation{Whatever floats your goat}
   ]
 ]
 
@@ -101,14 +90,11 @@ In the pdf version, we should see the "What is this course about?" question here
 @questionnaire[ #:nolatex #t
   @question["multiplechoice"
     "What does TS stand for?"
-    @solution["TeamSpeak"]
-    @explanation["etc"
-    ]
-    @distractor["Torus Examination"]
-    @explanation["although technically..."
-    ]
-    @solution["TypeScript"]
-    @explanation["Yup"
-    ]
+    @solution{TeamSpeak}
+    @explanation{etc}
+    @distractor{Torus Examination}
+    @explanation{although technically...}
+    @solution{TypeScript}
+    @explanation{Yup}
   ]
 ]

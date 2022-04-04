@@ -57,7 +57,21 @@ function renderQuestionnaire(questionnaire) {
     const root = questionnaire.rootElement;
     root.setAttribute("total_questions", "" + questionnaire.questions.length);
     root.setAttribute("current_question", "1");
-    const f = (pos) => {
+    const overview_text = hideContext("overview_text");
+    const buttons = hideContext("buttons");
+    root.innerHTML = `
+    <div class="content-wrapper">
+      <div class="question-overview">
+      ${overview_text}
+      </div>
+      ${questionnaire.questions.reverse().map(renderQuestion)}
+      <div class="question-footer">
+      ${buttons}
+      </div>
+    </div>
+  `;
+    // Local functions
+    function hideContext(pos) {
         switch (pos) {
             // if only one question exists, ignore question overview text
             case "overview_text":
@@ -74,36 +88,23 @@ function renderQuestionnaire(questionnaire) {
                 }
                 else {
                     return `
-            <div class="change-question-button"
-                 id="prev_button"
-                 style="visibility:hidden;"
-                 onclick="questionChangeHandler(event)">
-                 prev
-            </div>
-            <div class="change-question-button"
-                 id="next_button"
-                 onclick="questionChangeHandler(event)">
-                 next
-            </div>
-            `;
+          <div class="change-question-button"
+               id="prev_button"
+               style="visibility:hidden;"
+               onclick="questionChangeHandler(event)">
+               prev
+          </div>
+          <div class="change-question-button"
+               id="next_button"
+               onclick="questionChangeHandler(event)">
+               next
+          </div>
+          `;
                 }
             default:
                 break;
         }
-    };
-    const overview_text = f("overview_text");
-    const buttons = f("buttons");
-    root.innerHTML = `
-    <div class="content-wrapper">
-      <div class="question-overview">
-      ${overview_text}
-      </div>
-      ${questionnaire.questions.reverse().map(renderQuestion)}
-      <div class="question-footer">
-      ${buttons}
-      </div>
-    </div>
-  `;
+    }
 }
 // function renderQuestionaire(questionnaire: HTMLElement) {
 //   console.log(questionnaire);
@@ -429,189 +430,219 @@ Mi42Mi05LjM3NWwtMTYwLTE2MGMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNWwxNjAt
 MTYwYzEyLjUtMTIuNSAzMi43NS0xMi41IDQ1LjI1IDBzMTIuNSAzMi43NSAwIDQ1LjI1TDc3
 LjI1IDI1NmwxMzcuNCAxMzcuNGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1QzIwOC40
 IDQ0NC45IDIwMC4yIDQ0OCAxOTIgNDQ4eiIvPjwvc3ZnPg==`;
-    Ressources.angle_right_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAy
-NTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNjQgNDQ4Yy04LjE4OCAwLTE2LjM4LTMuMTI1LTIy
-LjYyLTkuMzc1Yy0xMi41LTEyLjUtMTIuNS0zMi43NSAwLTQ1LjI1TDE3OC44IDI1Nkw0MS4z
-OCAxMTguNmMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNXMzMi43NS0xMi41IDQ1LjI1
-IDBsMTYwIDE2MGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1bC0xNjAgMTYwQzgwLjM4
-IDQ0NC45IDcyLjE5IDQ0OCA2NCA0NDh6Ii8+PC9zdmc+`;
-    Ressources.check_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDM4LjYgMTA1LjRDNDUxLjEgMTE3LjkgNDUxLjEg
-MTM4LjEgNDM4LjYgMTUwLjZMMTgyLjYgNDA2LjZDMTcwLjEgNDE5LjEgMTQ5LjkgNDE5LjEg
-MTM3LjQgNDA2LjZMOS4zNzIgMjc4LjZDLTMuMTI0IDI2Ni4xLTMuMTI0IDI0NS45IDkuMzcy
-IDIzMy40QzIxLjg3IDIyMC45IDQyLjEzIDIyMC45IDU0LjYzIDIzMy40TDE1OS4xIDMzOC43
-TDM5My40IDEwNS40QzQwNS45IDkyLjg4IDQyNi4xIDkyLjg4IDQzOC42IDEwNS40SDQzOC42
-eiIvPjwvc3ZnPg==`;
-    Ressources.circle_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1
-MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNTEyIDI1NkM1MTIgMzk3LjQgMzk3LjQgNTEyIDI1
-NiA1MTJDMTE0LjYgNTEyIDAgMzk3LjQgMCAyNTZDMCAxMTQuNiAxMTQuNiAwIDI1NiAwQzM5
-Ny40IDAgNTEyIDExNC42IDUxMiAyNTZ6TTI1NiA0OEMxNDEuMSA0OCA0OCAxNDEuMSA0OCAy
-NTZDNDggMzcwLjkgMTQxLjEgNDY0IDI1NiA0NjRDMzcwLjkgNDY0IDQ2NCAzNzAuOSA0NjQg
-MjU2QzQ2NCAxNDEuMSAzNzAuOSA0OCAyNTYgNDh6Ii8+PC9zdmc+`;
-    Ressources.minus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMy
-LTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTMxLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIg
-MzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8+PC9zdmc+`;
-    Ressources.plus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDMyIDI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMy
-IDMyLjAxSDI1NnYxNDRjMCAxNy42OS0xNC4zMyAzMS45OS0zMiAzMS45OXMtMzItMTQuMy0z
-Mi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5
-IDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQu
-MzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8+PC9z
-dmc+`;
-    Ressources.square_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzg0IDMyQzQxOS4zIDMyIDQ0OCA2MC42NSA0NDgg
-OTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42NSA0ODAgMCA0NTEu
-MyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMzg0IDgwSDY0QzU1LjE2
-IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0MzIgNjQgNDMySDM4NEMz
+    Ressources.angle_right_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxuNTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmbexp
+ort const angle_right_solid = `;
+    /svg+xml;base64,PHN2ZyB4bWxuNTY;
+    gNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh;
+    0;
+    dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmN;
+    vbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29;
+    ucywgSW5jLiAtLT48cGF0aCBkPSJNNjQgNDQ4Yy04LjE4OCAwLTE2LjM4LTMuMTI1LTIyLjY;
+    yLTkuMzc1Yy0xMi41LTEyLjUtMTIuNS0zMi43NSAwLTQ1LjI1TDE3OC44IDI1Nkw0MS4zOCA;
+    xMTguNmMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNXMzMi43NS0xMi41IDQ1LjI1IDB;
+    sMTYwIDE2MGMxMi41IDEyLjUgMTIuNSAzMi43NSAwDQ1;
+    LjI1bC0xNjAgMTYwQzgwLjM4;
+    IDQ0NC45IDcyLjE5IDQ0OCA2NCA0NDh6Ii8 + PC9zdmc +
+        `;
+export const check_solid = `;
+    data: image / svg + xml;
+    base64, PHN2ZyB4bWxucz0export;
+    co;
+    Ressources.check_solid = `data:image/svg+xml;b
+
+ase64,PHN2ZyB4bWxucz
+0export const check_solid = `;
+    /svg+xml;ba;
+    se;
+    64, PHN2ZyB4bWxuc;
+    z0iaHNDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4;
+    wIGJ;
+    5;
+    IEBmb250YXd;
+    lc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgL;
+    SBodHR;
+    wczovL2Z;
+    vbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2U;
+    pIENvcHl;
+    yaWd;
+    odCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDM4LjYgM;
+    TA1LjRDNDU;
+    xLjEgMTE3LjkgNDUxLjEgMTM4LjEgNDM4LjYgMTUwLjZ;
+    MMTgyLjYgNDA2Lj;
+    ZDMTcwLjEg;
+    NDE5LjEgMTQ5LjkgNDE5LjEgMTM3LjQgNDA2LjZMOS4zNzIgMjc4LjZDLTMuMT;
+    I0IDI2Ni;
+    4;
+    xLTMuMTI0IDI0NS;
+    45;
+    IDkuMzcyIDIzMy40QzIxLjg3DI;
+    yMC45IDQyLjEzIDIyMC45IDU0LjYzIDIzMy40TDE1OS4xIDMzOC43;
+    TDM5My40IDEwNS40QzQwNS45IDkyLjg4IDQyNi4xIDkyLjg4IDQzOC42IDEwNS40SDQzOC42;
+    eiIvPjwvc3ZnPsquare_regular = `data:image/svg+xml;b
+ase64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ij
+AgMCA0
+NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4gIGJ5IEB=b250YXdl
+c29tZSAt
+IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2Zvbn
+Rhd2Vzb21l
+LmNvbS9s=WNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAy
+MDIyIEZvbnRp
+Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzg0IDMyQzQxOS4zIDMyIDQ0OC
+A2MC42NSA0NDgg
+OTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42
+NSA0ODAgMCA0NTEu
+MyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMz
+g0IDgwSDY0QzU1LjE2
+IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0
+MzIgNjQgNDMySDM4NEMz
 OTIuOCA0MzIgNDAwIDQyNC44IDQwMCA0MTZWOTZDNDAwIDg3LjE2IDM5Mi44IDgwIDM4NCA4
 MHoiLz48L3N2Zz4=`;
-    Ressources.xmark_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAz
-MjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIu
-NzUgMCA0NS4yNUMzMDQuNCA0MTIuOSAyOTYuMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUt
-MjIuNjItOS4zNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQx
-NiAzMiA0MTZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1
-IDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1
-IDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41
-LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1
-LjRMMzEwLjYgMzYxLjR6Ii8+PC9zdmc+`;
-    Ressources.style = `questionnaire {
+    `;
+export const circleY29ucywgSW5jL iAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDA
+wIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTM
+xLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIgMzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8
++PC9zdmc+`;
+    co;
+    nst;
+    Ressources.plus_solid;
+    Ressources.plus_solid = `data:i
+mage/svg+xml;base64,PHN2ZyB4bWxucz0iexport const plus_solid = `;
+    e / svg + xml;
+    base64, PHN2ZyB4bWxucz0iaHRNDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUg;
+    UHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExp;
+    Y2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExp;
+    Y2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29uywgSW5jLiAtLT48cGF0aCBkPSJNNDMyI;
+    DI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMy;
+    IDMyLjAxSDI1NyxMLT48cGF0aCBkPSJNMzg;
+    0;
+    IDMyQzQxOS4zIDMyIDQ0OCA2MC42NSA0NDgg;
+    OTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0O;
+    DAgMzg0IDQ4MEg2NEMyOTZWNDE2QzQ0O;
+    CA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42NSA0ODAgMCA0NTEuMyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMzg0IDgwSDY0QzU1LjE2IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0MzIgNjQgNDMySDM4NEMzOTIuOCA0MzIgNDAwIDQyNC44IDQwMCA0MTZWOTZDNDAwIDg3LjE2IDM5Mi44IDgwIDM4NCA4MHoiLz48L3N2Zz4 =
+        questionnaire `;
+export const xmark_solid = `;
+    data: image / svg + xml;
+    base6export;
+    const xmark_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0export const xmark_solid = `, data;
+    /svg+xml;base64,PHN2ZyB4bWxucz0iaHMjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIu;
+    NzUgMCA0NS4yNUMzMDQuNCbody;
+    {
+        width: 100 % ;
+        margin: 0;
+        padding: 0;
+        font - family;
+        monospace;
+    }
+    A0MTIuOnaire;
+    questionSAyOTYMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUt;
+    MjIuNjItOSzNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQx;
+    questionnaire;
+    NiAzMiA0MZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1;
+    IDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1;
+    IDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41;
+    UtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1;
+    questionnaire;
+    LjRMMzEwLjYgMzYxLjR6Ii8 + PC9zdmc +
+        `;
+export con0tyle estionnaire {
   display: block;
   margin: 40px 0 100px ;
 }
 
-questionnaire .content-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;
+question-wrapper {
+questionnaire   display: flex;
+ questionnaire  flex-wrap: wrap; questionnaire
+on: column;
   margin: 10px;
   padding: 10px;
-  justify-content: center;
-}
-questionnaire question{
-  display:none;
-}
-questionnaire .question-overview{
+questionnaire   justify-content: center;
+e question{
+  margin-bottom: 0.5em;
+  display:15pxone;
+ 15px}
+questionnaire questionnaire .question-overview{
 margin: 0 auto 10px;
 font-size:1.1em;
 }
 questionnaire question{
-  width: 90%;
-  margin: 0 auto;
-  font-size: 18pt;
-  padding:4vw;
-  background-color: #fcfcfc;
-}
-
-questionnaire .question-header, questionnaire .question-footer, questionnaire .wrapper-answer {
+  width:: 0 auto;
+  font-padding:4vw;
+olor: #fcfcfc;
+questionnaire }
+questionnaire.ionnaire .question-footer, questionnaire .wrapper-answer {
   display: inline-flex;
-  width: 100%;
+
 }
 
-questionnaire .question-header {
-  justify-content: space-between;
-  margin-bottom: 0.5em;
+questionnaire qstion-header {
+ent: space-between;
+questionnaire   margin-bottom: 0.5em;
 }
 
-questionnaire .question-footer{
+.question-foote,ranswer [visible=true] {
   justify-content: center;
 }
 
-questionnaire [visible=true]{
-    display:block;
+questionnaire [vi1spxible=true]{
+questionnaire     display:block;
 }
 
-questionnaire .wrapper-answer {
+.questwonnaire irapper-an questionnaireswer {
   border: 1px solid #eee;
-  padding: 5px 12px;
+questionnaire   padding: 5px 12px;
   font-size: 14pt;
   margin: 15px 0 0;
   width:90%;
 }
-
-questionnaire answer p {
-  margin: 0 0 0 16px;
-  padding: 6px;
-  /*font-size: 12pt;
+qu
+stionnaire eanswer p {
+  margin: 0 6ding: 6pxe: 12pt;
   border: 1px solid #000;
-  width:100%;*/
-}
+/
+questionn}ire a
 
-questionnaire .wrapper-answer:hover, questionnaire img:hover, questionnaire .change-question-button:hover {
+questionnair.rper-answer:hover, questionnaire img:hover, questionnaire .change-question-button:hover {
   cursor: pointer;
-  /*background-color: #ddd;*/
+/color: #ddd;*/
 }
 
 questionnaire .wrapper-answer:hover {
   background-color: #eee;
-}
-
-
-questionnaire explanation {
+questionnaire i 0r2epx explanation {
   display: none;
   /*max-width: 30vw;*/
 }
+quest
+onnaire iquestionna1em;
+  ilign-self: center;
+}
 
-questionnaire answer [visible=true] {
-  margin: 5px 0;
+qresei nnaire p {nswer [visible=true] {
+0;marg nig-lf: center;
   padding: 15px 12px;
   font-size: 12pt;
-  word-break: break-word;
-  border:0;
-  background-color: #fdfdfd;
-}
-
-questionnaire answer [visible=true] p {
-  border: 0;
-}
-
-questionnaire img {
+questionnaire   word-break: break-word;
+dackgrquestionnaire ou
+ re20px
   height: 1em;
-  align-self: center;
+questionnaire center;
 }
 
 questionnaire p {
-  margin: 0;
-  align-self: center;
+questionnaire  aler;
 }
 
-questionnaire [clicked=true] .wrapper-answer, questionnaire [clicked=true] .wrapper-answer:hover{
+[clicked0e] .wpper-answer, questionnaire [clicked=true] .wrapper-answer:hover{
   background-color:#d30000;
 }
 
-questionnaire [clicked=true][correct=true] .wrapper-answer{
+questionnaire questi15pxnnair 0e [clicked=true][correct=true] .wrapper-answer{
   background-color:#aceb84;
 }
-
-questionnaire .change-question-button{
+ .change-question-button{
   padding:15px;
-  margin:0 15px;
-  border: 4px solid #bbb;
-  border-radius: 7px;
-  font-size:1.3em;
-}
-questionnaire .change-question-button:hover{
+  margin:0nd re qu sti}n rapperisply:monospace;
+  font-size:12pt;uestionnaire .change-question-button:hover{
   background-color: #bbb;
 }
 

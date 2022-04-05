@@ -69,9 +69,16 @@ function setup() {
   // render every questionnaire in the HTML Document
   for (let i = q_col.length - 1; i >= 0; i--) {
     const questionnaire: HTMLElement = q_col[i] as HTMLElement;
-    const r = parseQuestionnaire(questionnaire);
-    console.log(r);
-    renderQuestionnaire(r);
+    // validate htmL Structure before parsing
+    if (validateQuestionnaireStructure(questionnaire) == true) {
+      const r = parseQuestionnaire(questionnaire);
+      console.log(r);
+      // Possible ValidationPoint (Attributes)
+      renderQuestionnaire(r);
+    }
+    else {
+      //DO NOTHING
+    }
   }
 }
 window.onload = setup;
@@ -102,7 +109,7 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
       </div>
     </div>
   `;
-// Local functions
+  // Local functions
   function hideContext(pos: string) {
     switch (pos) {
       // if only one question exists, ignore question overview text
@@ -182,6 +189,10 @@ function nodeOuterHTML(x: Node) {
   return outerHTML;
 }
 
+// ######### VALIDATION METHODS ##########
+
+//validateQuestionnaire
+
 // validateAttributes
 // check <question> attribute singlechoice | multiplechoice
 // check multiple <answer> attributes for at least (for multiplechoice) 1 correct answer
@@ -211,30 +222,30 @@ function validateAttribute(question: HTMLElement) {
   }
   // if attr value does not exist
   if (val == null) {
-    let msg = "Necessary attribute" + attr + "is missing at: " + question;
+    let msg = `Necessary attribute &lt;question type='' &gt; is missing at: ${question.outerHTML}`;
     renderError(question, msg);
     return false;
   }
   // if value exists, but is not correctly assigned
   else if (val != "singlechoice" && val != "multiplechoice") {
-    let msg = "Necessary attribute" + attr + "with value: " + val + "is not 'singlechoice' nor 'multiplechoice': " + question;
+    let msg = `Necessary attribute &lt;question type='' &gt; with value: ${val}is neither 'singlechoice' nor 'multiplechoice': ${question.outerHTML}`;
     renderError(question, msg);
     return false;
   }
   // if only 1 or less answer exists
   else if (answers.length < 2) {
-    let msg = "You need to provide at least two answers for one question: " + question + ", " + answers;
+    let msg = `You need to provide at least two answers for one question:  ${question.outerHTML}`;
     renderError(question, msg);
     return false;
   }
   else if (correct_answers == 0) {
-    let msg = "There is no correct answer in this question: " + question + ", " + answers;
+    let msg = `There is no correct answer in this question: ${question.outerHTML}`;
     renderError(question, msg);
     return false;
   }
   // if question attr is singlechoice, but more than one correct answer exists
   else if (val == "singlechoice" && correct_answers > 1) {
-    let msg = "There is more than one correct answer, but your question type is 'singlechoice': " + question + ", " + answers;
+    let msg = `There is more than one correct answer, but your question type is 'singlechoice': " ${question.outerHTML}`;
     renderError(question, msg);
     return false;
   }
@@ -253,22 +264,20 @@ function validateQuestionnaireStructure(questionnaire: HTMLElement) {
   let answers: HTMLCollection = questionnaire.getElementsByTagName("answer");
   let explanation: HTMLCollection = questionnaire.getElementsByTagName("explanation");
   // validate given html tag elements
-  let x = 0;
-  let i = 0;
 
-  if (validateHtmlTagElements(x, i, questions) == true
-    && validateHtmlTagElements(x, i, answers) == true
-    && validateHtmlTagElements(x, i, explanation) == true) {
-      return true;
+  if (validateHtmlTagElements(questions.length - 1, questions) == true
+    && validateHtmlTagElements(answers.length - 1, answers) == true
+    && validateHtmlTagElements(explanation.length - 1, explanation) == true) {
+    return true;
   }
-  else{
+  else {
     return false;
   }
-  function validateHtmlTagElements(x: number, i: number, col: HTMLCollection) {
+  function validateHtmlTagElements(i: number, col: HTMLCollection) {
     if (i >= 0) {
       let validated = validateStructure(col[i] as HTMLElement);
       if (validated == true) {
-        let bool = validateHtmlTagElements(x, i - 1, col) as boolean;
+        let bool = validateHtmlTagElements(i - 1, col) as boolean;
         return bool;
       }
       else {
@@ -283,9 +292,8 @@ function validateQuestionnaireStructure(questionnaire: HTMLElement) {
 // <questionnaire> -> <question> -> at least 2 <answer> -> <explanation>
 // return either messageString or Boolean: True
 function validateStructure(el: HTMLElement) {
-  let html_tag = el.tagName;
-  let parent = el.parentElement as HTMLElement | null;
-
+  const html_tag = el.tagName;
+  const parent = el.parentElement as HTMLElement | null;
   if (html_tag == "QUESTION") {
     // parent has to be a QUESTIONNAIRE
     return parentHasToBe(parent, "QUESTIONNAIRE");
@@ -302,7 +310,7 @@ function validateStructure(el: HTMLElement) {
     if (parent ?.tagName == tag) {
       return true;
     } else {
-      let msg = "HTML structure is invalid: Please check your input at: " + el.innerHTML;
+      let msg = `HTML structure is invalid: Please check your input at:  ${el.parentElement?.outerHTML}`;
       renderError(el, msg);
       return false;
     }
@@ -311,25 +319,42 @@ function validateStructure(el: HTMLElement) {
 
 // renderError
 function renderError(current_el: HTMLElement, message: string) {
-  let questionnaire = getTagRecursive(current_el, "questionnaire");
-  let wrapper = makeDiv("error-wrapper");
-  let header = makeDiv("error-header");
-  header.innerHTML = "<h2>Why do I see this error?</h2>";
-  let box = makeDiv("error-box");
-  box.innerHTML = "<p>There was a syntax error in the programming module, probably caused by a wrong syntax.</p>";
-  let msg = makeDiv("error-message");
-  msg.innerHTML = "<p>" + current_el + ", Error:" + message + "</p>";
-  // msg.setAttribute("id","error_msg");
-  wrapper.append(header, box, msg);
-  questionnaire.replaceChildren(wrapper);
+  const el_name = current_el.localName;
+  const questionnaire = getTagRecursive(current_el, "questionnaire");
+  const error_html = `
+  <div class="error-wrapper">
+    <div class="error-header">
+      <h2> Why do I see this red funny box?</h2>
+    </div>
+    <div class="error-box">
+    <p>There was a syntax error with:
+    &lt;${el_name}&gt;</p>
+    </div>
+    <pre class="error-message">
+    ${escapeHtml(message)}
+    </pre>
+  </div>
+  `;
+  questionnaire.innerHTML = error_html;
+  console.log(error_html);
 }
 
 // makeDiv
 // ClassName as String -> HTMLDivElement
 function makeDiv(css_name: string) {
-  let new_div = document.createElement("div");
+  const new_div = document.createElement("div");
   new_div.setAttribute("class", css_name);
   return new_div;
+}
+// escapeHtml
+// escape HTML TAGS
+function escapeHtml(str: string) {
+   return str.replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#39;");
+
 }
 // getTagRecursive from a child element
 // if element has TagName
@@ -337,7 +362,6 @@ function makeDiv(css_name: string) {
 // else: retry with parentElement
 
 function getTagRecursive(el: HTMLElement, tag: string) {
-  console.log(el);
   if (el.tagName == tag.toUpperCase()) {
     return el;
   }

@@ -18,17 +18,19 @@ interface Question {
   type: Questiontype;
   text: Node[];
   answers: Answer[];
+  rootElement: HTMLElement;
 };
 
 interface Answer {
   correct: boolean;
   text: Node[];
   explanation?: HTMLElement;
+  rootElement: HTMLElement;
 }
 
 // ########### PARSE METHODS
 
-function parseQuestionnaire(questionnaire: HTMLElement) : Questionnaire {
+function parseQuestionnaire(questionnaire: HTMLElement): Questionnaire {
   return {
     rootElement: questionnaire,
     questions: Array.from(questionnaire.children as HTMLCollection).map(x => parseQuestion(x as HTMLElement))
@@ -43,7 +45,8 @@ function parseQuestion(question: HTMLElement): Question {
   return {
     type: type,
     text: text,
-    answers: answers.map(x => parseAnswer(x as HTMLElement))
+    answers: answers.map(x => parseAnswer(x as HTMLElement)),
+    rootElement: question
   };
 }
 
@@ -55,9 +58,11 @@ function parseAnswer(answer: HTMLElement): Answer {
   return {
     correct: correct,
     text: text,
-    explanation: explanation
+    explanation: explanation,
+    rootElement: answer
   };
 }
+
 
 function setup() {
   // setup style
@@ -68,9 +73,16 @@ function setup() {
   // render every questionnaire in the HTML Document
   for (let i = q_col.length - 1; i >= 0; i--) {
     const questionnaire: HTMLElement = q_col[i] as HTMLElement;
-    const r = parseQuestionnaire(questionnaire);
-    console.log(r);
-    renderQuestionnaire(r);
+    // validate htmL Structure before parsing
+    if (validateQuestionnaireStructure(questionnaire) == true) {
+      const r = parseQuestionnaire(questionnaire);
+      console.log(r);
+      // Possible ValidationPoint (Attributes)
+      renderQuestionnaire(r);
+    }
+    else {
+      //DO NOTHING
+    }
   }
 }
 window.onload = setup;
@@ -83,134 +95,80 @@ window.onload = setup;
 
 // ### RENDER FUNCTIONS ###
 function renderQuestionnaire(questionnaire: Questionnaire) {
-  const range = document.createRange();
   const root = questionnaire.rootElement;
   root.setAttribute("total_questions", "" + questionnaire.questions.length);
   root.setAttribute("current_question", "1");
-  const root_string = `
+
+  const overview_text = oneQuestionOnly("overview_text");
+  const buttons = oneQuestionOnly("buttons");
+  root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
-        Question 1 of ${questionnaire.questions.length}
+      ${overview_text}
       </div>
       ${questionnaire.questions.reverse().map(renderQuestion)}
       <div class="question-footer">
-        <div class="change-question-button"
-             id="prev_button"
-             style="visibility:hidden;"
-             onclick="questionChangeHandler(event)">
-             prev
-        </div>
-        <div class="change-question-button"
-             id="next_button"
-             onclick="questionChangeHandler(event)">
-             next
-        </div>
+      ${buttons}
       </div>
     </div>
   `;
-  const doc_frag= range.createContextualFragment(root_string);
-  root.appendChild(doc_frag);
-}
-// function renderQuestionaire(questionnaire: HTMLElement) {
-//   console.log(questionnaire);
-//   //build wrapper-content
-//   let content: HTMLDivElement = makeDiv("content-wrapper");
-//   let questions = questionnaire.children as HTMLCollection;
-//   let question_number: number = questions.length;
-//   // access children and append to wrapper-content
-//   for (let i = question_number - 1; i >= 0; i--) {
-//     content.append(questions[i]);
-//   }
-//   questionnaire.prepend(content);
-//   buildQuestionOverview(questionnaire, content, question_number);
-//   //render Questions + Answers
-//   renderQuestions(questionnaire);
-//   renderAnswers(questionnaire);
-//   buildQuestionnaireFooter(content, question_number);
-// }
-// function buildQuestionOverview(questionnaire:HTMLElement, content: HTMLDivElement, question_number:number){
-//   // question-overview
-//   let q_overview: HTMLDivElement = makeDiv("question-overview");
-//   q_overview.textContent = "Frage 1" + " von " + question_number;
-//   content.prepend(q_overview);
-//   // question-current-total initial
-//   questionnaire.setAttribute("total_questions", "" + question_number);
-//   questionnaire.setAttribute("current_question", "1")
-// }
-// // build questionnaire footer
-// // if only one question: BUILD NO BUTTON
-// function buildQuestionnaireFooter(content:HTMLDivElement, question_number:number){
-//   if (question_number == 1) {
-//     //BUILD NOTHING
-//   }
-//   else {
-//     let footer: HTMLDivElement = makeDiv("question-footer");
-//     content.append(footer);
-//     buildFooterButtons(footer);
-//   }
-// }
 
-//build 2 buttons: "prev"-Question, "next"-Question
-// function buildFooterButtons(footer: HTMLDivElement) {
-//   let prev_button: HTMLDivElement = makeDiv("change-question-button");
-//   let next_button: HTMLDivElement = makeDiv("change-question-button");
-//   prev_button.setAttribute("id", "prev_button");
-//   next_button.setAttribute("id", "next_button");
-//   prev_button.setAttribute("style", "visibility:hidden;");
-//   prev_button.textContent = "prev";
-//   next_button.textContent = "next";
-//   prev_button.addEventListener("click", questionChangeHandler);
-//   next_button.addEventListener("click", questionChangeHandler);
-//   footer.append(prev_button, next_button);
-// }
+  // Local functions
+  function oneQuestionOnly(pos: string) {
+    switch (pos) {
+      // if only one question exists, ignore question overview text
+      case "overview_text":
+        if (questionnaire.questions.length == 1) {
+          return "";
+        }
+        else {
+          return `Question 1 of ${questionnaire.questions.length}`;
+        }
+      // if only one question exists, ignore "prev", "next" buttons.
+      case "buttons":
+        if (questionnaire.questions.length == 1) {
+          return "";
+        }
+        else {
+          return `
+          <div class="change-question-button"
+               id="prev_button"
+               style="visibility:hidden;"
+               onclick="questionChangeHandler(event)">
+               prev
+          </div>
+          <div class="change-question-button"
+               id="next_button"
+               onclick="questionChangeHandler(event)">
+               next
+          </div>
+          `;
+        }
+      default:
+        break;
+    }
+  }
+}
 
 // renderQuestions
-// for every question:
-// add <div>-wrapper + <img>-icon (done)
-// add EventListener for CollapseAll-Function
+// if validation fails return false, else return html-string
 function renderQuestion(question: Question, index: number) {
-  return `
+  if (validateAttribute(question) == true) {
+    return `
     <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
       <div class="question-header">
         <p>${question.text.map(nodeOuterHTML).join('')}</p>
-        <img src="${Ressources.plus_solid}" onclick="explanationEventHandler.bind(event.target.el, true)">
+        <img src="${Ressources.plus_solid}" onclick="explanationEventHandler(event)">
       </div>
       ${question.answers.map(renderAnswer).join('')}
     </question>
   `;
+  }
+  else {
+    return "";
+  }
 }
-// function renderQuestions(questionnaire: HTMLElement) {
-//   // get wrapper-content
-//   let wrapper_content = questionnaire.firstChild as HTMLDivElement;
-//   let questions: HTMLCollection = questionnaire.getElementsByTagName("question");
-//   let lastIndex = questions.length - 1;
-//   questions[lastIndex].setAttribute("visible", "true");
-//
-//   for (let i = lastIndex; i >= 0; i--) {
-//     let question: HTMLElement = questions[i] as HTMLElement;
-//     buildQuestionHeader(question);
-//
-//     //append question to wrapper-content
-//     wrapper_content.append(question);
-//   }
-// }
-//
-//
-// // question->DOM Manipulation
-// // Question Text and CollapseAll-Functionality in question-header
-// function buildQuestionHeader(question: HTMLElement) {
-//   let text = document.createElement("p");
-//   text.innerHTML = (question.childNodes[0] as Text).data;
-//   question.childNodes[0].remove();
-//   let header: HTMLDivElement = document.createElement("div");
-//   header.setAttribute("class", "question-header");
-//   question.prepend(header);
-//   // append text and img
-//   let img = document.createElement("img");
-//   img.setAttribute("src", Ressources.plus_solid);
-//   img.addEventListener("click", explanationEventHandler.bind(img, true));
-//   header.append(text, img);
-// }
+
 function renderAnswer(answer: Answer) {
   return `
   <answer correct="${answer.correct ? 'true' : 'false'}">
@@ -219,7 +177,7 @@ function renderAnswer(answer: Answer) {
       <p>
         ${answer.text.map(nodeOuterHTML).join('')}
       </p>
-      ${answer.explanation?.outerHTML}
+      ${answer.explanation ?.outerHTML}
     </div>
   </answer>
   `;
@@ -227,49 +185,195 @@ function renderAnswer(answer: Answer) {
 
 function nodeOuterHTML(x: Node) {
   const outerHTML = (x as HTMLElement).outerHTML;
-  if(outerHTML == undefined) {
+  if (outerHTML == undefined) {
     const data = (x as Text).data;
-    if(data == undefined) {
+    if (data == undefined) {
       return '';
     }
     return data;
   }
+  console.log("outerHTML:" + outerHTML);
   return outerHTML;
 }
 
-// // questionnaire->DOM Manipulation
-// function renderAnswers(questionnaire: HTMLElement) {
-//   let answers: HTMLCollection = questionnaire.getElementsByTagName("answer");
-//   //for every answer:
-//   // add <div> wrapper + <img>-icon (done)
-//   // add EventListener for AnswerClickEvents (done)
-//   for (let i = answers.length - 1; i >= 0; i--) {
-//     let answer: HTMLElement = answers[i] as HTMLElement;
-//     // build div-wrapper
-//     let new_div: HTMLDivElement = document.createElement("div");
-//     let text = document.createElement("p");
-//     text.innerHTML = (answer.childNodes[0] as Text).data;
-//     answer.childNodes[0].remove();
-//     new_div.setAttribute("class", "wrapper-answer");
-//     answer.prepend(new_div);
-//     //append text and img
-//     let img = document.createElement("img");
-//     const mode = answer.parentElement?.getAttribute("type");
-//     img.setAttribute("src", mode === 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular);
-//     new_div.append(img, text);
-//     answer.addEventListener("click", checkAnswerEventHandler);
-//     answer.addEventListener("click", explanationEventHandler.bind(answer, false));
-//   }
-// }
-//
+// renderError
+function renderError(current_el: HTMLElement, message: string) {
+  const el_name = current_el.localName;
+  const questionnaire = getTagRecursive(current_el, "questionnaire");
+  const error_html = `
+  <div class="error-wrapper">
+    <div class="error-header">
+      <h2> Why do I see this red funny box?</h2>
+    </div>
+    <div class="error-box">
+    <p>There was a syntax error with:
+    &lt;${el_name}&gt;</p>
+    </div>
+    <pre class="error-message">
+    ${escapeHtml(message)}
+    </pre>
+  </div>
+  `;
+  questionnaire.innerHTML = error_html;
+  console.log(error_html);
+}
+
+// ######### VALIDATION METHODS ##########
+
+
+// validateQuestionnaireStructure
+// checks if all necessary tags in questionnaire have the correct parentElement
+function validateQuestionnaireStructure(questionnaire: HTMLElement) {
+  let questions: HTMLCollection = questionnaire.getElementsByTagName("question");
+  let answers: HTMLCollection = questionnaire.getElementsByTagName("answer");
+  let explanation: HTMLCollection = questionnaire.getElementsByTagName("explanation");
+  // validate given html tag elements
+
+  if (validateHtmlTagElements(questions.length - 1, questions) == true
+    && validateHtmlTagElements(answers.length - 1, answers) == true
+    && validateHtmlTagElements(explanation.length - 1, explanation) == true) {
+    return true;
+  }
+  else {
+    return false;
+  }
+  function validateHtmlTagElements(i: number, col: HTMLCollection) {
+    if (i >= 0) {
+      let validated = validateStructure(col[i] as HTMLElement);
+      if (validated == true) {
+        let bool = validateHtmlTagElements(i - 1, col) as boolean;
+        return bool;
+      }
+      else {
+        return false;
+      }
+    } else {
+      return true;
+    }
+  }
+}
+// ValidateStructure
+// <questionnaire> -> <question> -> at least 2 <answer> -> <explanation>
+// return either messageString or Boolean: True
+function validateStructure(el: HTMLElement) {
+  const html_tag = el.tagName;
+  const parent = el.parentElement as HTMLElement | null;
+  if (html_tag == "QUESTION") {
+    // parent has to be a QUESTIONNAIRE
+    return parentHasToBe(parent, "QUESTIONNAIRE");
+  }
+  else if (html_tag == "ANSWER") {
+    // parent has to be a QUESTION
+    return parentHasToBe(parent, "QUESTION");
+  }
+  else if (html_tag == "EXPLANATION") {
+    // parent has to be an ANSWER
+    return parentHasToBe(parent, "ANSWER");
+  }
+  function parentHasToBe(parent: HTMLElement | null, tag: string) {
+    if (parent ?.tagName == tag) {
+      return true;
+    } else {
+      let msg = `HTML structure is invalid: Please check your input at:  ${el.parentElement ?.outerHTML}`;
+      renderError(el, msg);
+      return false;
+    }
+  }
+}
+
+// validateAttributes
+// check <question> attribute singlechoice | multiplechoice
+// check multiple <answer> attributes for at least (for multiplechoice) 1 correct answer
+// returns true (for successful validation) or false (fail)
+function validateAttribute(question: Question) {
+  let val = question.type;
+  let answers = question.answers;
+  let i = answers.length - 1;
+  let x = 0 as number;
+  let correct_answers = getCorrectAnswer(x, i) as number;
+  // get all correct answers to this question
+  function getCorrectAnswer(x: number, i: number) {
+    if (i >= 0) {
+      let correct = answers[i].correct;
+      if (correct == true) {
+        x = getCorrectAnswer(x + 1, i - 1) as number;
+        return x;
+      }
+      else {
+        x = getCorrectAnswer(x, i - 1) as number;
+        return x;
+      }
+    } else {
+      return x;
+    }
+  }
+  // if attr value does not exist
+  if (val == null) {
+    let msg = `Necessary attribute &lt;question type='' &gt; is missing at: ${question.rootElement.outerHTML}`;
+    renderError(question.rootElement, msg);
+    return false;
+  }
+  // if value exists, but is not correctly assigned
+  else if (val != "singlechoice" && val != "multiplechoice") {
+    let msg = `Necessary attribute &lt;question type='' &gt; with value: ${val}is neither 'singlechoice' nor 'multiplechoice': ${question.rootElement.outerHTML}`;
+    renderError(question.rootElement, msg);
+    return false;
+  }
+  // if only 1 or less answer exists
+  else if (answers.length < 2) {
+    let msg = `You need to provide at least two answers for one question:  ${question.rootElement.outerHTML}`;
+    renderError(question.rootElement, msg);
+    return false;
+  }
+  else if (correct_answers == 0) {
+    let msg = `There is no correct answer in this question: ${question.rootElement.outerHTML}`;
+    renderError(question.rootElement, msg);
+    return false;
+  }
+  // if question attr is singlechoice, but more than one correct answer exists
+  else if (val == "singlechoice" && correct_answers > 1) {
+    let msg = `There is more than one correct answer, but your question type is 'singlechoice': " ${question.rootElement.outerHTML}`;
+    renderError(question.rootElement, msg);
+    return false;
+  }
+  else {
+    return true;
+  }
+}
+
+
+// ######## HELPER FUNCTIONS #######
 // makeDiv
 // ClassName as String -> HTMLDivElement
 function makeDiv(css_name: string) {
-  let new_div = document.createElement("div");
+  const new_div = document.createElement("div");
   new_div.setAttribute("class", css_name);
   return new_div;
 }
+// escapeHtml
+// escape HTML TAGS
+function escapeHtml(str: string) {
+  return str.replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 
+}
+// getTagRecursive from a child element
+// if element has TagName
+// return;
+// else: retry with parentElement
+function getTagRecursive(el: HTMLElement, tag: string) {
+  if (el.tagName == tag.toUpperCase()) {
+    return el;
+  }
+  else {
+    let parent: HTMLElement = el.parentElement as HTMLElement;
+    let result = getTagRecursive(parent, tag) as HTMLElement;
+    return result;
+  }
+}
 
 // ### EVENT HANDLER FUNCTIONS ###
 
@@ -278,75 +382,81 @@ function makeDiv(css_name: string) {
 // EventHandler -> DOM Manipulation
 function questionChangeHandler(event: Event) {
   // get Questionnaire attributes
-  let el:HTMLElement = event.target as HTMLElement;
+  let el: HTMLElement = event.target as HTMLElement;
   let button = el.getAttribute("id");
-  let questionnaire: HTMLElement = el.parentElement ?.parentElement ?.parentElement as HTMLElement;
-  let min_qid: number = 0;
-  let max_qid: number = parseInt(questionnaire.getAttribute("total_questions") as string) - 1;
-  let current_qid: number = parseInt(questionnaire.getAttribute("current_question") as string) - 1;
+  let questionnaire: HTMLElement = getTagRecursive(el, "questionnaire") as HTMLElement;
+  let total_questions: number = parseInt(questionnaire.getAttribute("total_questions") as string);
+  let current_question: number = parseInt(questionnaire.getAttribute("current_question") as string);
   let questions = questionnaire.getElementsByTagName("question");
-
+  let min_qid: number = 0;
+  let max_qid: number = total_questions - 1;
+  let qid = current_question - 1;
   // change question
   // if button is "prev"
-  if (button == "prev_button") {
-    questions[current_qid].removeAttribute("visible");
-    questions[current_qid - 1].setAttribute("visible", "true");
-    let str_current = current_qid.toString();
-    questionnaire.setAttribute("current_question", str_current);
-    questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
-    //hide button if button to first question is clicked
-    if (current_qid - 1 == min_qid) {
-      // !!! CHANGE CLASS INSTEAD OF STYLE?
-      el.setAttribute("style", "visibility:hidden;");
-    }
-    // show next-Button
-    el.nextElementSibling ?.setAttribute("style", "visibility:visible;");
+  switch (button) {
+    case "prev_button":
+      let prev_qid = current_question - 1;
+      // change visibility to the previous question
+      questions[qid].removeAttribute("visible");
+      questions[qid - 1].setAttribute("visible", "true");
+      // change question overview text
+      questionnaire.setAttribute("current_question", prev_qid.toString());
+      questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + prev_qid.toString() + " of " + total_questions;
+      //hide button if button to first question
+      if (prev_qid - 1 == min_qid) {
+        el.setAttribute("style", "visibility:hidden;");
+      }
+      // show next-Button
+      el.nextElementSibling ?.setAttribute("style", "visibility:visible;");
+      break;
+
+    case "next_button":
+      let next_qid = qid + 1;
+      questions[qid].removeAttribute("visible");
+      questions[next_qid].setAttribute("visible", "true");
+      //change question overview text
+      questionnaire.setAttribute("current_question", (current_question + 1).toString());
+      questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + (current_question + 1).toString() + " of " + total_questions;
+      // hide button if button to last question
+      if (next_qid == max_qid) {
+        el.setAttribute("style", "visibility:hidden;");
+      }
+      //show prev_button
+      el.previousElementSibling ?.setAttribute("style", "visibility:visible;");
+      break;
+
+    default:
+      console.log("No Button caused this EventHandler", button);
+      break;
   }
-  else if (button == "next_button") {
-    questions[current_qid].removeAttribute("visible");
-    questions[current_qid + 1].setAttribute("visible", "true");
-    //change questionnaire attributes
-    let str_current = (current_qid + 2).toString();
-    questionnaire.setAttribute("current_question", str_current);
-    //change question overview
-    questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
-    // hide button if last question of questionnaire
-    if (current_qid + 1 == max_qid) {
-      el.setAttribute("style", "visibility:hidden;");
-    }
-    el.previousElementSibling ?.setAttribute("style", "visibility:visible;");
-  }
-  else {
-    console.log("No Button caused this EventHandler", button);
-  }
+
+
 }
+
+
 
 // ExplanationEventHandler
 // Handles Events for shoowing explanation text
-function explanationEventHandler(this: HTMLElement, collapse: boolean) {
-  if (collapse == true) {
-    let question: HTMLElement = this.parentElement ?.parentElement as HTMLElement;
-    let answers: HTMLCollection = question.getElementsByTagName("answer") as HTMLCollection;
-    //change icons and collapse
-    if (this.getAttribute("clicked") == "true") {
-      this.setAttribute("src", Ressources.plus_solid);
-      //  this.setAttribute("clicked", "false");
-      for (let i = answers.length - 1; i >= 0; i--) {
-        let answer = answers[i] as HTMLElement;
-        answer.getElementsByTagName("explanation")[0].removeAttribute("visible");
-      }
-    }
-    else {
-      this.setAttribute("src", Ressources.minus_solid);
-      this.setAttribute("clicked", "true");
-      for (let i = answers.length - 1; i >= 0; i--) {
-        let answer = answers[i] as HTMLElement;
-        answer.getElementsByTagName("explanation")[0].setAttribute("visible", "true");
-      }
+function explanationEventHandler(event: Event) {
+  const el = event.target as HTMLElement;
+  const question: HTMLElement = getTagRecursive(el, "question") as HTMLElement;
+  const answers: HTMLCollection = question.getElementsByTagName("answer") as HTMLCollection;
+  //change icons and collapse
+  if (el.getAttribute("clicked") == "true") {
+    el.setAttribute("src", Ressources.plus_solid);
+    el.setAttribute("clicked", "false");
+    for (let i = answers.length - 1; i >= 0; i--) {
+      let answer = answers[i] as HTMLElement;
+      answer.getElementsByTagName("explanation")[0].removeAttribute("visible");
     }
   }
   else {
-    showExplanation(this);
+    el.setAttribute("src", Ressources.minus_solid);
+    el.setAttribute("clicked", "true");
+    for (let i = answers.length - 1; i >= 0; i--) {
+      let answer = answers[i] as HTMLElement;
+      answer.getElementsByTagName("explanation")[0].setAttribute("visible", "true");
+    }
   }
 }
 // show <explanation>
@@ -360,38 +470,34 @@ function showExplanation(answer: HTMLElement) {
     explanation.setAttribute("visible", "true");
   }
 }
-
 // unified click on answer event handler
-function clickAnswerHandler(event:Event) {
-  console.log(event.target);
-  const el = event.target;
-} //: Event) {
-  // console.log('clicked clickAnswerHandler');
-  // console.log(this);
-  // const el = this.target as HTMLElement;
-  // console.log(el);
-  // checkAnswerEventHandler.bind(el);
-  // explanationEventHandler.bind(el, false);
-//}
+function clickAnswerHandler(event: Event) {
+  const el = event.target as HTMLElement;
+  checkAnswerEventHandler(el);
+  // show Explanation
+  let answer = getTagRecursive(el, "answer");
+  showExplanation(answer);
+}
+
 
 // check click for correct answer
 // depending on question type show either
 // - for multiplechoice just clicked answer
 // - for singlechoice all answers
-function checkAnswerEventHandler(this: HTMLElement) {
-  let question_type = this.parentElement ?.getAttribute("type");
+function checkAnswerEventHandler(el: HTMLElement) {
+  let question_type = getTagRecursive(el, "question").getAttribute("type");
   if (question_type == "multiplechoice") {
-    showAnswer(this);
+    let answer = getTagRecursive(el, "answer");
+    showAnswer(answer);
   }
   else if (question_type == "singlechoice") {
-    let answers = this.parentElement ?.getElementsByTagName("answer") as HTMLCollection;
+    let answers = getTagRecursive(el, "question").getElementsByTagName("answer") as HTMLCollection;
     for (let i = answers ?.length - 1; i >= 0; i--) {
       let answer: HTMLElement = answers[i] as HTMLElement;
       showAnswer(answer);
     }
   }
 }
-
 // showAnswer
 // show icons and highlight answer
 function showAnswer(answer: HTMLElement) {
@@ -404,11 +510,3 @@ function showAnswer(answer: HTMLElement) {
     img.setAttribute("src", Ressources.xmark_solid);
   }
 }
-
-
-// swipeEvent
-// const divContainer = document.getElementById("touch-event-test");
-// divContainer.addEventListener("")
-// function (){
-//
-// }

@@ -198,5 +198,24 @@ questionnaire .change-question-button:hover{
   questionnaire question {
     max-width: 600px;
   }
+}
+.error-wrapper{
+  display:block;
+  max-width: 600px;
+  border: 5px solid red;
+   margin: 0 auto;
+  padding:0 20px;
+}
+.error-header{
+
+}
+.error-box{
+font-size:16pt;
+line-height:1.5em;
+}
+
+.error-message{
+  font-family:monospace;
+  font-size:12pt;
 }`;
 }

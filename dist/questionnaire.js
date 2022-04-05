@@ -130,7 +130,7 @@ function renderQuestion(question, index) {
   `;
     }
     else {
-        return false;
+        return "";
     }
 }
 function renderAnswer(answer) {
@@ -389,7 +389,6 @@ function questionChangeHandler(event) {
 // ExplanationEventHandler
 // Handles Events for shoowing explanation text
 function explanationEventHandler(event) {
-    console.log("CLICK");
     const el = event.target;
     const question = getTagRecursive(el, "question");
     const answers = question.getElementsByTagName("answer");

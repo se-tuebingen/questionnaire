@@ -101,7 +101,6 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
 
   const overview_text = oneQuestionOnly("overview_text");
   const buttons = oneQuestionOnly("buttons");
-
   root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
@@ -113,6 +112,7 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
       </div>
     </div>
   `;
+
   // Local functions
   function oneQuestionOnly(pos: string) {
     switch (pos) {
@@ -165,7 +165,7 @@ function renderQuestion(question: Question, index: number) {
   `;
   }
   else {
-    return false;
+    return "";
   }
 }
 
@@ -438,7 +438,6 @@ function questionChangeHandler(event: Event) {
 // ExplanationEventHandler
 // Handles Events for shoowing explanation text
 function explanationEventHandler(event: Event) {
-  console.log("CLICK");
   const el = event.target as HTMLElement;
   const question: HTMLElement = getTagRecursive(el, "question") as HTMLElement;
   const answers: HTMLCollection = question.getElementsByTagName("answer") as HTMLCollection;

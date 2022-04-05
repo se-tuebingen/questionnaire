@@ -4,28 +4,28 @@
 <head>
   <title>Questionnaire Module Test HTML</title>
   <style>
-  body {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    font-family: monospace;
-  }
+    body {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: monospace;
+    }
   </style>
 </head>
 
 <body>
-<!-- VALIDATING GIVEN HTML STRUCTURE -->
+  <!-- VALIDATING GIVEN HTML STRUCTURE -->
   <!-- <question> has not <questionnaire> as parentElement -->
   <questionnaire>
     <question type="singlechoice">
       <answer>
         <question type="multiplechoice">
           What is TS? (multiple-choice)
-        Torso Syndrome
-        <explanation>
-          No, there is no such thing
-        </explanation>
-      </question>
+          Torso Syndrome
+          <explanation>
+            No, there is no such thing
+          </explanation>
+        </question>
       </answer>
       <answer correct="true">
         TypeScript
@@ -48,38 +48,40 @@
     </question>
   </questionnaire>
 
-<!-- VALIDATING NECESSARY ATTRIBUTE -->
-<!-- <answer has no correct attribute -->
+  <!-- VALIDATING NECESSARY ATTRIBUTE -->
+  <!-- <answer has no correct attribute -->
   <questionnaire>
     <question type="multiplechoice">
       What is TS? (multiple-choice)
       <answer>
-          Torso Syndrome
+        Torso Syndrome
         <explanation>
           No, there is no such thing
         </explanation>
       </answer>
       <answer>
-          TypeScript
+        TypeScript
         <explanation>
           This is correct
         </explanation>
       </answer>
       <answer>
-          Thin Slice
+        Thin Slice
         <explanation>
           No, there is no such thing
         </explanation>
       </answer>
       <answer>
-          Team Speak
+        Team Speak
         <explanation>
           Also correct.
         </explanation>
       </answer>
     </question>
-    
-    <question type="singlechoice">
+  </questionnaire>
+<!-- question.type is not the appropriate type-->
+  <questionnaire>
+    <question type="random">
       What is an example question? (single-choice)
       <answer>
         Some good old-fashioned dialog
@@ -97,13 +99,13 @@
         lorem ipsum
         <explanation>
           Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
-            gubergren,
-            no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et
-            justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna
-            aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+          gubergren,
+          no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et
+          justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna
+          aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
 
           Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis
-            dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+          dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
 
           Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse
         </explanation>

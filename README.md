@@ -89,8 +89,12 @@ For your questions to show up in a PDF, you need to specify where they should be
 - A simple `@texquestions[]` renders the last `@questionnaire` that was defined above it. _If `@texquestions[]` is not called, the code for generating the latex for a question will not be run._
 - Using this several times will produce a warning, which can be safely ignored (`WARNING: collected information for key multiple times: '(QuestionnaireDefaultQuestionnaire #t);`)
 - If you have several questionnaires and want to e.g. move them to a separate section at the end, you need to specify a key as a keyword argument to both commands: `@texquestions[#:key "intro"]` renders what has been defined in `@questionnaire[#:key "intro" ...]`.
-- `@texquestions[#:texsolutionstyle "margin"]` (default) adds the solutions as a block of rotated text in the margin beside the questions.
-- `#:texsolutionstyle "inline"` adds the solutions as a block of rotated text below the questions.
+
+There are also some styling options for the LaTex output that can be passed as keyword arguments to `@texquestions`:
+- `#:texsolutionstyle` Where the solution is added:
+  - `"margin"` (default) in the margin beside the questions
+  - `"inline"` below the questions
+- `#:explain` Whether to include explanations in the solution (default: `#t`)
 
 ## Tests
 

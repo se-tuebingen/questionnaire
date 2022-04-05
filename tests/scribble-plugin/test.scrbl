@@ -92,9 +92,9 @@ Questionnaire with several questions:
 
 @section{Moving questions to another section}
 
-In the pdf version, we should see the "What is this course about?" question here again, in the HTML version, it is "What does TS stand for":
+In the pdf version, we should see the "What is this course about?" question here again (but without explanations), in the HTML version, it is "What does TS stand for":
 
-@texquestions[#:key "singlechoicetest"]
+@texquestions[#:key "singlechoicetest" #:explain #f]
 @questionnaire[
   @question["multiplechoice"
     @q{What does TS stand for?}

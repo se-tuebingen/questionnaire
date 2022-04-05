@@ -226,49 +226,68 @@
         (map-number #:current (+ current 1) f (cdr xs))))
 )
 
-; solution for single answer
+; show explanation for answer (if applicable)
 (define/contract
   (latex-explanation n answer)
-  (-> exact-integer? answer? block?)
+  (-> exact-integer? answer? (cons/c boolean? block?))
   (let ([correct (solution? answer)]
         [explanation (cond
           [(solution/e? answer) (solution/e-explanation answer)]
           [(distractor/e? answer) (distractor/e-explanation answer)]
           [else ""])]
         [letter (enumerate-letter n)])
-    (compound-paragraph
-      (style #f '())
-      (append
-        (blocksify (list (if correct (bold letter) letter) ")"))
-        (blocksify explanation)
+    (cons
+      (not (string=? "" explanation))
+      (cond
+        [(content? explanation)
+         (car (blocksify (list (if correct (bold letter) letter) ")" explanation)))]
+        [else
+         (compound-paragraph
+          (style #f '())
+          (append
+            (blocksify (list (if correct (bold letter) letter) ")"))
+            (blocksify explanation)
+          ))]
       )
     )
   )
 )
 
+; show letter for correct answers
+(define/contract
+  (short-solution n answer)
+  (-> exact-integer? answer? content?)
+  (if (solution? answer) (enumerate-letter n) "")
+)
+
 ; solution for a question
 (define/contract
-  (latex-solution n question)
-  (-> exact-integer? question-container? (listof block?))
+  (latex-solution n question explain)
+  (-> exact-integer? question-container? boolean? (listof block?))
   (let ([answers (question-container-answers question)]
         [numeral (string-append (number->string n) ".")])
     (append
-      (blocksify numeral)
-      (map-number latex-explanation answers)
+      (blocksify (cons numeral (map-number short-solution answers)))
+      (if explain
+          (map (lambda (x) (cdr x))
+            (filter (lambda (x) (car x))
+              (map-number latex-explanation answers)))
+          '())
     )
   )
 )
 
 ; solution part
 (define/contract
-  (render-solutions-latex questionnaire solstyle)
-  (-> questionnaire-container? texsolutionstyles block?)
+  (render-solutions-latex questionnaire solstyle explain)
+  (-> questionnaire-container? texsolutionstyles boolean? block?)
   (let
     ([rotatedtext
       (nested-flow
         (style (string-append "QRotate" solstyle) (list 'command))
-        (foldr append '() (map-number latex-solution
-         (questionnaire-container-questions questionnaire))))
+        (foldr append '() (map-number
+          (lambda (n q) (latex-solution n q explain))
+          (questionnaire-container-questions questionnaire))))
     ])
   (cond [(string=? solstyle "inline") rotatedtext]
         [(string=? solstyle "margin") (margin-note rotatedtext)])
@@ -288,14 +307,14 @@
 
 ;; top-level latex renderer for questionnaire
 (define/contract
-  (render-latex solstyle questionnaire )
-  (-> texsolutionstyles questionnaire-container? block?)
+  (render-latex solstyle explain questionnaire)
+  (-> texsolutionstyles boolean? questionnaire-container? block?)
   (nested-flow
     (style 'vertical-inset (list (tex-addition (solutions-style solstyle))))
     (list
      (render-questions-latex
       (questionnaire-container-questions questionnaire))
-     (render-solutions-latex questionnaire solstyle)))
+     (render-solutions-latex questionnaire solstyle explain)))
 )
 
 ; save a questionnaire during the collect pass
@@ -392,14 +411,16 @@
 
 ; latex print location
 (define
-  (texquestions #:key [key "DefaultQuestionnaire"] #:texsolutionstyle [style "margin"])
+  (texquestions #:key [key "DefaultQuestionnaire"] #:texsolutionstyle [style "margin"] #:explain [explain #t])
   (cond [(not (string? key))
          (raise-argument-error 'key "A string key for retrieving the questionnaire with @texquestions" key)]
         [(not (texsolutionstyles style))
-         (raise-argument-error 'texsolutionstyle "A valid layout option for the solutions in latex (margin or inline)" style)]
+         (raise-argument-error 'texsolutionstyle "A valid layout option for the solutions in latex (margin or inline), default: margin" style)]
+        [(not (boolean? explain))
+         (raise-argument-error 'explain "A boolean flag whether to print explanations, default: #t" explain)]
         [else (cond-block
                 [latex
-                 (retrieve-questionnaire key (lambda (x) (render-latex style x)))]
+                 (retrieve-questionnaire key (lambda (x) (render-latex style explain x)))]
                 [html nothing]
               )]
   )

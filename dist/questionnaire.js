@@ -18,7 +18,8 @@ function parseQuestion(question) {
     return {
         type: type,
         text: text,
-        answers: answers.map(x => parseAnswer(x))
+        answers: answers.map(x => parseAnswer(x)),
+        rootElement: question
     };
 }
 function parseAnswer(answer) {
@@ -29,7 +30,8 @@ function parseAnswer(answer) {
     return {
         correct: correct,
         text: text,
-        explanation: explanation
+        explanation: explanation,
+        rootElement: answer
     };
 }
 function setup() {
@@ -64,8 +66,8 @@ function renderQuestionnaire(questionnaire) {
     const root = questionnaire.rootElement;
     root.setAttribute("total_questions", "" + questionnaire.questions.length);
     root.setAttribute("current_question", "1");
-    const overview_text = hideContext("overview_text");
-    const buttons = hideContext("buttons");
+    const overview_text = oneQuestionOnly("overview_text");
+    const buttons = oneQuestionOnly("buttons");
     root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
@@ -78,7 +80,7 @@ function renderQuestionnaire(questionnaire) {
     </div>
   `;
     // Local functions
-    function hideContext(pos) {
+    function oneQuestionOnly(pos) {
         switch (pos) {
             // if only one question exists, ignore question overview text
             case "overview_text":
@@ -114,19 +116,22 @@ function renderQuestionnaire(questionnaire) {
     }
 }
 // renderQuestions
-// for every question:
-// add <div>-wrapper + <img>-icon (done)
-// add EventListener for CollapseAll-Function
+// if validation fails return false, else return html-string
 function renderQuestion(question, index) {
-    return `
+    if (validateAttribute(question) == true) {
+        return `
     <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
       <div class="question-header">
         <p>${question.text.map(nodeOuterHTML).join('')}</p>
-        <img src="${Ressources.plus_solid}" onclick="explanationEventHandler.bind(event.target.el, true)">
+        <img src="${Ressources.plus_solid}" onclick="explanationEventHandler(event)">
       </div>
       ${question.answers.map(renderAnswer).join('')}
     </question>
   `;
+    }
+    else {
+        return false;
+    }
 }
 function renderAnswer(answer) {
     var _a;
@@ -154,70 +159,28 @@ function nodeOuterHTML(x) {
     console.log("outerHTML:" + outerHTML);
     return outerHTML;
 }
-// ######### VALIDATION METHODS ##########
-//validateQuestionnaire
-// validateAttributes
-// check <question> attribute singlechoice | multiplechoice
-// check multiple <answer> attributes for at least (for multiplechoice) 1 correct answer
-// returns true (for successful validation) or false (fail)
-function validateAttribute(question) {
-    let attr = "type";
-    let val = question.getAttribute(attr);
-    let answers = question.children;
-    let i = answers.length - 1;
-    let x = 0;
-    let correct_answers = getCorrectAnswer(x, i);
-    // get all correct answers to this question
-    function getCorrectAnswer(x, i) {
-        if (i >= 0) {
-            let correct = answers[i].getAttribute("correct");
-            if (correct == "true") {
-                x = getCorrectAnswer(x + 1, i - 1);
-                return x;
-            }
-            else {
-                x = getCorrectAnswer(x, i - 1);
-                return x;
-            }
-        }
-        else {
-            return x;
-        }
-    }
-    // if attr value does not exist
-    if (val == null) {
-        let msg = `Necessary attribute &lt;question type='' &gt; is missing at: ${question.outerHTML}`;
-        renderError(question, msg);
-        return false;
-    }
-    // if value exists, but is not correctly assigned
-    else if (val != "singlechoice" && val != "multiplechoice") {
-        let msg = `Necessary attribute &lt;question type='' &gt; with value: ${val}is neither 'singlechoice' nor 'multiplechoice': ${question.outerHTML}`;
-        renderError(question, msg);
-        return false;
-    }
-    // if only 1 or less answer exists
-    else if (answers.length < 2) {
-        let msg = `You need to provide at least two answers for one question:  ${question.outerHTML}`;
-        renderError(question, msg);
-        return false;
-    }
-    else if (correct_answers == 0) {
-        let msg = `There is no correct answer in this question: ${question.outerHTML}`;
-        renderError(question, msg);
-        return false;
-    }
-    // if question attr is singlechoice, but more than one correct answer exists
-    else if (val == "singlechoice" && correct_answers > 1) {
-        let msg = `There is more than one correct answer, but your question type is 'singlechoice': " ${question.outerHTML}`;
-        renderError(question, msg);
-        return false;
-    }
-    else {
-        return true;
-    }
+// renderError
+function renderError(current_el, message) {
+    const el_name = current_el.localName;
+    const questionnaire = getTagRecursive(current_el, "questionnaire");
+    const error_html = `
+  <div class="error-wrapper">
+    <div class="error-header">
+      <h2> Why do I see this red funny box?</h2>
+    </div>
+    <div class="error-box">
+    <p>There was a syntax error with:
+    &lt;${el_name}&gt;</p>
+    </div>
+    <pre class="error-message">
+    ${escapeHtml(message)}
+    </pre>
+  </div>
+  `;
+    questionnaire.innerHTML = error_html;
+    console.log(error_html);
 }
-//else if (val == "singlechoice" && )
+// ######### VALIDATION METHODS ##########
 // validateQuestionnaireStructure
 // checks if all necessary tags in questionnaire have the correct parentElement
 function validateQuestionnaireStructure(questionnaire) {
@@ -279,27 +242,67 @@ function validateStructure(el) {
         }
     }
 }
-// renderError
-function renderError(current_el, message) {
-    const el_name = current_el.localName;
-    const questionnaire = getTagRecursive(current_el, "questionnaire");
-    const error_html = `
-  <div class="error-wrapper">
-    <div class="error-header">
-      <h2> Why do I see this red funny box?</h2>
-    </div>
-    <div class="error-box">
-    <p>There was a syntax error with:
-    &lt;${el_name}&gt;</p>
-    </div>
-    <pre class="error-message">
-    ${escapeHtml(message)}
-    </pre>
-  </div>
-  `;
-    questionnaire.innerHTML = error_html;
-    console.log(error_html);
+// validateAttributes
+// check <question> attribute singlechoice | multiplechoice
+// check multiple <answer> attributes for at least (for multiplechoice) 1 correct answer
+// returns true (for successful validation) or false (fail)
+function validateAttribute(question) {
+    let val = question.type;
+    let answers = question.answers;
+    let i = answers.length - 1;
+    let x = 0;
+    let correct_answers = getCorrectAnswer(x, i);
+    // get all correct answers to this question
+    function getCorrectAnswer(x, i) {
+        if (i >= 0) {
+            let correct = answers[i].correct;
+            if (correct == true) {
+                x = getCorrectAnswer(x + 1, i - 1);
+                return x;
+            }
+            else {
+                x = getCorrectAnswer(x, i - 1);
+                return x;
+            }
+        }
+        else {
+            return x;
+        }
+    }
+    // if attr value does not exist
+    if (val == null) {
+        let msg = `Necessary attribute &lt;question type='' &gt; is missing at: ${question.rootElement.outerHTML}`;
+        renderError(question.rootElement, msg);
+        return false;
+    }
+    // if value exists, but is not correctly assigned
+    else if (val != "singlechoice" && val != "multiplechoice") {
+        let msg = `Necessary attribute &lt;question type='' &gt; with value: ${val}is neither 'singlechoice' nor 'multiplechoice': ${question.rootElement.outerHTML}`;
+        renderError(question.rootElement, msg);
+        return false;
+    }
+    // if only 1 or less answer exists
+    else if (answers.length < 2) {
+        let msg = `You need to provide at least two answers for one question:  ${question.rootElement.outerHTML}`;
+        renderError(question.rootElement, msg);
+        return false;
+    }
+    else if (correct_answers == 0) {
+        let msg = `There is no correct answer in this question: ${question.rootElement.outerHTML}`;
+        renderError(question.rootElement, msg);
+        return false;
+    }
+    // if question attr is singlechoice, but more than one correct answer exists
+    else if (val == "singlechoice" && correct_answers > 1) {
+        let msg = `There is more than one correct answer, but your question type is 'singlechoice': " ${question.rootElement.outerHTML}`;
+        renderError(question.rootElement, msg);
+        return false;
+    }
+    else {
+        return true;
+    }
 }
+// ######## HELPER FUNCTIONS #######
 // makeDiv
 // ClassName as String -> HTMLDivElement
 function makeDiv(css_name) {
@@ -385,31 +388,27 @@ function questionChangeHandler(event) {
 }
 // ExplanationEventHandler
 // Handles Events for shoowing explanation text
-function explanationEventHandler(el, collapse) {
-    if (collapse == true) {
-        let question = getTagRecursive(el, "question");
-        let answers = question.getElementsByTagName("answer");
-        //change icons and collapse
-        if (el.getAttribute("clicked") == "true") {
-            el.setAttribute("src", Ressources.plus_solid);
-            //  this.setAttribute("clicked", "false");
-            for (let i = answers.length - 1; i >= 0; i--) {
-                let answer = answers[i];
-                answer.getElementsByTagName("explanation")[0].removeAttribute("visible");
-            }
-        }
-        else {
-            el.setAttribute("src", Ressources.minus_solid);
-            el.setAttribute("clicked", "true");
-            for (let i = answers.length - 1; i >= 0; i--) {
-                let answer = answers[i];
-                answer.getElementsByTagName("explanation")[0].setAttribute("visible", "true");
-            }
+function explanationEventHandler(event) {
+    console.log("CLICK");
+    const el = event.target;
+    const question = getTagRecursive(el, "question");
+    const answers = question.getElementsByTagName("answer");
+    //change icons and collapse
+    if (el.getAttribute("clicked") == "true") {
+        el.setAttribute("src", Ressources.plus_solid);
+        el.setAttribute("clicked", "false");
+        for (let i = answers.length - 1; i >= 0; i--) {
+            let answer = answers[i];
+            answer.getElementsByTagName("explanation")[0].removeAttribute("visible");
         }
     }
     else {
-        let answer = getTagRecursive(el, "answer");
-        showExplanation(answer);
+        el.setAttribute("src", Ressources.minus_solid);
+        el.setAttribute("clicked", "true");
+        for (let i = answers.length - 1; i >= 0; i--) {
+            let answer = answers[i];
+            answer.getElementsByTagName("explanation")[0].setAttribute("visible", "true");
+        }
     }
 }
 // show <explanation>
@@ -427,15 +426,10 @@ function showExplanation(answer) {
 function clickAnswerHandler(event) {
     const el = event.target;
     checkAnswerEventHandler(el);
-    explanationEventHandler(el, false);
-} //: Event) {
-// console.log('clicked clickAnswerHandler');
-// console.log(this);
-// const el = this.target as HTMLElement;
-// console.log(el);
-// checkAnswerEventHandler.bind(el);
-// explanationEventHandler.bind(el, false);
-//}
+    // show Explanation
+    let answer = getTagRecursive(el, "answer");
+    showExplanation(answer);
+}
 // check click for correct answer
 // depending on question type show either
 // - for multiplechoice just clicked answer
@@ -466,115 +460,6 @@ function showAnswer(answer) {
         img.setAttribute("src", Ressources.xmark_solid);
     }
 }
-// ####### OLD RENDER FUNCTIONS #########
-// function renderQuestionaire(questionnaire: HTMLElement) {
-//   console.log(questionnaire);
-//   //build wrapper-content
-//   let content: HTMLDivElement = makeDiv("content-wrapper");
-//   let questions = questionnaire.children as HTMLCollection;
-//   let question_number: number = questions.length;
-//   // access children and append to wrapper-content
-//   for (let i = question_number - 1; i >= 0; i--) {
-//     content.append(questions[i]);
-//   }
-//   questionnaire.prepend(content);
-//   buildQuestionOverview(questionnaire, content, question_number);
-//   //render Questions + Answers
-//   renderQuestions(questionnaire);
-//   renderAnswers(questionnaire);
-//   buildQuestionnaireFooter(content, question_number);
-// }
-// function buildQuestionOverview(questionnaire:HTMLElement, content: HTMLDivElement, question_number:number){
-//   // question-overview
-//   let q_overview: HTMLDivElement = makeDiv("question-overview");
-//   q_overview.textContent = "Frage 1" + " von " + question_number;
-//   content.prepend(q_overview);
-//   // question-current-total initial
-//   questionnaire.setAttribute("total_questions", "" + question_number);
-//   questionnaire.setAttribute("current_question", "1")
-// }
-// // build questionnaire footer
-// // if only one question: BUILD NO BUTTON
-// function buildQuestionnaireFooter(content:HTMLDivElement, question_number:number){
-//   if (question_number == 1) {
-//     //BUILD NOTHING
-//   }
-//   else {
-//     let footer: HTMLDivElement = makeDiv("question-footer");
-//     content.append(footer);
-//     buildFooterButtons(footer);
-//   }
-// }
-//build 2 buttons: "prev"-Question, "next"-Question
-// function buildFooterButtons(footer: HTMLDivElement) {
-//   let prev_button: HTMLDivElement = makeDiv("change-question-button");
-//   let next_button: HTMLDivElement = makeDiv("change-question-button");
-//   prev_button.setAttribute("id", "prev_button");
-//   next_button.setAttribute("id", "next_button");
-//   prev_button.setAttribute("style", "visibility:hidden;");
-//   prev_button.textContent = "prev";
-//   next_button.textContent = "next";
-//   prev_button.addEventListener("click", questionChangeHandler);
-//   next_button.addEventListener("click", questionChangeHandler);
-//   footer.append(prev_button, next_button);
-// }
-// function renderQuestions(questionnaire: HTMLElement) {
-//   // get wrapper-content
-//   let wrapper_content = questionnaire.firstChild as HTMLDivElement;
-//   let questions: HTMLCollection = questionnaire.getElementsByTagName("question");
-//   let lastIndex = questions.length - 1;
-//   questions[lastIndex].setAttribute("visible", "true");
-//
-//   for (let i = lastIndex; i >= 0; i--) {
-//     let question: HTMLElement = questions[i] as HTMLElement;
-//     buildQuestionHeader(question);
-//
-//     //append question to wrapper-content
-//     wrapper_content.append(question);
-//   }
-// }
-//
-//
-// // question->DOM Manipulation
-// // Question Text and CollapseAll-Functionality in question-header
-// function buildQuestionHeader(question: HTMLElement) {
-//   let text = document.createElement("p");
-//   text.innerHTML = (question.childNodes[0] as Text).data;
-//   question.childNodes[0].remove();
-//   let header: HTMLDivElement = document.createElement("div");
-//   header.setAttribute("class", "question-header");
-//   question.prepend(header);
-//   // append text and img
-//   let img = document.createElement("img");
-//   img.setAttribute("src", Ressources.plus_solid);
-//   img.addEventListener("click", explanationEventHandler.bind(img, true));
-//   header.append(text, img);
-// }
-// // questionnaire->DOM Manipulation
-// function renderAnswers(questionnaire: HTMLElement) {
-//   let answers: HTMLCollection = questionnaire.getElementsByTagName("answer");
-//   //for every answer:
-//   // add <div> wrapper + <img>-icon (done)
-//   // add EventListener for AnswerClickEvents (done)
-//   for (let i = answers.length - 1; i >= 0; i--) {
-//     let answer: HTMLElement = answers[i] as HTMLElement;
-//     // build div-wrapper
-//     let new_div: HTMLDivElement = document.createElement("div");
-//     let text = document.createElement("p");
-//     text.innerHTML = (answer.childNodes[0] as Text).data;
-//     answer.childNodes[0].remove();
-//     new_div.setAttribute("class", "wrapper-answer");
-//     answer.prepend(new_div);
-//     //append text and img
-//     let img = document.createElement("img");
-//     const mode = answer.parentElement?.getAttribute("type");
-//     img.setAttribute("src", mode === 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular);
-//     new_div.append(img, text);
-//     answer.addEventListener("click", checkAnswerEventHandler);
-//     answer.addEventListener("click", explanationEventHandler.bind(answer, false));
-//   }
-// }
-//
 var Ressources;
 (function (Ressources) {
     Ressources.angle_left_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAy
@@ -768,15 +653,7 @@ questionnaire .change-question-button{
   border-radius: 7px;
   font-size:1.3em;
 }
-questionnaire .change-question-button:hover{
-  background-color: #bbb;
-}
-
-@media (min-width: 768px) {
-  questionnaire question {
-    max-width: 600px;
-  }
-}
+q
 .error-wrapper{
   display:block;
   max-width: 600px;
@@ -788,6 +665,14 @@ questionnaire .change-question-button:hover{
 
 }
 .error-box{
+font-size:16pt;
+line-height:1.5em;
+}
+
+.error-message{
+  font-family:monospace;
+  font-size:12pt;
+}error-box{
 font-size:16pt;
 line-height:1.5em;
 }

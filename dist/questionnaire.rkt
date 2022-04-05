@@ -288,8 +288,8 @@
 
 ;; top-level latex renderer for questionnaire
 (define/contract
-  (render-latex questionnaire solstyle)
-  (-> questionnaire-container? texsolutionstyles block?)
+  (render-latex solstyle questionnaire )
+  (-> texsolutionstyles questionnaire-container? block?)
   (nested-flow
     (style 'vertical-inset (list (tex-addition (solutions-style solstyle))))
     (list
@@ -298,10 +298,10 @@
      (render-solutions-latex questionnaire solstyle)))
 )
 
-; save latex questionnaire
+; save a questionnaire during the collect pass
 (define/contract
-  (save-latex location content)
-  (-> string? block? block?)
+  (save-questionnaire location content)
+  (-> string? questionnaire-container? block?)
   (paragraph (style #f '()) (list
     (collect-element
       (style #f '())
@@ -316,13 +316,13 @@
     )))
 )
 
-; retrieve latex questionnaire
+; retrieve and render questionnaire during the resolve pass
 (define/contract
-  (retrieve-latex location)
-  (-> string? delayed-block?)
+  (retrieve-questionnaire location renderer)
+  (-> string? any/c delayed-block?)
   (delayed-block
     (lambda (r p ri)
-      (resolve-get p ri (list (string->symbol (string-append "Questionnaire" location)) #t)))
+      (renderer (resolve-get p ri (list (string->symbol (string-append "Questionnaire" location)) #t))))
   )
 )
 
@@ -376,22 +376,15 @@
 
 ; questionnaire
 (define
-  (questionnaire #:texsolutionstyle [style "margin"] #:key [key "DefaultQuestionnaire"] #:nolatex [nolatex #f] . questions)
+  (questionnaire #:key [key "DefaultQuestionnaire"] . questions)
    (cond [(not (andmap question-container? questions))
           (raise-argument-error 'questions "A list of @question s (question-container)" questions)]
-         [(not (texsolutionstyles style))
-          (raise-argument-error 'texsolutionstyle "A valid layout option for the solutions in latex (margin or inline)" style)]
          [(not (string? key))
           (raise-argument-error 'key "A string key for retrieving the questionnaire with @texquestions" key)]
-         [(not (boolean? nolatex))
-          (raise-argument-error 'nolatex "A boolean flag whether to suppress latex rendering" nolatex)]
          [else
          (cond-block
            [html (render-html (questionnaire-container questions))]
-           [latex (if nolatex
-                      nothing
-                      (save-latex key
-                        (render-latex (questionnaire-container questions) style)))]
+           [latex (save-questionnaire key (questionnaire-container questions))]
          )
          ]
    )
@@ -399,11 +392,14 @@
 
 ; latex print location
 (define
-  (texquestions #:key [key "DefaultQuestionnaire"])
+  (texquestions #:key [key "DefaultQuestionnaire"] #:texsolutionstyle [style "margin"])
   (cond [(not (string? key))
          (raise-argument-error 'key "A string key for retrieving the questionnaire with @texquestions" key)]
+        [(not (texsolutionstyles style))
+         (raise-argument-error 'texsolutionstyle "A valid layout option for the solutions in latex (margin or inline)" style)]
         [else (cond-block
-                [latex (retrieve-latex key)]
+                [latex
+                 (retrieve-questionnaire key (lambda (x) (render-latex style x)))]
                 [html nothing]
               )]
   )

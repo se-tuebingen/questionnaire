@@ -32,7 +32,7 @@ Single-Choice Question:
 
 Multiple-Choice-Question (in the pdf, the solution should be below and not in the margin, here):
 
-@questionnaire[ #:texsolutionstyle "inline"
+@questionnaire[
 @question["multiplechoice"
   @q{What does TS stand for?}
 
@@ -44,7 +44,7 @@ Multiple-Choice-Question (in the pdf, the solution should be below and not in th
 
 In latex, the questions should be rendered below:
 @texquestions[#:key "singlechoicetest"]
-@texquestions[]
+@texquestions[#:texsolutionstyle "inline"]
 
 @section{More than one Question}
 
@@ -95,7 +95,7 @@ Questionnaire with several questions:
 In the pdf version, we should see the "What is this course about?" question here again, in the HTML version, it is "What does TS stand for":
 
 @texquestions[#:key "singlechoicetest"]
-@questionnaire[ #:nolatex #t
+@questionnaire[
   @question["multiplechoice"
     @q{What does TS stand for?}
 

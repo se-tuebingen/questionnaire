@@ -86,14 +86,10 @@ You can generate your questions much in the same style as in the HTML document. 
 ```
 
 For your questions to show up in a PDF, you need to specify where they should be rendered.
-- A simple `@texquestions[]` renders the last `@questionnaire` that was defined above it.
+- A simple `@texquestions[]` renders the last `@questionnaire` that was defined above it. _If `@texquestions[]` is not called, the code for generating the latex for a question will not be run._
 - Using this several times will produce a warning, which can be safely ignored (`WARNING: collected information for key multiple times: '(QuestionnaireDefaultQuestionnaire #t);`)
 - If you have several questionnaires and want to e.g. move them to a separate section at the end, you need to specify a key as a keyword argument to both commands: `@texquestions[#:key "intro"]` renders what has been defined in `@questionnaire[#:key "intro" ...]`.
-- If you explicitly want to suppress the code for latex rendering, you can add `#:nolatex true` to a `@questionnaire`. However, questionnaires without any corresponding `@texquestions[]` call will never produce any LaTex output.
-
-There a is also a style option that can be passed to `@questionnaire` as keyword argument:
-
-- `#:texsolutionstyle "margin"` (default) adds the solutions as a block of rotated text in the margin beside the questions.
+- `@texquestions[#:texsolutionstyle "margin"]` (default) adds the solutions as a block of rotated text in the margin beside the questions.
 - `#:texsolutionstyle "inline"` adds the solutions as a block of rotated text below the questions.
 
 ## Tests

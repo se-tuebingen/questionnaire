@@ -40,8 +40,11 @@ function parseQuestionnaire(questionnaire: HTMLElement): Questionnaire {
 function parseQuestion(question: HTMLElement): Question {
   const type = question.getAttribute('type') as Questiontype;
   const text = Array.from(question.childNodes as NodeList)
-    .filter(x => (x as HTMLElement).tagName != 'ANSWER');
-  const answers = Array.from(question.getElementsByTagName('answer') as HTMLCollection);
+    .filter(x => (x as HTMLElement).tagName != 'DISTRACTOR'
+      || (x as HTMLElement).tagName == 'SOLUTION');
+  const answers = Array.from(question.childNodes as NodeList)
+    .filter(x => (x as HTMLElement).tagName == 'DISTRACTOR'
+      || (x as HTMLElement).tagName == 'SOLUTION');
   return {
     type: type,
     text: text,
@@ -51,7 +54,7 @@ function parseQuestion(question: HTMLElement): Question {
 }
 
 function parseAnswer(answer: HTMLElement): Answer {
-  const correct = (answer.getAttribute('correct') as string) == 'true';
+  const correct = (answer.tagName == 'SOLUTION') ? true : false;
   const text = Array.from(answer.childNodes as NodeList)
     .filter(x => (x as HTMLElement).tagName != 'EXPLANATION');
   const explanation = answer.getElementsByTagName('explanation')[0] as HTMLElement;
@@ -74,15 +77,15 @@ function setup() {
   for (let i = q_col.length - 1; i >= 0; i--) {
     const questionnaire: HTMLElement = q_col[i] as HTMLElement;
     // validate htmL Structure before parsing
-    if (validateQuestionnaireStructure(questionnaire) == true) {
-      const r = parseQuestionnaire(questionnaire);
-      console.log(r);
-      // Possible ValidationPoint (Attributes)
-      renderQuestionnaire(r);
-    }
-    else {
-      //DO NOTHING
-    }
+    //    if (validateQuestionnaireStructure(questionnaire) == true) {
+    const r = parseQuestionnaire(questionnaire);
+    console.log(r);
+    // Possible ValidationPoint (Attributes)
+    renderQuestionnaire(r);
+    //    }
+    //    else {
+    //DO NOTHING
+    //    }
   }
 }
 window.onload = setup;
@@ -153,8 +156,8 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
 // renderQuestions
 // if validation fails return false, else return html-string
 function renderQuestion(question: Question, index: number) {
-  if (validateAttribute(question) == true) {
-    return `
+  // if (validateAttribute(question) == true) {
+  return `
     <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
       <div class="question-header">
         <p>${question.text.map(nodeOuterHTML).join('')}</p>
@@ -163,11 +166,11 @@ function renderQuestion(question: Question, index: number) {
       ${question.answers.map(renderAnswer).join('')}
     </question>
   `;
-  }
-  else {
-    return "";
-  }
 }
+//  else {
+//    return "";
+//  }
+//}
 
 function renderAnswer(answer: Answer) {
   return `

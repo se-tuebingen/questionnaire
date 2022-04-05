@@ -13,8 +13,11 @@ function parseQuestionnaire(questionnaire) {
 function parseQuestion(question) {
     const type = question.getAttribute('type');
     const text = Array.from(question.childNodes)
-        .filter(x => x.tagName != 'ANSWER');
-    const answers = Array.from(question.getElementsByTagName('answer'));
+        .filter(x => x.tagName != 'DISTRACTOR'
+        || x.tagName == 'SOLUTION');
+    const answers = Array.from(question.childNodes)
+        .filter(x => x.tagName == 'DISTRACTOR'
+        || x.tagName == 'SOLUTION');
     return {
         type: type,
         text: text,
@@ -23,7 +26,7 @@ function parseQuestion(question) {
     };
 }
 function parseAnswer(answer) {
-    const correct = answer.getAttribute('correct') == 'true';
+    const correct = (answer.tagName == 'SOLUTION') ? true : false;
     const text = Array.from(answer.childNodes)
         .filter(x => x.tagName != 'EXPLANATION');
     const explanation = answer.getElementsByTagName('explanation')[0];
@@ -44,15 +47,15 @@ function setup() {
     for (let i = q_col.length - 1; i >= 0; i--) {
         const questionnaire = q_col[i];
         // validate htmL Structure before parsing
-        if (validateQuestionnaireStructure(questionnaire) == true) {
-            const r = parseQuestionnaire(questionnaire);
-            console.log(r);
-            // Possible ValidationPoint (Attributes)
-            renderQuestionnaire(r);
-        }
-        else {
-            //DO NOTHING
-        }
+        //    if (validateQuestionnaireStructure(questionnaire) == true) {
+        const r = parseQuestionnaire(questionnaire);
+        console.log(r);
+        // Possible ValidationPoint (Attributes)
+        renderQuestionnaire(r);
+        //    }
+        //    else {
+        //DO NOTHING
+        //    }
     }
 }
 window.onload = setup;
@@ -118,8 +121,8 @@ function renderQuestionnaire(questionnaire) {
 // renderQuestions
 // if validation fails return false, else return html-string
 function renderQuestion(question, index) {
-    if (validateAttribute(question) == true) {
-        return `
+    // if (validateAttribute(question) == true) {
+    return `
     <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
       <div class="question-header">
         <p>${question.text.map(nodeOuterHTML).join('')}</p>
@@ -128,11 +131,11 @@ function renderQuestion(question, index) {
       ${question.answers.map(renderAnswer).join('')}
     </question>
   `;
-    }
-    else {
-        return "";
-    }
 }
+//  else {
+//    return "";
+//  }
+//}
 function renderAnswer(answer) {
     var _a;
     return `
@@ -470,186 +473,224 @@ Mi42Mi05LjM3NWwtMTYwLTE2MGMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNWwxNjAt
 MTYwYzEyLjUtMTIuNSAzMi43NS0xMi41IDQ1LjI1IDBzMTIuNSAzMi43NSAwIDQ1LjI1TDc3
 LjI1IDI1NmwxMzcuNCAxMzcuNGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1QzIwOC40
 IDQ0NC45IDIwMC4yIDQ0OCAxOTIgNDQ4eiIvPjwvc3ZnPg==`;
-    Ressources.angle_right_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAy
-NTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNjQgNDQ4Yy04LjE4OCAwLTE2LjM4LTMuMTI1LTIy
-LjYyLTkuMzc1Yy0xMi41LTEyLjUtMTIuNS0zMi43NSAwLTQ1LjI1TDE3OC44IDI1Nkw0MS4z
-OCAxMTguNmMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNXMzMi43NS0xMi41IDQ1LjI1
-IDBsMTYwIDE2MGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1bC0xNjAgMTYwQzgwLjM4
-IDQ0NC45IDcyLjE5IDQ0OCA2NCA0NDh6Ii8+PC9zdmc+`;
-    Ressources.check_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDM4LjYgMTA1LjRDNDUxLjEgMTE3LjkgNDUxLjEg
-MTM4LjEgNDM4LjYgMTUwLjZMMTgyLjYgNDA2LjZDMTcwLjEgNDE5LjEgMTQ5LjkgNDE5LjEg
-MTM3LjQgNDA2LjZMOS4zNzIgMjc4LjZDLTMuMTI0IDI2Ni4xLTMuMTI0IDI0NS45IDkuMzcy
-IDIzMy40QzIxLjg3IDIyMC45IDQyLjEzIDIyMC45IDU0LjYzIDIzMy40TDE1OS4xIDMzOC43
-TDM5My40IDEwNS40QzQwNS45IDkyLjg4IDQyNi4xIDkyLjg4IDQzOC42IDEwNS40SDQzOC42
-eiIvPjwvc3ZnPg==`;
-    Ressources.circle_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1
-MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNTEyIDI1NkM1MTIgMzk3LjQgMzk3LjQgNTEyIDI1
-NiA1MTJDMTE0LjYgNTEyIDAgMzk3LjQgMCAyNTZDMCAxMTQuNiAxMTQuNiAwIDI1NiAwQzM5
-Ny40IDAgNTEyIDExNC42IDUxMiAyNTZ6TTI1NiA0OEMxNDEuMSA0OCA0OCAxNDEuMSA0OCAy
-NTZDNDggMzcwLjkgMTQxLjEgNDY0IDI1NiA0NjRDMzcwLjkgNDY0IDQ2NCAzNzAuOSA0NjQg
-MjU2QzQ2NCAxNDEuMSAzNzAuOSA0OCAyNTYgNDh6Ii8+PC9zdmc+`;
-    Ressources.minus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMy
-LTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTMxLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIg
-MzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8+PC9zdmc+`;
-    Ressources.plus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDMyIDI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMy
-IDMyLjAxSDI1NnYxNDRjMCAxNy42OS0xNC4zMyAzMS45OS0zMiAzMS45OXMtMzItMTQuMy0z
-Mi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5
-IDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQu
-MzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8+PC9z
-dmc+`;
-    Ressources.square_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzg0IDMyQzQxOS4zIDMyIDQ0OCA2MC42NSA0NDgg
-OTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42NSA0ODAgMCA0NTEu
-MyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMzg0IDgwSDY0QzU1LjE2
-IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0MzIgNjQgNDMySDM4NEMz
+    Ressources.angle_right_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxuNTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmbexp
+ort const angle_right_solid = `;
+    /svg+xml;base64,PHN2ZyB4bWxuNTY;
+    gNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh;
+    0;
+    dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmN;
+    vbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29;
+    ucywgSW5jLiAtLT48cGF0aCBkPSJNNjQgNDQ4Yy04LjE4OCAwLTE2LjM4LTMuMTI1LTIyLjY;
+    yLTkuMzc1Yy0xMi41LTEyLjUtMTIuNS0zMi43NSAwLTQ1LjI1TDE3OC44IDI1Nkw0MS4zOCA;
+    xMTguNmMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNXMzMi43NS0xMi41IDQ1LjI1IDB;
+    sMTYwIDE2MGMxMi41IDEyLjUgMTIuNSAzMi43NSAwDQ1;
+    LjI1bC0xNjAgMTYwQzgwLjM4;
+    IDQ0NC45IDcyLjE5IDQ0OCA2NCA0NDh6Ii8 + PC9zdmc +
+        `;
+export const check_solid = `;
+    data: image / svg + xml;
+    base64, PHN2ZyB4bWxucz0export;
+    co;
+    Ressources.check_solid = `data:image/svg+xml;b
+
+ase64,PHN2ZyB4bWxucz
+0export const check_solid = `;
+    /svg+xml;ba;
+    se;
+    64, PHN2ZyB4bWxuc;
+    z0iaHNDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4;
+    wIGJ;
+    5;
+    IEBmb250YXd;
+    lc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgL;
+    SBodHR;
+    wczovL2Z;
+    vbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2U;
+    pIENvcHl;
+    yaWd;
+    odCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDM4LjYgM;
+    TA1LjRDNDU;
+    xLjEgMTE3LjkgNDUxLjEgMTM4LjEgNDM4LjYgMTUwLjZ;
+    MMTgyLjYgNDA2Lj;
+    ZDMTcwLjEg;
+    NDE5LjEgMTQ5LjkgNDE5LjEgMTM3LjQgNDA2LjZMOS4zNzIgMjc4LjZDLTMuMT;
+    I0IDI2Ni;
+    4;
+    xLTMuMTI0IDI0NS;
+    45;
+    IDkuMzcyIDIzMy40QzIxLjg3DI;
+    yMC45IDQyLjEzIDIyMC45IDU0LjYzIDIzMy40TDE1OS4xIDMzOC43;
+    TDM5My40IDEwNS40QzQwNS45IDkyLjg4IDQyNi4xIDkyLjg4IDQzOC42IDEwNS40SDQzOC42;
+    eiIvPjwvc3Zn;
+    square_regular = P `data:image/svg+xml;b
+ase64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9Ij
+AgMCA0
+NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4gIGJ5IEBmb250YXdl
+c29tZSAt
+IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2Zvbn
+Rhd2Vzb21l
+L=NvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHly=WdodCAy
+MDIyIEZvbnRp
+Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzg0IDMyQzQxOS4zIDMyIDQ0OC
+A2MC42NSA0NDgg
+OTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42
+NSA0ODAgMCA0NTEu
+MyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMz
+g0IDgwSDY0QzU1LjE2
+IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0
+MzIgNjQgNDMySDM4NEMz
 OTIuOCA0MzIgNDAwIDQyNC44IDQwMCA0MTZWOTZDNDAwIDg3LjE2IDM5Mi44IDgwIDM4NCA4
 MHoiLz48L3N2Zz4=`;
-    Ressources.xmark_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAz
-MjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIu
-NzUgMCA0NS4yNUMzMDQuNCA0MTIuOSAyOTYuMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUt
-MjIuNjItOS4zNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQx
-NiAzMiA0MTZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1
-IDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1
-IDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41
-LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1
-LjRMMzEwLjYgMzYxLjR6Ii8+PC9zdmc+`;
-    Ressources.style = `questionnaire {
+    expo;
+    t;
+    const xmar;
+    `;
+export const circleY29ucywgSW5jL iAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDA
+wIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTM
+xLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIgMzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8
++PC9zdmc+`;
+    co;
+    nst;
+    Ressources.plus_solid;
+    Ressources.plus_solid = `data:i
+mage/svg+xml;base64,PHN2ZyB4bWxucz0iexport const plus_solid = `;
+    e / svg + xml;
+    base64, PHN2ZyB4bWxucz0iaHRNDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUg;
+    UHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExp;
+    Y2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExp;
+    Y2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29uywgSW5jLiAtLT48cGF0aCBkPSJNNDMyI;
+    DI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMy;
+    IDMyLjAxSDI1SyzIcT48cGF0aCBkPSJNMzg;
+    0;
+    IDMyQzQxOS4zIDMyIDQ0OCA2MC42NSA0NDgg;
+    OTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0O;
+    DAgMzg0IDQ4MEg2NEMyOTZWNDE2QzQ0O;
+    CA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42NSA0ODAgMCA0NTEuMyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMzg0IDgwSDY0QzU1LjE2IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0MzIgNjQgNDMySDM4NEMzOTIuOCA0MzIgNDAwIDQyNC44IDQwMCA0MTZWOTZDNDAwIDg3LjE2IDM5Mi44IDgwIDM4NCA4MHoiLz48L3N2Zz4 =
+        questionnaire `;
+export const xmark_solid = `;
+    data: image / svg + xml;
+    base6export;
+    const xmark_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0export const xmark_solid = `, data;
+    /svg+xml;base64,PHN2ZyB4bWxucz0iaHMjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIu;
+    NzUgMCA0NS4yNUMzMDQuNCbody;
+    {
+        width: 100 % ;
+        margin: 0;
+        padding: 0;
+        font - family;
+        monospace;
+    }
+    A0MTIunOaire;
+    questionSAyOTYMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUt;
+    MjIuNjItOSzNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQx;
+    questionnaire;
+    NiAzMiA0MZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1;
+    IDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1;
+    IDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41;
+    UtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1;
+    LjRMMzEwnaire;
+    questionLjYgMzYxLjR6Ii8 + PC9zdmc +
+        `;
+export con0tyle estionnaire {
   display: block;
   margin: 40px 0 100px ;
 }
 
-questionnaire .content-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;
+question-wrapper {
+questionnaire   display: flex;
+ questionnaire  flex-wrap: wrap;
+questionnaire on: column;
   margin: 10px;
   padding: 10px;
-  justify-content: center;
+questionnaire   justify-content: center;
 }
-questionnaire question{
-  display:none;
-}
+  margin-bottom: 0.5em;
+question{
+  display:15pxone;
+questionnaire  15px}
 questionnaire .question-overview{
 margin: 0 auto 10px;
 font-size:1.1em;
-}
-questionnaire question{
-  width: 90%;
-  margin: 0 auto;
-  font-size: 18pt;
-  padding:4vw;
-  background-color: #fcfcfc;
-}
-
-questionnaire .question-header, questionnaire .question-footer, questionnaire .wrapper-answer {
+questionnaire }
+question{
+  widthn: 0 auto;
+  font-sadding:4vw;
+questionnaire olor: #fcquestion-header, questionnaire .question-footer, questionnaire .wrapper-answer {
   display: inline-flex;
-  width: 100%;
+
 }
 
-questionnaire .question-header {
-  justify-content: space-between;
+questionnaire.estion-header {
+questionnaire ent: space-between;
   margin-bottom: 0.5em;
 }
 
-questionnaire .question-footer{
+.questionanswer, -footer[visible=true] {
   justify-content: center;
 }
 
-questionnaire [visible=true]{
-    display:block;
+questionnaire questionnaire [vi1spxibquestionnalre ie=true]{
+ questionnaire    display:block;
 }
 
-questionnaire .wrapper-answer {
-  border: 1px solid #eee;
+.wrapper-answer {
+questionnaire   border: 1px solid #eee;
   padding: 5px 12px;
   font-size: 14pt;
   margin: 15px 0 0;
   width:90%;
-}
+qu}stionnaire e
 
-questionnaire answer p {
-  margin: 0 0 0 16px;
-  padding: 6px;
-  /*font-size: 12pt;
+answer p {
+  margin: 0  ding: 6pxe: 12pt;
   border: 1px solid #000;
-  width:100%;*/
+questionn/ire a
 }
 
-questionnaire .wrapper-answer:hover, questionnaire img:hover, questionnaire .change-question-button:hover {
+questionnae.apper-answer:hover, questionnaire img:hover, questionnaire .change-question-button:hover {
   cursor: pointer;
-  /*background-color: #ddd;*/
+/color: #ddd;*/
 }
 
 questionnaire .wrapper-answer:hover {
-  background-color: #eee;
-}
-
-
-questionnaire explanation {
+questionn ire a background-color: #eee;
+i 0r2epx explanation {
   display: none;
   /*max-width: 30vw;*/
+questionna}re i
+
+qumargsnn1em;
+  nlign-self: center;
 }
 
-questionnaire answer [visible=true] {
-  margin: 5px 0;
+qies;i
+nnaire p { align-self: center answer [visible=true] {
+ ;
   padding: 15px 12px;
-  font-size: 12pt;
-  word-break: break-word;
-  border:0;
-  background-color: #fdfdfd;
+questionnaire   font-size: 12pt;
+  word-break questionnaire: break-word;
+;ackgrou
+ re20px
+questionnaire   height: 1em;
+center;
 }
 
-questionnaire answer [visible=true] p {
-  border: 0;
+questionnaire questionnaire p {
+ ater;
 }
 
-questionnaire img {
-  height: 1em;
-  align-self: center;
-}
-
-questionnaire p {
-  margin: 0;
-  align-self: center;
-}
-
-questionnaire [clicked=true] .wrapper-answer, questionnaire [clicked=true] .wrapper-answer:hover{
+[click0rue] rapper-answer, questionnaire [clicked=true] .wrapper-answer:hover{
   background-color:#d30000;
 }
-
-questionnaire [clicked=true][correct=true] .wrapper-answer{
+questionnaire 
+questi15pxnnair 0e [clicked=true][correct=true] .wrapper-answer{
   background-color:#aceb84;
 }
-
-questionnaire .change-question-button{
-  padding:15px;
+ .change-question-button{
+  questionnaire padding:15px;
   margin:0 15px;
   border: 4px solid #bbb;
-  border-radius: 7px;
+ : 7px;
   font-size:1.3em;
 }
 q

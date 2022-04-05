@@ -14,7 +14,19 @@
 (define questiontypes (or/c "singlechoice" "multiplechoice"))
 (define texsolutionstyles (or/c "inline" "margin"))
  ; one-of does not work with strings
-(define arbitrary-content? (or/c block? (or/c (listof block?) content?)))
+(define arbitrary-content?
+  (or/c block?
+  (or/c content?
+        (listof (or/c content? block?)))))
+
+; helper for arbitrary content
+(define/contract
+  (homogenize xs)
+  (-> (listof (or/c content? block?)) (listof block?))
+  (map (lambda (x) (if (block? x) x
+        (paragraph (style #f '()) x)
+  )) xs)
+)
 
 ; general answer for easy accessor
 (struct/contract answer (
@@ -72,8 +84,8 @@
      (paragraph wrapper content)]
     [(block? content)
      (nested-flow wrapper (list content))]
-    [((listof block?) content)
-     (nested-flow wrapper content)]
+    [((listof (or/c block? content?)) content)
+     (nested-flow wrapper (homogenize content))]
   )
 )
 
@@ -140,7 +152,7 @@
   (cond
     [(content? c) (list (paragraph (style #f '()) c))]
     [(block? c) (list c)]
-    [((listof block?) c) c]
+    [((listof (or/c block? content?)) c) (homogenize c)]
   )
 )
 
@@ -237,7 +249,7 @@
           [else ""])]
         [letter (enumerate-letter n)])
     (cons
-      (not (string=? "" explanation))
+      ((or/c solution/e? distractor/e?) answer)
       (cond
         [(content? explanation)
          (car (blocksify (list (if correct (bold letter) letter) ")" explanation)))]
@@ -382,7 +394,7 @@
     [(not (questiontypes type))
      (raise-argument-error 'type "A valid question type string (singlechoice or multiplechoice)" type)]
     [(not (arbitrary-content? text))
-     (raise-argument-error 'text "An Element of Type content?, block? or a list of one of them" text)]
+     (raise-argument-error 'text "An Element of Type content?, block? or a list of (possibly a mix of) them" text)]
     [(not (andmap (or/c answer? explanation?) answers))
      (raise-argument-error 'answers "A list of @solution|@distractor|@explanation" answers)]
     [else

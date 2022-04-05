@@ -457,7 +457,84 @@
 %  ... document content ...
 %  \postDoc
 %  \end{document}
-\newcommand{\QRotatemargin}[1]{{\rotatebox{180}{\parbox{\marginparwidth}{#1}}}}\newcommand{\QRotateinline}[1]{{\rotatebox{180}{\parbox{\textwidth}{#1}}}}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\QRotatemargin}[1]{{\rotatebox{180}{\parbox{\marginparwidth}{#1}}}}\newcommand{\QRotateinline}[1]{{\rotatebox{180}{\parbox{\textwidth}{#1}}}}
+% Redefine \SColorize to produce B&W Scheme text
+\newcommand{\SColorize}[2]{\color{#1}{#2}}
+
+% Redefine SHyphen to allow identifiers to be hyphenated
+\newcommand{\SHyphen}[1]{#1}
+
+\newcommand{\inColor}[2]{{\SHyphen{\Scribtexttt{\SColorize{#1}{#2}}}}}
+\definecolor{PaleBlue}{rgb}{0.90,0.90,1.0}
+\definecolor{LightGray}{rgb}{0.90,0.90,0.90}
+\definecolor{CommentColor}{rgb}{0.76,0.45,0.12}
+\definecolor{ParenColor}{rgb}{0.52,0.24,0.14}
+\definecolor{IdentifierColor}{rgb}{0.15,0.15,0.50}
+\definecolor{ResultColor}{rgb}{0.0,0.0,0.69}
+\definecolor{ValueColor}{rgb}{0.13,0.55,0.13}
+\definecolor{OutputColor}{rgb}{0.59,0.00,0.59}
+
+\newcommand{\RktPlain}[1]{\inColor{black}{#1}}
+\newcommand{\RktKw}[1]{{\SColorize{black}{\Scribtexttt{#1}}}} % no \textbf anymore
+\newcommand{\RktStxLink}[1]{\RktKw{#1}}
+\newcommand{\RktStxDef}[1]{\RktStxLink{#1}}
+\newcommand{\RktCmt}[1]{\inColor{CommentColor}{#1}}
+\newcommand{\RktPn}[1]{\inColor{ParenColor}{#1}}
+\newcommand{\RktInBG}[1]{\inColor{ParenColor}{#1}}
+\newcommand{\RktSym}[1]{\inColor{IdentifierColor}{#1}}
+\newcommand{\RktSymDef}[1]{\RktSym{#1}}
+\newcommand{\RktVal}[1]{\inColor{ValueColor}{#1}}
+\newcommand{\RktValLink}[1]{\inColor{blue}{#1}}
+\newcommand{\RktValDef}[1]{\RktValLink{#1}}
+\newcommand{\RktModLink}[1]{\inColor{blue}{#1}}
+\newcommand{\RktRes}[1]{\inColor{ResultColor}{#1}}
+\newcommand{\RktOut}[1]{\inColor{OutputColor}{#1}}
+\newcommand{\RktMeta}[1]{\inColor{IdentifierColor}{#1}}
+\newcommand{\RktMod}[1]{\inColor{black}{#1}}
+\newcommand{\RktRdr}[1]{\inColor{black}{#1}}
+\newcommand{\RktVarCol}[1]{\inColor{IdentifierColor}{#1}}
+\newcommand{\RktVar}[1]{{\RktVarCol{\textsl{#1}}}}
+\newcommand{\RktErrCol}[1]{\inColor{red}{#1}}
+\newcommand{\RktErr}[1]{{\RktErrCol{\textrm{\textit{#1}}}}}
+\newcommand{\RktOpt}[1]{#1}
+\newcommand{\RktIn}[1]{\incolorbox{LightGray}{\RktInBG{#1}}}
+\newcommand{\highlighted}[1]{\colorbox{PaleBlue}{\hspace{-0.5ex}\RktInBG{#1}\hspace{-0.5ex}}}
+
+\newenvironment{RktBlk}{}{}
+\newenvironment{defmodule}{}{}
+\newenvironment{prototype}{}{}
+\newenvironment{argcontract}{}{}
+\newenvironment{together}{}{}
+
+\newenvironment{specgrammar}{}{}
+
+
+\newenvironment{RBibliography}{}{}
+\newcommand{\bibentry}[1]{\parbox[t]{0.8\linewidth}{#1}}
+
+\newenvironment{leftindent}{\begin{quote}}{\end{quote}}
+\newenvironment{insetpara}{\begin{quote}}{\end{quote}}
+
+\newcommand{\Rfilebox}[2]{\begin{list}{}{\topsep=0pt\partopsep=0pt%
+\listparindent=0pt\itemindent=0pt\labelwidth=0pt\leftmargin=0ex\rightmargin=0ex%
+\itemsep=0pt\parsep=0pt}\item #1
+
+#2\end{list}}
+\newcommand{\RfileboxBox}[3]{#3{\halign{\hfil##\cr #1 \cr #2 \cr}}}
+\newcommand{\RfileboxBoxT}[2]{\RfileboxBox{#1}{#2}{\vtop}}
+\newcommand{\RfileboxBoxC}[2]{\RfileboxBox{#1}{#2}{\Svcenter}}
+\newcommand{\RfileboxBoxB}[2]{\RfileboxBox{#1}{#2}{\vbox}}
+\newcommand{\Rfiletitle}[1]{\hfill \fbox{#1}}
+\newcommand{\RfiletitleBox}[1]{\fbox{#1}}
+\newcommand{\Rfilename}[1]{#1}
+\newenvironment{Rfilecontent}{}{}
+\newcommand{\RfilecontentBox}[1]{#1}
+
+\newcommand{\RBackgroundLabel}[1]{}
+\newenvironment{RBackgroundLabelInner}{}{}
+
+\newcommand{\RpackageSpec}[1]{\hspace{5ex} #1}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Re-definitions for the PLT Scheme manual style
 
 \renewcommand{\sectionNewpage}{\newpage}
@@ -609,6 +686,82 @@ In the pdf version, we should see the "What is this course about?" question here
 \refpara{\begin{refcolumn}\begin{refcontent}\QRotatemargin{1.c}\end{refcontent}\end{refcolumn}}\end{SVInsetFlow}
 
 \noindent 
+
+\sectionNewpage
+
+\Ssection{Including arbitrary Content}{Including arbitrary Content}\label{t:x28part_x22Includingx5farbitraryx5fContentx22x29}
+
+Scribble allows to create:
+
+
+\noindent \begin{itemize}\atItemizeStart
+
+\item Itemizations
+
+\item Tables
+
+
+\noindent \begin{bigtabular}{@{\bigtableleftpad}l@{}l@{}l@{}}
+\hbox{\textbf{Numbers}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\textbf{Strings}} \\
+\hbox{\RktVal{42}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\RktVal{"42"}} \\
+\hbox{\RktPn{(}\RktSym{+}\Scribtexttt{ }\RktVal{21}\Scribtexttt{ }\RktVal{21}\RktPn{)}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\RktVal{"(+ 21 21)"}}\end{bigtabular}
+
+\item \begin{SCodeFlow}\RktPn{(}\RktSym{string{-}append}\mbox{\hphantom{\Scribtexttt{x}}}\RktVal{"Racket"}\mbox{\hphantom{\Scribtexttt{x}}}\RktVal{"Code"}\RktPn{)}\end{SCodeFlow}
+
+\item Images: \includegraphics[scale=1.0]{rocket-s.jpg}
+
+\item  And much more, which cannot be covered in its entirety\end{itemize}
+
+This questionnaire tests proper handling of those cases:
+
+
+
+\noindent \begin{SVInsetFlow}\begin{enumerate}\atItemizeStart
+
+\item Which of the following answers are correct?
+
+\noindent 
+
+
+\noindent \begin{itemize}\atItemizeStart
+
+\item The first
+
+\item The second
+
+\item The third\end{itemize}
+
+\noindent \begin{enumerate}\atItemizeStart
+
+\item \begin{itemize}\atItemizeStart
+
+\item 1.
+
+\item 3.\end{itemize}
+
+\item \begin{enumerate}\atItemizeStart
+
+\item The third
+
+\item The first\end{enumerate}
+
+\item None of the above\end{enumerate}\end{enumerate}
+
+\refpara{\begin{refcolumn}\begin{refcontent}\QRotatemargin{1.c
+
+\textbf{c})
+
+\noindent \begin{enumerate}\atItemizeStart
+
+\item 1. and 3. contradict each other
+
+\item with such riddles, this is always the answer\end{enumerate}}\end{refcontent}\end{refcolumn}}\end{SVInsetFlow}
 
 \postDoc
 \end{document}

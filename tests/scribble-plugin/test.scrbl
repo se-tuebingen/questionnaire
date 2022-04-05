@@ -1,7 +1,7 @@
 #lang scribble/manual
 
 @(require "questionnaire.rkt")
-@(require pict) @; for testing picture rendering
+@; @(require scribble/eval)
 
 @title[#:version ""]{Questionnaire test manual}
 @author["Florian Kellner"]
@@ -104,3 +104,61 @@ In the pdf version, we should see the "What is this course about?" question here
     @solution{TypeScript}
   ]
 ]
+
+@section{Including arbitrary Content}
+
+Scribble allows to create:
+@itemlist[
+  @item{Itemizations}
+  @item{Tables
+    @tabular[#:sep @hspace[3]
+ (list (list @bold{Numbers}       @bold{Strings})
+       (list @racket[42]         @racket["42"])
+       (list @racket[(+ 21 21)]  @racket["(+ 21 21)"]))]
+  }
+  @item{
+    @racketblock[(string-append "Racket" "Code")]
+  }
+  @item{
+    Images: @image["rocket-s.jpg"]
+  }
+  @item{ And much more, which cannot be covered in its entirety}
+]
+
+
+This questionnaire tests proper handling of those cases:
+
+@questionnaire[
+  @question["multiplechoice"
+    @q{
+      Which of the following answers are correct?
+      @itemlist[
+        @item{The first}
+        @item{The second}
+        @item{The third}
+      ]
+    }
+    @distractor{
+      @itemlist[
+        @item{1.}
+        @item{3.}
+      ]
+    }
+    @distractor{
+      @itemlist[ #:style 'ordered
+        @item{The third}
+        @item{The first}
+      ]
+    }
+    @solution{
+      None of the above
+    }
+    @explanation{
+      @itemlist[ #:style 'ordered
+        @item{1. and 3. contradict each other}
+        @item{with such riddles, this is always the answer}
+      ]
+    }
+  ]
+]
+@texquestions[]

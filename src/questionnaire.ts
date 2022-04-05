@@ -41,7 +41,7 @@ function parseQuestion(question: HTMLElement): Question {
   const type = question.getAttribute('type') as Questiontype;
   const text = Array.from(question.childNodes as NodeList)
     .filter(x => (x as HTMLElement).tagName != 'DISTRACTOR'
-      || (x as HTMLElement).tagName == 'SOLUTION');
+      && (x as HTMLElement).tagName != 'SOLUTION');
   const answers = Array.from(question.childNodes as NodeList)
     .filter(x => (x as HTMLElement).tagName == 'DISTRACTOR'
       || (x as HTMLElement).tagName == 'SOLUTION');
@@ -109,7 +109,7 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
       <div class="question-overview">
       ${overview_text}
       </div>
-      ${questionnaire.questions.reverse().map(renderQuestion)}
+      ${questionnaire.questions.reverse().map(renderQuestion).join('')}
       <div class="question-footer">
       ${buttons}
       </div>
@@ -180,7 +180,7 @@ function renderAnswer(answer: Answer) {
       <p>
         ${answer.text.map(nodeOuterHTML).join('')}
       </p>
-      ${answer.explanation ?.outerHTML}
+      ${(answer.explanation == undefined)? '' : answer.explanation.outerHTML}
     </div>
   </answer>
   `;

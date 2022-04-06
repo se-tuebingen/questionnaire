@@ -160,7 +160,7 @@ function renderQuestion(question: Question, index: number) {
   return `
     <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
       <div class="question-header">
-        <p>${question.text.map(nodeOuterHTML).join('')}</p>
+        <div>${question.text.map(nodeOuterHTML).join('')}</div>
         <img src="${Ressources.plus_solid}" onclick="explanationEventHandler(event)">
       </div>
       ${question.answers.map(renderAnswer).join('')}
@@ -177,10 +177,10 @@ function renderAnswer(answer: Answer) {
   <answer correct="${answer.correct ? 'true' : 'false'}">
     <div class="wrapper-answer" onclick="clickAnswerHandler(event)">
       <img src="${Ressources.circle_regular}">
-      <p>
-        ${answer.text.map(nodeOuterHTML).join('')}
-      </p>
-      ${(answer.explanation == undefined)? '' : answer.explanation.outerHTML}
+      <div>
+        ${answer.text.map(nodeOuterHTML).join('')}        
+        ${(answer.explanation == undefined)? '' : answer.explanation.outerHTML}
+      </div>
     </div>
   </answer>
   `;

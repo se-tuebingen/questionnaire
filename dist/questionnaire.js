@@ -125,7 +125,7 @@ function renderQuestion(question, index) {
     return `
     <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
       <div class="question-header">
-        <p>${question.text.map(nodeOuterHTML).join('')}</p>
+        <div>${question.text.map(nodeOuterHTML).join('')}</div>
         <img src="${Ressources.plus_solid}" onclick="explanationEventHandler(event)">
       </div>
       ${question.answers.map(renderAnswer).join('')}
@@ -141,10 +141,10 @@ function renderAnswer(answer) {
   <answer correct="${answer.correct ? 'true' : 'false'}">
     <div class="wrapper-answer" onclick="clickAnswerHandler(event)">
       <img src="${Ressources.circle_regular}">
-      <p>
-        ${answer.text.map(nodeOuterHTML).join('')}
-      </p>
-      ${(answer.explanation == undefined) ? '' : answer.explanation.outerHTML}
+      <div>
+        ${answer.text.map(nodeOuterHTML).join('')}        
+        ${(answer.explanation == undefined) ? '' : answer.explanation.outerHTML}
+      </div>
     </div>
   </answer>
   `;
@@ -572,6 +572,11 @@ questionnaire img {
 
 questionnaire p {
   margin: 0;
+  align-self: center;
+}
+
+questionnaire .wrapper-answer > div, questionnaire .question-header > div {
+  margin: 0.5em;
   align-self: center;
 }
 

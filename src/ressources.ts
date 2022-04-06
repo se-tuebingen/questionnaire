@@ -107,6 +107,11 @@ questionnaire p {
   align-self: center;
 }
 
+questionnaire .wrapper-answer > div, questionnaire .question-header > div {
+  margin: 0.5em;
+  align-self: center;
+}
+
 questionnaire [clicked=true] .wrapper-answer, questionnaire [clicked=true] .wrapper-answer:hover{
   background-color:#d30000;
 }

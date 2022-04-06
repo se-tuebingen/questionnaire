@@ -161,7 +161,7 @@ function renderQuestion(question: Question, index: number) {
     <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
       <div class="question-header">
         <div>${question.text.map(nodeOuterHTML).join('')}</div>
-        <img src="${Ressources.plus_solid}" onclick="explanationEventHandler(event)">
+        <img src="${Ressources.plus_solid}" onclick="collapseEventHandler(event)">
       </div>
       ${question.answers.map(renderAnswer).join('')}
     </question>
@@ -178,7 +178,7 @@ function renderAnswer(answer: Answer) {
     <div class="wrapper-answer" onclick="clickAnswerHandler(event)">
       <img src="${Ressources.circle_regular}">
       <div>
-        ${answer.text.map(nodeOuterHTML).join('')}        
+        ${answer.text.map(nodeOuterHTML).join('')}
         ${(answer.explanation == undefined)? '' : answer.explanation.outerHTML}
       </div>
     </div>
@@ -438,9 +438,9 @@ function questionChangeHandler(event: Event) {
 
 
 
-// ExplanationEventHandler
-// Handles Events for shoowing explanation text
-function explanationEventHandler(event: Event) {
+// CollapseEventHandler
+// Handles Collapse Event for shoowing explanation texts
+function collapseEventHandler(event: Event) {
   const el = event.target as HTMLElement;
   const question: HTMLElement = getTagRecursive(el, "question") as HTMLElement;
   const answers: HTMLCollection = question.getElementsByTagName("answer") as HTMLCollection;
@@ -450,7 +450,8 @@ function explanationEventHandler(event: Event) {
     el.setAttribute("clicked", "false");
     for (let i = answers.length - 1; i >= 0; i--) {
       let answer = answers[i] as HTMLElement;
-      answer.getElementsByTagName("explanation")[0].removeAttribute("visible");
+      let explanation = answer.getElementsByTagName("explanation")[0];
+      (explanation != undefined) ? explanation.removeAttribute("visible"): "";
     }
   }
   else {
@@ -458,7 +459,8 @@ function explanationEventHandler(event: Event) {
     el.setAttribute("clicked", "true");
     for (let i = answers.length - 1; i >= 0; i--) {
       let answer = answers[i] as HTMLElement;
-      answer.getElementsByTagName("explanation")[0].setAttribute("visible", "true");
+      let explanation = answer.getElementsByTagName("explanation")[0];
+      (explanation != undefined) ? explanation.setAttribute("visible", "true"): "";
     }
   }
 }

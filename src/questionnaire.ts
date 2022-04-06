@@ -479,7 +479,12 @@ function clickAnswerHandler(event: Event) {
   checkAnswerEventHandler(el);
   // show Explanation
   let answer = getTagRecursive(el, "answer");
-  showExplanation(answer);
+  if (answer.getElementsByTagName('explanation').length == 0){
+    console.log("There is no explanation");
+  }
+  else{
+    showExplanation(answer);
+  }
 }
 
 

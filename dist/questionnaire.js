@@ -7,7 +7,7 @@
 function parseQuestionnaire(questionnaire) {
     return {
         rootElement: questionnaire,
-        questions: Array.from(questionnaire.children).map(x => parseQuestion(x))
+        questions: Array.from(questionnaire.children).map(x => parseQuestion(x)).reverse()
     };
 }
 function parseQuestion(question) {

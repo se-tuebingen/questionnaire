@@ -33,7 +33,7 @@ interface Answer {
 function parseQuestionnaire(questionnaire: HTMLElement): Questionnaire {
   return {
     rootElement: questionnaire,
-    questions: Array.from(questionnaire.children as HTMLCollection).map(x => parseQuestion(x as HTMLElement))
+    questions: Array.from(questionnaire.children as HTMLCollection).map(x => parseQuestion(x as HTMLElement)).reverse()
   };
 }
 

@@ -77,15 +77,15 @@ function setup() {
   for (let i = q_col.length - 1; i >= 0; i--) {
     const questionnaire: HTMLElement = q_col[i] as HTMLElement;
     // validate htmL Structure before parsing
-    //    if (validateQuestionnaireStructure(questionnaire) == true) {
+        if (validateQuestionnaireStructure(questionnaire) == true) {
     const r = parseQuestionnaire(questionnaire);
     console.log(r);
     // Possible ValidationPoint (Attributes)
     renderQuestionnaire(r);
-    //    }
-    //    else {
+        }
+        else {
     //DO NOTHING
-    //    }
+        }
   }
 }
 window.onload = setup;
@@ -265,19 +265,19 @@ function validateStructure(el: HTMLElement) {
     // parent has to be a QUESTIONNAIRE
     return parentHasToBe(parent, "QUESTIONNAIRE");
   }
-  else if (html_tag == "ANSWER") {
+  else if (html_tag == "SOLUTION" || html_tag == "DISTRACTOR") {
     // parent has to be a QUESTION
     return parentHasToBe(parent, "QUESTION");
   }
   else if (html_tag == "EXPLANATION") {
-    // parent has to be an ANSWER
-    return parentHasToBe(parent, "ANSWER");
+    // parent has to be an SOLUTION OR DISTRACTOR
+    return parentHasToBe(parent, "SOLUTION", "DISTRACTOR");
   }
-  function parentHasToBe(parent: HTMLElement | null, tag: string) {
-    if (parent ?.tagName == tag) {
+  function parentHasToBe(parent: HTMLElement | null, tag: string, tag_two?: string) {
+    if (parent ?.tagName == tag || parent?.tagName == tag_two) {
       return true;
     } else {
-      let msg = `HTML structure is invalid: Please check your input at:  ${el.parentElement ?.outerHTML}`;
+      let msg = `HTML structure is invalid: Please check your input at:  ${parent?.outerHTML}`;
       renderError(el, msg);
       return false;
     }
@@ -479,7 +479,12 @@ function clickAnswerHandler(event: Event) {
   checkAnswerEventHandler(el);
   // show Explanation
   let answer = getTagRecursive(el, "answer");
-  showExplanation(answer);
+  if (answer.getElementsByTagName('explanation').length == 0){
+    console.log("There is no explanation");
+  }
+  else{
+    showExplanation(answer);
+  }
 }
 
 

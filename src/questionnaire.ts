@@ -33,7 +33,7 @@ interface Answer {
 function parseQuestionnaire(questionnaire: HTMLElement): Questionnaire {
   return {
     rootElement: questionnaire,
-    questions: Array.from(questionnaire.children as HTMLCollection).map(x => parseQuestion(x as HTMLElement)).reverse()
+    questions: Array.from(questionnaire.children as HTMLCollection).map(x => parseQuestion(x as HTMLElement))
   };
 }
 
@@ -109,7 +109,7 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
       <div class="question-overview">
       ${overview_text}
       </div>
-      ${questionnaire.questions.reverse().map(renderQuestion).join('')}
+      ${questionnaire.questions.map(renderQuestion).join('')}
       <div class="question-footer">
       ${buttons}
       </div>

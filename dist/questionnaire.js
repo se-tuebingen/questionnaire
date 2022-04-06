@@ -7,7 +7,7 @@
 function parseQuestionnaire(questionnaire) {
     return {
         rootElement: questionnaire,
-        questions: Array.from(questionnaire.children).map(x => parseQuestion(x)).reverse()
+        questions: Array.from(questionnaire.children).map(x => parseQuestion(x))
     };
 }
 function parseQuestion(question) {
@@ -76,7 +76,7 @@ function renderQuestionnaire(questionnaire) {
       <div class="question-overview">
       ${overview_text}
       </div>
-      ${questionnaire.questions.reverse().map(renderQuestion).join('')}
+      ${questionnaire.questions.map(renderQuestion).join('')}
       <div class="question-footer">
       ${buttons}
       </div>

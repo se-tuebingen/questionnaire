@@ -35,28 +35,32 @@
 )
 
 ; solution and distractor
-(struct/contract solution answer ()
+(struct/contract solution-container answer ()
   #:transparent
 )
-(struct/contract distractor answer ()
+(define (solution . x) (solution-container x))
+
+(struct/contract distractor-container answer ()
   #:transparent
 )
+(define (distractor . x) (distractor-container x))
 
 ; same but with explanation
-(struct/contract solution/e solution (
+(struct/contract solution/e solution-container (
   [explanation arbitrary-content?])
   #:transparent
 )
-(struct/contract distractor/e distractor (
+(struct/contract distractor/e distractor-container (
   [explanation arbitrary-content?])
   #:transparent
 )
 
 ; explanation
-(struct/contract explanation (
+(struct/contract explanation-container (
   [text arbitrary-content?])
   #:transparent
 )
+(define (explanation . x) (explanation-container x))
 
 ; question
 (struct/contract question-container (
@@ -159,7 +163,7 @@
 (define/contract
   (render-answer-html answer)
   (-> answer? block?)
-  (answer-tag (solution? answer)
+  (answer-tag (solution-container? answer)
     (append
       (blocksify (answer-text answer))
       (cond
@@ -242,7 +246,7 @@
 (define/contract
   (latex-explanation n answer)
   (-> exact-integer? answer? (cons/c boolean? block?))
-  (let ([correct (solution? answer)]
+  (let ([correct (solution-container? answer)]
         [explanation (cond
           [(solution/e? answer) (solution/e-explanation answer)]
           [(distractor/e? answer) (distractor/e-explanation answer)]
@@ -269,7 +273,7 @@
 (define/contract
   (short-solution n answer)
   (-> exact-integer? answer? content?)
-  (if (solution? answer) (enumerate-letter n) "")
+  (if (solution-container? answer) (enumerate-letter n) "")
 )
 
 ; solution for a question
@@ -365,18 +369,18 @@
 ; helper for assigning explanations to answers
 (define/contract
   (merge-explanations xs)
-  (-> (listof (or/c answer? explanation?)) (listof answer?))
+  (-> (listof (or/c answer? explanation-container?)) (listof answer?))
   (if (pair? xs)
       (if (pair? (cdr xs))
           (let ([a (car xs)]
                 [b (car (cdr xs))]
                 [xxs (cdr (cdr xs))])
             (cond
-              [(and (distractor? a) (explanation? b))
-               (cons (distractor/e (answer-text a) (explanation-text b)) (merge-explanations xxs))]
-              [(and (solution? a) (explanation? b))
-               (cons (solution/e (answer-text a) (explanation-text b)) (merge-explanations xxs))]
-              [(explanation? a)
+              [(and (distractor-container? a) (explanation-container? b))
+               (cons (distractor/e (answer-text a) (explanation-container-text b)) (merge-explanations xxs))]
+              [(and (solution-container? a) (explanation-container? b))
+               (cons (solution/e (answer-text a) (explanation-container-text b)) (merge-explanations xxs))]
+              [(explanation-container? a)
                (raise-argument-error 'xs "A solution or distractor before every explanation, at most one explanation per solution/distractor" xs)]
               [else (cons a (merge-explanations (cdr xs)))]
             )
@@ -395,7 +399,7 @@
      (raise-argument-error 'type "A valid question type string (singlechoice or multiplechoice)" type)]
     [(not (arbitrary-content? text))
      (raise-argument-error 'text "An Element of Type content?, block? or a list of (possibly a mix of) them" text)]
-    [(not (andmap (or/c answer? explanation?) answers))
+    [(not (andmap (or/c answer? explanation-container?) answers))
      (raise-argument-error 'answers "A list of @solution|@distractor|@explanation" answers)]
     [else
      (question-container type text (merge-explanations answers))]

@@ -745,13 +745,98 @@ This questionnaire tests proper handling of those cases:
 
 \item 3.\end{itemize}
 
-\item \begin{enumerate}\atItemizeStart
+\item What about
+
+
+\noindent \begin{enumerate}\atItemizeStart
 
 \item The third
 
 \item The first\end{enumerate}
 
-\item None of the above\end{enumerate}\end{enumerate}
+\item None of the above\end{enumerate}
+
+\item Fill in the gap in the table!
+
+\noindent 
+
+
+\noindent \begin{bigtabular}{@{\bigtableleftpad}l@{}l@{}l@{}}
+\hbox{\textbf{Expression}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\textbf{Value}} \\
+\hbox{\RktVal{42}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\RktVal{42}} \\
+\hbox{\RktPn{(}\RktSym{+}\Scribtexttt{ }\RktVal{21}\Scribtexttt{ }\RktVal{21}\RktPn{)}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{}\end{bigtabular}
+
+\noindent \begin{enumerate}\atItemizeStart
+
+\item Of course it is
+
+
+\noindent \begin{bigtabular}{@{\bigtableleftpad}l@{}l@{}l@{}}
+\hbox{\textbf{Expression}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\textbf{Value}} \\
+\hbox{\RktVal{42}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\RktVal{42}} \\
+\hbox{\RktPn{(}\RktSym{+}\Scribtexttt{ }\RktVal{21}\Scribtexttt{ }\RktVal{21}\RktPn{)}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\RktVal{"(+ 21 21)"}}\end{bigtabular}
+
+\item \bigtableinlinecorrect\begin{bigtabular}{@{\bigtableleftpad}l@{}l@{}l@{}}
+\hbox{\textbf{Expression}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\textbf{Value}} \\
+\hbox{\RktVal{42}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\RktVal{42}} \\
+\hbox{\RktPn{(}\RktSym{+}\Scribtexttt{ }\RktVal{21}\Scribtexttt{ }\RktVal{21}\RktPn{)}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\RktVal{42}}\end{bigtabular}
+
+\item None of the above\end{enumerate}
+
+\item More reduction!
+
+\noindent 
+
+
+\begin{SCodeFlow}\begin{RktBlk}\begin{SingleColumn}\RktPn{(}\RktSym{+}
+
+\mbox{\hphantom{\Scribtexttt{xx}}}\RktPn{(}\RktSym{*}\mbox{\hphantom{\Scribtexttt{x}}}\RktVal{3}\mbox{\hphantom{\Scribtexttt{x}}}\RktVal{7}\RktPn{)}
+
+\mbox{\hphantom{\Scribtexttt{xx}}}\RktPn{(}\RktSym{*}\mbox{\hphantom{\Scribtexttt{x}}}\RktVal{7}\mbox{\hphantom{\Scribtexttt{x}}}\RktVal{3}\RktPn{)}\RktPn{)}\end{SingleColumn}\end{RktBlk}\end{SCodeFlow}
+
+\noindent \begin{enumerate}\atItemizeStart
+
+\item \begin{SCodeFlow}\begin{RktBlk}\begin{SingleColumn}\RktPn{(}\RktSym{+}
+
+\mbox{\hphantom{\Scribtexttt{xxx}}}\RktVal{21}
+
+\mbox{\hphantom{\Scribtexttt{xxx}}}\RktVal{21}\RktPn{)}\end{SingleColumn}\end{RktBlk}\end{SCodeFlow}
+
+\item Finally
+
+
+\begin{SCodeFlow}\RktVal{42}\end{SCodeFlow}
+
+\item None of the above\end{enumerate}
+
+\item We only have one test image, so bear with me:
+\includegraphics[scale=1.0]{rocket-s.jpg} \Scribtexttt{+} \includegraphics[scale=1.0]{rocket-s.jpg} \Scribtexttt{={\hbox{\texttt{?}}}}
+
+\noindent \begin{enumerate}\atItemizeStart
+
+\item \includegraphics[scale=1.0]{rocket-s.jpg}
+
+\item \includegraphics[scale=1.0]{rocket-s.jpg} \includegraphics[scale=1.0]{rocket-s.jpg}
+
+\item \includegraphics[scale=1.0]{rocket-s.jpg} \includegraphics[scale=1.0]{rocket-s.jpg} \includegraphics[scale=1.0]{rocket-s.jpg}\end{enumerate}\end{enumerate}
 
 \refpara{\begin{refcolumn}\begin{refcontent}\QRotatemargin{1.c
 
@@ -761,7 +846,44 @@ This questionnaire tests proper handling of those cases:
 
 \item 1. and 3. contradict each other
 
-\item with such riddles, this is always the answer\end{enumerate}}\end{refcontent}\end{refcolumn}}\end{SVInsetFlow}
+\item with such riddles, this is always the answer\end{enumerate}
+
+2.b
+
+c)
+
+\noindent No, the below is correct:
+
+\noindent 
+
+
+\noindent \begin{bigtabular}{@{\bigtableleftpad}l@{}l@{}l@{}}
+\hbox{\textbf{Expression}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\textbf{Value}} \\
+\hbox{\RktVal{42}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\RktVal{42}} \\
+\hbox{\RktPn{(}\RktSym{+}\Scribtexttt{ }\RktVal{21}\Scribtexttt{ }\RktVal{21}\RktPn{)}} &
+\hbox{\mbox{\hphantom{\Scribtexttt{xxx}}}} &
+\hbox{\RktVal{42}}\end{bigtabular}
+
+3.ab
+
+\textbf{b})
+
+\noindent Both happen:
+
+\noindent 
+
+
+\begin{SCodeFlow}\begin{RktBlk}\begin{SingleColumn}\RktPn{(}\RktSym{+}\mbox{\hphantom{\Scribtexttt{x}}}\RktVal{21}\mbox{\hphantom{\Scribtexttt{x}}}\RktVal{21}\RktPn{)}
+
+\RktVal{42}\end{SingleColumn}\end{RktBlk}\end{SCodeFlow}
+
+4.b
+
+\textbf{b})\includegraphics[scale=1.0]{rocket-s.jpg} times 2}\end{refcontent}\end{refcolumn}}\end{SVInsetFlow}
 
 \postDoc
 \end{document}

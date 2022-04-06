@@ -145,6 +145,7 @@ This questionnaire tests proper handling of those cases:
       ]
     }
     @distractor{
+      What about
       @itemlist[ #:style 'ordered
         @item{The third}
         @item{The first}
@@ -158,6 +159,92 @@ This questionnaire tests proper handling of those cases:
         @item{1. and 3. contradict each other}
         @item{with such riddles, this is always the answer}
       ]
+    }
+  ]
+
+  @question["singlechoice"
+    @q{
+      Fill in the gap in the table!
+      @tabular[#:sep @hspace[3]
+   (list (list @bold{Expression}       @bold{Value})
+         (list @racket[42]         @racket[42])
+         (list @racket[(+ 21 21)] ""))]
+    }
+    @distractor{
+      Of course it is
+      @tabular[#:sep @hspace[3]
+   (list (list @bold{Expression}       @bold{Value})
+         (list @racket[42]         @racket[42])
+         (list @racket[(+ 21 21)]  @racket["(+ 21 21)"]))]
+    }
+    @solution{
+      @tabular[#:sep @hspace[3]
+   (list (list @bold{Expression}       @bold{Value})
+         (list @racket[42]         @racket[42])
+         (list @racket[(+ 21 21)]  @racket[42]))]
+    }
+    @distractor{
+      None of the above
+    }
+    @explanation{
+      No, the below is correct:
+      @tabular[#:sep @hspace[3]
+   (list (list @bold{Expression}       @bold{Value})
+         (list @racket[42]         @racket[42])
+         (list @racket[(+ 21 21)]  @racket[42]))]
+    }
+  ]
+
+  @question["multiplechoice"
+    @q{
+      More reduction!
+      @racketblock[
+        (+
+          (* 3 7)
+          (* 7 3)
+        )
+      ]
+    }
+    @solution{
+      @racketblock[
+        (+
+           21
+           21
+        )
+      ]
+    }
+    @solution{
+      Finally
+      @racketblock[42]
+    }
+    @explanation{
+      Both happen:
+      @racketblock[
+        (+ 21 21)
+        42
+      ]
+    }
+    @distractor{
+      None of the above
+    }
+  ]
+
+  @question["singlechoice"
+    @q{
+      We only have one test image, so bear with me:
+      @image["rocket-s.jpg"] @tt{+} @image["rocket-s.jpg"] @tt{=?}
+    }
+    @distractor{
+      @image["rocket-s.jpg"]
+    }
+    @solution{
+      @image["rocket-s.jpg"] @image["rocket-s.jpg"]
+    }
+    @explanation{
+      @image["rocket-s.jpg"] times 2
+    }
+    @distractor{
+      @image["rocket-s.jpg"] @image["rocket-s.jpg"] @image["rocket-s.jpg"]
     }
   ]
 ]

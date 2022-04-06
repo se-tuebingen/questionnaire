@@ -13,23 +13,28 @@ function parseQuestionnaire(questionnaire) {
 function parseQuestion(question) {
     const type = question.getAttribute('type');
     const text = Array.from(question.childNodes)
-        .filter(x => x.tagName != 'ANSWER');
-    const answers = Array.from(question.getElementsByTagName('answer'));
+        .filter(x => x.tagName != 'DISTRACTOR'
+        && x.tagName != 'SOLUTION');
+    const answers = Array.from(question.childNodes)
+        .filter(x => x.tagName == 'DISTRACTOR'
+        || x.tagName == 'SOLUTION');
     return {
         type: type,
         text: text,
-        answers: answers.map(x => parseAnswer(x))
+        answers: answers.map(x => parseAnswer(x)),
+        rootElement: question
     };
 }
 function parseAnswer(answer) {
-    const correct = answer.getAttribute('correct') == 'true';
+    const correct = (answer.tagName == 'SOLUTION') ? true : false;
     const text = Array.from(answer.childNodes)
         .filter(x => x.tagName != 'EXPLANATION');
     const explanation = answer.getElementsByTagName('explanation')[0];
     return {
         correct: correct,
         text: text,
-        explanation: explanation
+        explanation: explanation,
+        rootElement: answer
     };
 }
 function setup() {
@@ -41,9 +46,16 @@ function setup() {
     // render every questionnaire in the HTML Document
     for (let i = q_col.length - 1; i >= 0; i--) {
         const questionnaire = q_col[i];
+        // validate htmL Structure before parsing
+        //    if (validateQuestionnaireStructure(questionnaire) == true) {
         const r = parseQuestionnaire(questionnaire);
         console.log(r);
+        // Possible ValidationPoint (Attributes)
         renderQuestionnaire(r);
+        //    }
+        //    else {
+        //DO NOTHING
+        //    }
     }
 }
 window.onload = setup;
@@ -54,134 +66,77 @@ window.onload = setup;
 // - question
 // ### RENDER FUNCTIONS ###
 function renderQuestionnaire(questionnaire) {
-    const range = document.createRange();
     const root = questionnaire.rootElement;
     root.setAttribute("total_questions", "" + questionnaire.questions.length);
     root.setAttribute("current_question", "1");
-    const root_string = `
+    const overview_text = oneQuestionOnly("overview_text");
+    const buttons = oneQuestionOnly("buttons");
+    root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
-        Question 1 of ${questionnaire.questions.length}
+      ${overview_text}
       </div>
-      ${questionnaire.questions.reverse().map(renderQuestion)}
+      ${questionnaire.questions.reverse().map(renderQuestion).join('')}
       <div class="question-footer">
-        <div class="change-question-button"
-             id="prev_button"
-             style="visibility:hidden;"
-             onclick="questionChangeHandler(event)">
-             prev
-        </div>
-        <div class="change-question-button"
-             id="next_button"
-             onclick="questionChangeHandler(event)">
-             next
-        </div>
+      ${buttons}
       </div>
     </div>
   `;
-    const doc_frag = range.createContextualFragment(root_string);
-    root.appendChild(doc_frag);
+    // Local functions
+    function oneQuestionOnly(pos) {
+        switch (pos) {
+            // if only one question exists, ignore question overview text
+            case "overview_text":
+                if (questionnaire.questions.length == 1) {
+                    return "";
+                }
+                else {
+                    return `Question 1 of ${questionnaire.questions.length}`;
+                }
+            // if only one question exists, ignore "prev", "next" buttons.
+            case "buttons":
+                if (questionnaire.questions.length == 1) {
+                    return "";
+                }
+                else {
+                    return `
+          <div class="change-question-button"
+               id="prev_button"
+               style="visibility:hidden;"
+               onclick="questionChangeHandler(event)">
+               prev
+          </div>
+          <div class="change-question-button"
+               id="next_button"
+               onclick="questionChangeHandler(event)">
+               next
+          </div>
+          `;
+                }
+            default:
+                break;
+        }
+    }
 }
-// function renderQuestionaire(questionnaire: HTMLElement) {
-//   console.log(questionnaire);
-//   //build wrapper-content
-//   let content: HTMLDivElement = makeDiv("content-wrapper");
-//   let questions = questionnaire.children as HTMLCollection;
-//   let question_number: number = questions.length;
-//   // access children and append to wrapper-content
-//   for (let i = question_number - 1; i >= 0; i--) {
-//     content.append(questions[i]);
-//   }
-//   questionnaire.prepend(content);
-//   buildQuestionOverview(questionnaire, content, question_number);
-//   //render Questions + Answers
-//   renderQuestions(questionnaire);
-//   renderAnswers(questionnaire);
-//   buildQuestionnaireFooter(content, question_number);
-// }
-// function buildQuestionOverview(questionnaire:HTMLElement, content: HTMLDivElement, question_number:number){
-//   // question-overview
-//   let q_overview: HTMLDivElement = makeDiv("question-overview");
-//   q_overview.textContent = "Frage 1" + " von " + question_number;
-//   content.prepend(q_overview);
-//   // question-current-total initial
-//   questionnaire.setAttribute("total_questions", "" + question_number);
-//   questionnaire.setAttribute("current_question", "1")
-// }
-// // build questionnaire footer
-// // if only one question: BUILD NO BUTTON
-// function buildQuestionnaireFooter(content:HTMLDivElement, question_number:number){
-//   if (question_number == 1) {
-//     //BUILD NOTHING
-//   }
-//   else {
-//     let footer: HTMLDivElement = makeDiv("question-footer");
-//     content.append(footer);
-//     buildFooterButtons(footer);
-//   }
-// }
-//build 2 buttons: "prev"-Question, "next"-Question
-// function buildFooterButtons(footer: HTMLDivElement) {
-//   let prev_button: HTMLDivElement = makeDiv("change-question-button");
-//   let next_button: HTMLDivElement = makeDiv("change-question-button");
-//   prev_button.setAttribute("id", "prev_button");
-//   next_button.setAttribute("id", "next_button");
-//   prev_button.setAttribute("style", "visibility:hidden;");
-//   prev_button.textContent = "prev";
-//   next_button.textContent = "next";
-//   prev_button.addEventListener("click", questionChangeHandler);
-//   next_button.addEventListener("click", questionChangeHandler);
-//   footer.append(prev_button, next_button);
-// }
 // renderQuestions
-// for every question:
-// add <div>-wrapper + <img>-icon (done)
-// add EventListener for CollapseAll-Function
+// if validation fails return false, else return html-string
 function renderQuestion(question, index) {
+    // if (validateAttribute(question) == true) {
     return `
     <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
       <div class="question-header">
         <p>${question.text.map(nodeOuterHTML).join('')}</p>
-        <img src="${Ressources.plus_solid}" onclick="explanationEventHandler.bind(event.target.el, true)">
+        <img src="${Ressources.plus_solid}" onclick="explanationEventHandler(event)">
       </div>
       ${question.answers.map(renderAnswer).join('')}
     </question>
   `;
 }
-// function renderQuestions(questionnaire: HTMLElement) {
-//   // get wrapper-content
-//   let wrapper_content = questionnaire.firstChild as HTMLDivElement;
-//   let questions: HTMLCollection = questionnaire.getElementsByTagName("question");
-//   let lastIndex = questions.length - 1;
-//   questions[lastIndex].setAttribute("visible", "true");
-//
-//   for (let i = lastIndex; i >= 0; i--) {
-//     let question: HTMLElement = questions[i] as HTMLElement;
-//     buildQuestionHeader(question);
-//
-//     //append question to wrapper-content
-//     wrapper_content.append(question);
-//   }
-// }
-//
-//
-// // question->DOM Manipulation
-// // Question Text and CollapseAll-Functionality in question-header
-// function buildQuestionHeader(question: HTMLElement) {
-//   let text = document.createElement("p");
-//   text.innerHTML = (question.childNodes[0] as Text).data;
-//   question.childNodes[0].remove();
-//   let header: HTMLDivElement = document.createElement("div");
-//   header.setAttribute("class", "question-header");
-//   question.prepend(header);
-//   // append text and img
-//   let img = document.createElement("img");
-//   img.setAttribute("src", Ressources.plus_solid);
-//   img.addEventListener("click", explanationEventHandler.bind(img, true));
-//   header.append(text, img);
-// }
+//  else {
+//    return "";
+//  }
+//}
 function renderAnswer(answer) {
-    var _a;
     return `
   <answer correct="${answer.correct ? 'true' : 'false'}">
     <div class="wrapper-answer" onclick="clickAnswerHandler(event)">
@@ -189,7 +144,7 @@ function renderAnswer(answer) {
       <p>
         ${answer.text.map(nodeOuterHTML).join('')}
       </p>
-      ${(_a = answer.explanation) === null || _a === void 0 ? void 0 : _a.outerHTML}
+      ${(answer.explanation == undefined) ? '' : answer.explanation.outerHTML}
     </div>
   </answer>
   `;
@@ -203,115 +158,258 @@ function nodeOuterHTML(x) {
         }
         return data;
     }
+    console.log("outerHTML:" + outerHTML);
     return outerHTML;
 }
-// // questionnaire->DOM Manipulation
-// function renderAnswers(questionnaire: HTMLElement) {
-//   let answers: HTMLCollection = questionnaire.getElementsByTagName("answer");
-//   //for every answer:
-//   // add <div> wrapper + <img>-icon (done)
-//   // add EventListener for AnswerClickEvents (done)
-//   for (let i = answers.length - 1; i >= 0; i--) {
-//     let answer: HTMLElement = answers[i] as HTMLElement;
-//     // build div-wrapper
-//     let new_div: HTMLDivElement = document.createElement("div");
-//     let text = document.createElement("p");
-//     text.innerHTML = (answer.childNodes[0] as Text).data;
-//     answer.childNodes[0].remove();
-//     new_div.setAttribute("class", "wrapper-answer");
-//     answer.prepend(new_div);
-//     //append text and img
-//     let img = document.createElement("img");
-//     const mode = answer.parentElement?.getAttribute("type");
-//     img.setAttribute("src", mode === 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular);
-//     new_div.append(img, text);
-//     answer.addEventListener("click", checkAnswerEventHandler);
-//     answer.addEventListener("click", explanationEventHandler.bind(answer, false));
-//   }
-// }
-//
+// renderError
+function renderError(current_el, message) {
+    const el_name = current_el.localName;
+    const questionnaire = getTagRecursive(current_el, "questionnaire");
+    const error_html = `
+  <div class="error-wrapper">
+    <div class="error-header">
+      <h2> Why do I see this red funny box?</h2>
+    </div>
+    <div class="error-box">
+    <p>There was a syntax error with:
+    &lt;${el_name}&gt;</p>
+    </div>
+    <pre class="error-message">
+    ${escapeHtml(message)}
+    </pre>
+  </div>
+  `;
+    questionnaire.innerHTML = error_html;
+    console.log(error_html);
+}
+// ######### VALIDATION METHODS ##########
+// validateQuestionnaireStructure
+// checks if all necessary tags in questionnaire have the correct parentElement
+function validateQuestionnaireStructure(questionnaire) {
+    let questions = questionnaire.getElementsByTagName("question");
+    let answers = questionnaire.getElementsByTagName("answer");
+    let explanation = questionnaire.getElementsByTagName("explanation");
+    // validate given html tag elements
+    if (validateHtmlTagElements(questions.length - 1, questions) == true
+        && validateHtmlTagElements(answers.length - 1, answers) == true
+        && validateHtmlTagElements(explanation.length - 1, explanation) == true) {
+        return true;
+    }
+    else {
+        return false;
+    }
+    function validateHtmlTagElements(i, col) {
+        if (i >= 0) {
+            let validated = validateStructure(col[i]);
+            if (validated == true) {
+                let bool = validateHtmlTagElements(i - 1, col);
+                return bool;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return true;
+        }
+    }
+}
+// ValidateStructure
+// <questionnaire> -> <question> -> at least 2 <answer> -> <explanation>
+// return either messageString or Boolean: True
+function validateStructure(el) {
+    const html_tag = el.tagName;
+    const parent = el.parentElement;
+    if (html_tag == "QUESTION") {
+        // parent has to be a QUESTIONNAIRE
+        return parentHasToBe(parent, "QUESTIONNAIRE");
+    }
+    else if (html_tag == "ANSWER") {
+        // parent has to be a QUESTION
+        return parentHasToBe(parent, "QUESTION");
+    }
+    else if (html_tag == "EXPLANATION") {
+        // parent has to be an ANSWER
+        return parentHasToBe(parent, "ANSWER");
+    }
+    function parentHasToBe(parent, tag) {
+        var _a;
+        if ((parent === null || parent === void 0 ? void 0 : parent.tagName) == tag) {
+            return true;
+        }
+        else {
+            let msg = `HTML structure is invalid: Please check your input at:  ${(_a = el.parentElement) === null || _a === void 0 ? void 0 : _a.outerHTML}`;
+            renderError(el, msg);
+            return false;
+        }
+    }
+}
+// validateAttributes
+// check <question> attribute singlechoice | multiplechoice
+// check multiple <answer> attributes for at least (for multiplechoice) 1 correct answer
+// returns true (for successful validation) or false (fail)
+function validateAttribute(question) {
+    let val = question.type;
+    let answers = question.answers;
+    let i = answers.length - 1;
+    let x = 0;
+    let correct_answers = getCorrectAnswer(x, i);
+    // get all correct answers to this question
+    function getCorrectAnswer(x, i) {
+        if (i >= 0) {
+            let correct = answers[i].correct;
+            if (correct == true) {
+                x = getCorrectAnswer(x + 1, i - 1);
+                return x;
+            }
+            else {
+                x = getCorrectAnswer(x, i - 1);
+                return x;
+            }
+        }
+        else {
+            return x;
+        }
+    }
+    // if attr value does not exist
+    if (val == null) {
+        let msg = `Necessary attribute &lt;question type='' &gt; is missing at: ${question.rootElement.outerHTML}`;
+        renderError(question.rootElement, msg);
+        return false;
+    }
+    // if value exists, but is not correctly assigned
+    else if (val != "singlechoice" && val != "multiplechoice") {
+        let msg = `Necessary attribute &lt;question type='' &gt; with value: ${val}is neither 'singlechoice' nor 'multiplechoice': ${question.rootElement.outerHTML}`;
+        renderError(question.rootElement, msg);
+        return false;
+    }
+    // if only 1 or less answer exists
+    else if (answers.length < 2) {
+        let msg = `You need to provide at least two answers for one question:  ${question.rootElement.outerHTML}`;
+        renderError(question.rootElement, msg);
+        return false;
+    }
+    else if (correct_answers == 0) {
+        let msg = `There is no correct answer in this question: ${question.rootElement.outerHTML}`;
+        renderError(question.rootElement, msg);
+        return false;
+    }
+    // if question attr is singlechoice, but more than one correct answer exists
+    else if (val == "singlechoice" && correct_answers > 1) {
+        let msg = `There is more than one correct answer, but your question type is 'singlechoice': " ${question.rootElement.outerHTML}`;
+        renderError(question.rootElement, msg);
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+// ######## HELPER FUNCTIONS #######
 // makeDiv
 // ClassName as String -> HTMLDivElement
 function makeDiv(css_name) {
-    let new_div = document.createElement("div");
+    const new_div = document.createElement("div");
     new_div.setAttribute("class", css_name);
     return new_div;
+}
+// escapeHtml
+// escape HTML TAGS
+function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+// getTagRecursive from a child element
+// if element has TagName
+// return;
+// else: retry with parentElement
+function getTagRecursive(el, tag) {
+    if (el.tagName == tag.toUpperCase()) {
+        return el;
+    }
+    else {
+        let parent = el.parentElement;
+        let result = getTagRecursive(parent, tag);
+        return result;
+    }
 }
 // ### EVENT HANDLER FUNCTIONS ###
 // EVENT AFTER BUTTON "prev" OR "next" CLICK
 // questionChangeHandler
 // EventHandler -> DOM Manipulation
 function questionChangeHandler(event) {
-    var _a, _b, _c, _d;
+    var _a, _b;
     // get Questionnaire attributes
     let el = event.target;
     let button = el.getAttribute("id");
-    let questionnaire = (_b = (_a = el.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.parentElement;
-    let min_qid = 0;
-    let max_qid = parseInt(questionnaire.getAttribute("total_questions")) - 1;
-    let current_qid = parseInt(questionnaire.getAttribute("current_question")) - 1;
+    let questionnaire = getTagRecursive(el, "questionnaire");
+    let total_questions = parseInt(questionnaire.getAttribute("total_questions"));
+    let current_question = parseInt(questionnaire.getAttribute("current_question"));
     let questions = questionnaire.getElementsByTagName("question");
+    let min_qid = 0;
+    let max_qid = total_questions - 1;
+    let qid = current_question - 1;
     // change question
     // if button is "prev"
-    if (button == "prev_button") {
-        questions[current_qid].removeAttribute("visible");
-        questions[current_qid - 1].setAttribute("visible", "true");
-        let str_current = current_qid.toString();
-        questionnaire.setAttribute("current_question", str_current);
-        questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
-        //hide button if button to first question is clicked
-        if (current_qid - 1 == min_qid) {
-            // !!! CHANGE CLASS INSTEAD OF STYLE?
-            el.setAttribute("style", "visibility:hidden;");
-        }
-        // show next-Button
-        (_c = el.nextElementSibling) === null || _c === void 0 ? void 0 : _c.setAttribute("style", "visibility:visible;");
-    }
-    else if (button == "next_button") {
-        questions[current_qid].removeAttribute("visible");
-        questions[current_qid + 1].setAttribute("visible", "true");
-        //change questionnaire attributes
-        let str_current = (current_qid + 2).toString();
-        questionnaire.setAttribute("current_question", str_current);
-        //change question overview
-        questionnaire.getElementsByClassName("question-overview")[0].textContent = "Frage " + str_current + " von " + questions.length;
-        // hide button if last question of questionnaire
-        if (current_qid + 1 == max_qid) {
-            el.setAttribute("style", "visibility:hidden;");
-        }
-        (_d = el.previousElementSibling) === null || _d === void 0 ? void 0 : _d.setAttribute("style", "visibility:visible;");
-    }
-    else {
-        console.log("No Button caused this EventHandler", button);
+    switch (button) {
+        case "prev_button":
+            let prev_qid = current_question - 1;
+            // change visibility to the previous question
+            questions[qid].removeAttribute("visible");
+            questions[qid - 1].setAttribute("visible", "true");
+            // change question overview text
+            questionnaire.setAttribute("current_question", prev_qid.toString());
+            questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + prev_qid.toString() + " of " + total_questions;
+            //hide button if button to first question
+            if (prev_qid - 1 == min_qid) {
+                el.setAttribute("style", "visibility:hidden;");
+            }
+            // show next-Button
+            (_a = el.nextElementSibling) === null || _a === void 0 ? void 0 : _a.setAttribute("style", "visibility:visible;");
+            break;
+        case "next_button":
+            let next_qid = qid + 1;
+            questions[qid].removeAttribute("visible");
+            questions[next_qid].setAttribute("visible", "true");
+            //change question overview text
+            questionnaire.setAttribute("current_question", (current_question + 1).toString());
+            questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + (current_question + 1).toString() + " of " + total_questions;
+            // hide button if button to last question
+            if (next_qid == max_qid) {
+                el.setAttribute("style", "visibility:hidden;");
+            }
+            //show prev_button
+            (_b = el.previousElementSibling) === null || _b === void 0 ? void 0 : _b.setAttribute("style", "visibility:visible;");
+            break;
+        default:
+            console.log("No Button caused this EventHandler", button);
+            break;
     }
 }
 // ExplanationEventHandler
 // Handles Events for shoowing explanation text
-function explanationEventHandler(collapse) {
-    var _a;
-    if (collapse == true) {
-        let question = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement;
-        let answers = question.getElementsByTagName("answer");
-        //change icons and collapse
-        if (this.getAttribute("clicked") == "true") {
-            this.setAttribute("src", Ressources.plus_solid);
-            //  this.setAttribute("clicked", "false");
-            for (let i = answers.length - 1; i >= 0; i--) {
-                let answer = answers[i];
-                answer.getElementsByTagName("explanation")[0].removeAttribute("visible");
-            }
-        }
-        else {
-            this.setAttribute("src", Ressources.minus_solid);
-            this.setAttribute("clicked", "true");
-            for (let i = answers.length - 1; i >= 0; i--) {
-                let answer = answers[i];
-                answer.getElementsByTagName("explanation")[0].setAttribute("visible", "true");
-            }
+function explanationEventHandler(event) {
+    const el = event.target;
+    const question = getTagRecursive(el, "question");
+    const answers = question.getElementsByTagName("answer");
+    //change icons and collapse
+    if (el.getAttribute("clicked") == "true") {
+        el.setAttribute("src", Ressources.plus_solid);
+        el.setAttribute("clicked", "false");
+        for (let i = answers.length - 1; i >= 0; i--) {
+            let answer = answers[i];
+            answer.getElementsByTagName("explanation")[0].removeAttribute("visible");
         }
     }
     else {
-        showExplanation(this);
+        el.setAttribute("src", Ressources.minus_solid);
+        el.setAttribute("clicked", "true");
+        for (let i = answers.length - 1; i >= 0; i--) {
+            let answer = answers[i];
+            answer.getElementsByTagName("explanation")[0].setAttribute("visible", "true");
+        }
     }
 }
 // show <explanation>
@@ -327,28 +425,24 @@ function showExplanation(answer) {
 }
 // unified click on answer event handler
 function clickAnswerHandler(event) {
-    console.log(event.target);
     const el = event.target;
-} //: Event) {
-// console.log('clicked clickAnswerHandler');
-// console.log(this);
-// const el = this.target as HTMLElement;
-// console.log(el);
-// checkAnswerEventHandler.bind(el);
-// explanationEventHandler.bind(el, false);
-//}
+    checkAnswerEventHandler(el);
+    // show Explanation
+    let answer = getTagRecursive(el, "answer");
+    showExplanation(answer);
+}
 // check click for correct answer
 // depending on question type show either
 // - for multiplechoice just clicked answer
 // - for singlechoice all answers
-function checkAnswerEventHandler() {
-    var _a, _b;
-    let question_type = (_a = this.parentElement) === null || _a === void 0 ? void 0 : _a.getAttribute("type");
+function checkAnswerEventHandler(el) {
+    let question_type = getTagRecursive(el, "question").getAttribute("type");
     if (question_type == "multiplechoice") {
-        showAnswer(this);
+        let answer = getTagRecursive(el, "answer");
+        showAnswer(answer);
     }
     else if (question_type == "singlechoice") {
-        let answers = (_b = this.parentElement) === null || _b === void 0 ? void 0 : _b.getElementsByTagName("answer");
+        let answers = getTagRecursive(el, "question").getElementsByTagName("answer");
         for (let i = (answers === null || answers === void 0 ? void 0 : answers.length) - 1; i >= 0; i--) {
             let answer = answers[i];
             showAnswer(answer);
@@ -367,90 +461,16 @@ function showAnswer(answer) {
         img.setAttribute("src", Ressources.xmark_solid);
     }
 }
-// swipeEvent
-// const divContainer = document.getElementById("touch-event-test");
-// divContainer.addEventListener("")
-// function (){
-//
-// }
 var Ressources;
 (function (Ressources) {
-    Ressources.angle_left_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAy
-NTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMTkyIDQ0OGMtOC4xODggMC0xNi4zOC0zLjEyNS0y
-Mi42Mi05LjM3NWwtMTYwLTE2MGMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNWwxNjAt
-MTYwYzEyLjUtMTIuNSAzMi43NS0xMi41IDQ1LjI1IDBzMTIuNSAzMi43NSAwIDQ1LjI1TDc3
-LjI1IDI1NmwxMzcuNCAxMzcuNGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1QzIwOC40
-IDQ0NC45IDIwMC4yIDQ0OCAxOTIgNDQ4eiIvPjwvc3ZnPg==`;
-    Ressources.angle_right_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAy
-NTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNjQgNDQ4Yy04LjE4OCAwLTE2LjM4LTMuMTI1LTIy
-LjYyLTkuMzc1Yy0xMi41LTEyLjUtMTIuNS0zMi43NSAwLTQ1LjI1TDE3OC44IDI1Nkw0MS4z
-OCAxMTguNmMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNXMzMi43NS0xMi41IDQ1LjI1
-IDBsMTYwIDE2MGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1bC0xNjAgMTYwQzgwLjM4
-IDQ0NC45IDcyLjE5IDQ0OCA2NCA0NDh6Ii8+PC9zdmc+`;
-    Ressources.check_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDM4LjYgMTA1LjRDNDUxLjEgMTE3LjkgNDUxLjEg
-MTM4LjEgNDM4LjYgMTUwLjZMMTgyLjYgNDA2LjZDMTcwLjEgNDE5LjEgMTQ5LjkgNDE5LjEg
-MTM3LjQgNDA2LjZMOS4zNzIgMjc4LjZDLTMuMTI0IDI2Ni4xLTMuMTI0IDI0NS45IDkuMzcy
-IDIzMy40QzIxLjg3IDIyMC45IDQyLjEzIDIyMC45IDU0LjYzIDIzMy40TDE1OS4xIDMzOC43
-TDM5My40IDEwNS40QzQwNS45IDkyLjg4IDQyNi4xIDkyLjg4IDQzOC42IDEwNS40SDQzOC42
-eiIvPjwvc3ZnPg==`;
-    Ressources.circle_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1
-MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNTEyIDI1NkM1MTIgMzk3LjQgMzk3LjQgNTEyIDI1
-NiA1MTJDMTE0LjYgNTEyIDAgMzk3LjQgMCAyNTZDMCAxMTQuNiAxMTQuNiAwIDI1NiAwQzM5
-Ny40IDAgNTEyIDExNC42IDUxMiAyNTZ6TTI1NiA0OEMxNDEuMSA0OCA0OCAxNDEuMSA0OCAy
-NTZDNDggMzcwLjkgMTQxLjEgNDY0IDI1NiA0NjRDMzcwLjkgNDY0IDQ2NCAzNzAuOSA0NjQg
-MjU2QzQ2NCAxNDEuMSAzNzAuOSA0OCAyNTYgNDh6Ii8+PC9zdmc+`;
-    Ressources.minus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMy
-LTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTMxLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIg
-MzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8+PC9zdmc+`;
-    Ressources.plus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDMyIDI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMy
-IDMyLjAxSDI1NnYxNDRjMCAxNy42OS0xNC4zMyAzMS45OS0zMiAzMS45OXMtMzItMTQuMy0z
-Mi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5
-IDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQu
-MzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8+PC9z
-dmc+`;
-    Ressources.square_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzg0IDMyQzQxOS4zIDMyIDQ0OCA2MC42NSA0NDgg
-OTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42NSA0ODAgMCA0NTEu
-MyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMzg0IDgwSDY0QzU1LjE2
-IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0MzIgNjQgNDMySDM4NEMz
-OTIuOCA0MzIgNDAwIDQyNC44IDQwMCA0MTZWOTZDNDAwIDg3LjE2IDM5Mi44IDgwIDM4NCA4
-MHoiLz48L3N2Zz4=`;
-    Ressources.xmark_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAz
-MjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIu
-NzUgMCA0NS4yNUMzMDQuNCA0MTIuOSAyOTYuMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUt
-MjIuNjItOS4zNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQx
-NiAzMiA0MTZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1
-IDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1
-IDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41
-LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1
-LjRMMzEwLjYgMzYxLjR6Ii8+PC9zdmc+`;
+    Ressources.angle_left_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMTkyIDQ0OGMtOC4xODggMC0xNi4zOC0zLjEyNS0yMi42Mi05LjM3NWwtMTYwLTE2MGMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNWwxNjAtMTYwYzEyLjUtMTIuNSAzMi43NS0xMi41IDQ1LjI1IDBzMTIuNSAzMi43NSAwIDQ1LjI1TDc3LjI1IDI1NmwxMzcuNCAxMzcuNGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1QzIwOC40IDQ0NC45IDIwMC4yIDQ0OCAxOTIgNDQ4eiIvPjwvc3ZnPg==`;
+    Ressources.angle_right_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNjQgNDQ4Yy04LjE4OCAwLTE2LjM4LTMuMTI1LTIyLjYyLTkuMzc1Yy0xMi41LTEyLjUtMTIuNS0zMi43NSAwLTQ1LjI1TDE3OC44IDI1Nkw0MS4zOCAxMTguNmMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNXMzMi43NS0xMi41IDQ1LjI1IDBsMTYwIDE2MGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1bC0xNjAgMTYwQzgwLjM4IDQ0NC45IDcyLjE5IDQ0OCA2NCA0NDh6Ii8+PC9zdmc+`;
+    Ressources.check_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDM4LjYgMTA1LjRDNDUxLjEgMTE3LjkgNDUxLjEgMTM4LjEgNDM4LjYgMTUwLjZMMTgyLjYgNDA2LjZDMTcwLjEgNDE5LjEgMTQ5LjkgNDE5LjEgMTM3LjQgNDA2LjZMOS4zNzIgMjc4LjZDLTMuMTI0IDI2Ni4xLTMuMTI0IDI0NS45IDkuMzcyIDIzMy40QzIxLjg3IDIyMC45IDQyLjEzIDIyMC45IDU0LjYzIDIzMy40TDE1OS4xIDMzOC43TDM5My40IDEwNS40QzQwNS45IDkyLjg4IDQyNi4xIDkyLjg4IDQzOC42IDEwNS40SDQzOC42eiIvPjwvc3ZnPg==`;
+    Ressources.circle_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNTEyIDI1NkM1MTIgMzk3LjQgMzk3LjQgNTEyIDI1NiA1MTJDMTE0LjYgNTEyIDAgMzk3LjQgMCAyNTZDMCAxMTQuNiAxMTQuNiAwIDI1NiAwQzM5Ny40IDAgNTEyIDExNC42IDUxMiAyNTZ6TTI1NiA0OEMxNDEuMSA0OCA0OCAxNDEuMSA0OCAyNTZDNDggMzcwLjkgMTQxLjEgNDY0IDI1NiA0NjRDMzcwLjkgNDY0IDQ2NCAzNzAuOSA0NjQgMjU2QzQ2NCAxNDEuMSAzNzAuOSA0OCAyNTYgNDh6Ii8+PC9zdmc+`;
+    Ressources.minus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTMxLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIgMzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8+PC9zdmc+`;
+    Ressources.plus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDMyIDI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMyIDMyLjAxSDI1NnYxNDRjMCAxNy42OS0xNC4zMyAzMS45OS0zMiAzMS45OXMtMzItMTQuMy0zMi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5IDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQuMzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8+PC9zdmc+`;
+    Ressources.square_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzg0IDMyQzQxOS4zIDMyIDQ0OCA2MC42NSA0NDggOTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42NSA0ODAgMCA0NTEuMyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMzg0IDgwSDY0QzU1LjE2IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0MzIgNjQgNDMySDM4NEMzOTIuOCA0MzIgNDAwIDQyNC44IDQwMCA0MTZWOTZDNDAwIDg3LjE2IDM5Mi44IDgwIDM4NCA4MHoiLz48L3N2Zz4=`;
+    Ressources.xmark_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIuNzUgMCA0NS4yNUMzMDQuNCA0MTIuOSAyOTYuMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUtMjIuNjItOS4zNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQxNiAzMiA0MTZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1IDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1IDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1LjRMMzEwLjYgMzYxLjR6Ii8+PC9zdmc+`;
     Ressources.style = `questionnaire {
   display: block;
   margin: 40px 0 100px ;
@@ -574,5 +594,24 @@ questionnaire .change-question-button:hover{
   questionnaire question {
     max-width: 600px;
   }
+}
+.error-wrapper{
+  display:block;
+  max-width: 600px;
+  border: 5px solid red;
+   margin: 0 auto;
+  padding:0 20px;
+}
+.error-header{
+
+}
+.error-box{
+font-size:16pt;
+line-height:1.5em;
+}
+
+.error-message{
+  font-family:monospace;
+  font-size:12pt;
 }`;
 })(Ressources || (Ressources = {}));

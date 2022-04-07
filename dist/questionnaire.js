@@ -37,6 +37,7 @@ function parseAnswer(answer) {
         rootElement: answer
     };
 }
+// ############### main function
 function setup() {
     // setup style
     const styleNode = document.createElement('style');
@@ -65,90 +66,120 @@ window.onload = setup;
 // - answer
 // - question
 // ### RENDER FUNCTIONS ###
+// - state is stored in the DOM via attributes
+// - as much hiding/showing as possible is done via css classes depending
+//   on those attributes
+// ### Questionnaire
+// <questionnaire>
+//  - total_questions
+//  - current_question
 function renderQuestionnaire(questionnaire) {
     const root = questionnaire.rootElement;
     root.setAttribute("total_questions", "" + questionnaire.questions.length);
     root.setAttribute("current_question", "1");
-    const overview_text = oneQuestionOnly("overview_text");
-    const buttons = oneQuestionOnly("buttons");
     root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
-      ${overview_text}
+      ${(questionnaire.questions.length == 1) ? '' : `Question 1 of ${questionnaire.questions.length}`}
       </div>
       ${questionnaire.questions.map(renderQuestion).join('')}
-      <div class="question-footer">
-      ${buttons}
-      </div>
     </div>
   `;
-    // Local functions
-    function oneQuestionOnly(pos) {
-        switch (pos) {
-            // if only one question exists, ignore question overview text
-            case "overview_text":
-                if (questionnaire.questions.length == 1) {
-                    return "";
-                }
-                else {
-                    return `Question 1 of ${questionnaire.questions.length}`;
-                }
-            // if only one question exists, ignore "prev", "next" buttons.
-            case "buttons":
-                if (questionnaire.questions.length == 1) {
-                    return "";
-                }
-                else {
-                    return `
-          <div class="change-question-button"
-               id="prev_button"
-               style="visibility:hidden;"
-               onclick="questionChangeHandler(event)">
-               prev
-          </div>
-          <div class="change-question-button"
-               id="next_button"
-               onclick="questionChangeHandler(event)">
-               next
-          </div>
-          `;
-                }
-            default:
-                break;
-        }
-    }
 }
-// renderQuestions
-// if validation fails return false, else return html-string
+// ### Question
+// <question>
+//  - type: "singlechoice"|"multiplechoice"
+//  - visible: "true" or not present
+//  - answer: "pending"|"correct"|"wrong"
 function renderQuestion(question, index) {
-    // if (validateAttribute(question) == true) {
     return `
-    <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
+    <question type="${question.type}"
+              ${index == 0 ? 'visible="true"' : ''}
+              answer="pending">
+      <div class="correct-text">
+        <p>Correct!</p>
+      </div>
+      <div class="wrong-text">
+        <p>Wrong!</p>
+      </div>
       <div class="question-header">
         <div>${question.text.map(nodeOuterHTML).join('')}</div>
-        <img src="${Ressources.plus_solid}" onclick="collapseEventHandler(event)">
       </div>
-      ${question.answers.map(renderAnswer).join('')}
+      ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
+      <div class="question-footer">
+        <div class="next-button" onClick="showNextQuestion(event)">
+          Next
+        </div>
+        <div class="submit-button" onClick="submitAnswer(event)">
+          Submit
+        </div>
+      </div>
     </question>
   `;
 }
-//  else {
-//    return "";
-//  }
-//}
-function renderAnswer(answer) {
+// event handlers:
+// continue
+function showNextQuestion(event) {
+    var _a;
+    const el = event.target;
+    const currentQuestion = getTagRecursive(el, "question");
+    const questionnaire = getTagRecursive(currentQuestion, "questionnaire");
+    // update header
+    const total_questions = parseInt(questionnaire.getAttribute("total_questions"));
+    const current_question = parseInt(questionnaire.getAttribute("current_question"));
+    if (current_question == total_questions) {
+        console.error("Tried to show next question, but we are already at the last question. Emitted by:", currentQuestion, el);
+        return;
+    }
+    questionnaire.setAttribute("current_question", (current_question + 1).toString());
+    questionnaire.getElementsByClassName("question-overview")[0].textContent = `Question ${current_question + 1} of ${total_questions}`;
+    // update visibility
+    (_a = currentQuestion.nextElementSibling) === null || _a === void 0 ? void 0 : _a.setAttribute('visible', 'true');
+    currentQuestion.removeAttribute('visible');
+}
+// submit
+function submitAnswer(event) {
+    const el = event.target;
+    const question = getTagRecursive(el, "question");
+    const answers = question.getElementsByTagName('answer');
+    // check correctness
+    const correct = Array.from(answers).every(a => a.getAttribute('correct') == a.getAttribute('selected'));
+    question.setAttribute('answer', correct ? 'correct' : 'wrong');
+    // expand necessary explanations, if present
+    Array.from(answers).map(a => {
+        if (a.getAttribute('selected') != a.getAttribute('correct')) {
+            a.setAttribute('expanded', 'true');
+        }
+    });
+}
+// ### Answer
+// <answer>
+//  - correct: "true"|"false"
+//  - selected: "true"|"false"
+function renderAnswer(type, answer) {
     return `
-  <answer correct="${answer.correct ? 'true' : 'false'}">
-    <div class="wrapper-answer" onclick="clickAnswerHandler(event)">
-      <img src="${Ressources.circle_regular}">
-      <div>
+  <answer correct="${answer.correct ? 'true' : 'false'}"
+          selected="false"
+          expanded="false">
+    <div class="wrapper-answer" onclick="selectAnswer(event)">
+      <img class="answer-mark" src="${type == 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular}">
+      <div class="answer-text-container">
         ${answer.text.map(nodeOuterHTML).join('')}
-        ${(answer.explanation == undefined) ? '' : answer.explanation.outerHTML}
       </div>
+      ${answer.explanation == undefined ? '' : `
+        <img class="expander"
+             title="show explanation"
+             src="${Ressources.angle_down_solid}">
+        <img class="collapser"
+             title="hide explanation"
+             src="${Ressources.angle_up_solid}">
+      `}
     </div>
+    ${(answer.explanation == undefined) ? '' : answer.explanation.outerHTML}
   </answer>
   `;
 }
+// helper
 function nodeOuterHTML(x) {
     const outerHTML = x.outerHTML;
     if (outerHTML == undefined) {
@@ -161,7 +192,39 @@ function nodeOuterHTML(x) {
     console.log("outerHTML:" + outerHTML);
     return outerHTML;
 }
-// renderError
+// event handler
+function selectAnswer(event) {
+    const el = event.target;
+    const answer = getTagRecursive(el, 'answer');
+    const question = getTagRecursive(answer, 'question');
+    if (question.getAttribute('answer') == 'pending') {
+        // toggle answer selection
+        const answermark = answer.getElementsByClassName('answer-mark')[0];
+        if (answer.getAttribute('selected') == 'false') {
+            answer.setAttribute('selected', 'true');
+            answermark.setAttribute('src', Ressources.xmark_solid);
+            if (question.getAttribute('type') == 'singlechoice') {
+                submitAnswer(event);
+            }
+        }
+        else {
+            answer.setAttribute('selected', 'false');
+            // we know it must be multiple choice - else we could not unselect stuff
+            answermark.setAttribute('src', Ressources.square_regular);
+        }
+    }
+    else {
+        // toggle showing of explanation
+        if (answer.getAttribute('expanded') == 'true') {
+            answer.setAttribute('expanded', 'false');
+        }
+        else {
+            answer.setAttribute('expanded', 'true');
+        }
+    }
+}
+// ### Error
+// render Function
 function renderError(current_el, message) {
     const el_name = current_el.localName;
     const questionnaire = getTagRecursive(current_el, "questionnaire");
@@ -181,6 +244,15 @@ function renderError(current_el, message) {
   `;
     questionnaire.innerHTML = error_html;
     console.log(error_html);
+}
+// helper
+// escape HTML TAGS
+function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 // ######### VALIDATION METHODS ##########
 // validateQuestionnaireStructure
@@ -304,22 +376,6 @@ function validateAttribute(question) {
     }
 }
 // ######## HELPER FUNCTIONS #######
-// makeDiv
-// ClassName as String -> HTMLDivElement
-function makeDiv(css_name) {
-    const new_div = document.createElement("div");
-    new_div.setAttribute("class", css_name);
-    return new_div;
-}
-// escapeHtml
-// escape HTML TAGS
-function escapeHtml(str) {
-    return str.replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-}
 // getTagRecursive from a child element
 // if element has TagName
 // return;
@@ -338,218 +394,182 @@ function getTagRecursive(el, tag) {
 // EVENT AFTER BUTTON "prev" OR "next" CLICK
 // questionChangeHandler
 // EventHandler -> DOM Manipulation
-function questionChangeHandler(event) {
-    var _a, _b;
-    // get Questionnaire attributes
-    let el = event.target;
-    let button = el.getAttribute("id");
-    let questionnaire = getTagRecursive(el, "questionnaire");
-    let total_questions = parseInt(questionnaire.getAttribute("total_questions"));
-    let current_question = parseInt(questionnaire.getAttribute("current_question"));
-    let questions = questionnaire.getElementsByTagName("question");
-    let min_qid = 0;
-    let max_qid = total_questions - 1;
-    let qid = current_question - 1;
-    // change question
-    // if button is "prev"
-    switch (button) {
-        case "prev_button":
-            let prev_qid = current_question - 1;
-            // change visibility to the previous question
-            questions[qid].removeAttribute("visible");
-            questions[qid - 1].setAttribute("visible", "true");
-            // change question overview text
-            questionnaire.setAttribute("current_question", prev_qid.toString());
-            questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + prev_qid.toString() + " of " + total_questions;
-            //hide button if button to first question
-            if (prev_qid - 1 == min_qid) {
-                el.setAttribute("style", "visibility:hidden;");
-            }
-            // show next-Button
-            (_a = el.nextElementSibling) === null || _a === void 0 ? void 0 : _a.setAttribute("style", "visibility:visible;");
-            break;
-        case "next_button":
-            let next_qid = qid + 1;
-            questions[qid].removeAttribute("visible");
-            questions[next_qid].setAttribute("visible", "true");
-            //change question overview text
-            questionnaire.setAttribute("current_question", (current_question + 1).toString());
-            questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + (current_question + 1).toString() + " of " + total_questions;
-            // hide button if button to last question
-            if (next_qid == max_qid) {
-                el.setAttribute("style", "visibility:hidden;");
-            }
-            //show prev_button
-            (_b = el.previousElementSibling) === null || _b === void 0 ? void 0 : _b.setAttribute("style", "visibility:visible;");
-            break;
-        default:
-            console.log("No Button caused this EventHandler", button);
-            break;
-    }
-}
-// CollapseEventHandler
-// Handles Collapse Event for shoowing explanation texts
-function collapseEventHandler(event) {
-    const el = event.target;
-    const question = getTagRecursive(el, "question");
-    const answers = question.getElementsByTagName("answer");
-    //change icons and collapse
-    if (el.getAttribute("clicked") == "true") {
-        el.setAttribute("src", Ressources.plus_solid);
-        el.setAttribute("clicked", "false");
-        for (let i = answers.length - 1; i >= 0; i--) {
-            let answer = answers[i];
-            let explanation = answer.getElementsByTagName("explanation")[0];
-            (explanation != undefined) ? explanation.removeAttribute("visible") : "";
-        }
-    }
-    else {
-        el.setAttribute("src", Ressources.minus_solid);
-        el.setAttribute("clicked", "true");
-        for (let i = answers.length - 1; i >= 0; i--) {
-            let answer = answers[i];
-            let explanation = answer.getElementsByTagName("explanation")[0];
-            (explanation != undefined) ? explanation.setAttribute("visible", "true") : "";
-        }
-    }
-}
-// show <explanation>
-//Answer->DOM Manipulation
-function showExplanation(answer) {
-    let explanation = answer.getElementsByTagName("explanation")[0];
-    if (explanation.getAttribute("visible") == "true") {
-        explanation.removeAttribute("visible");
-    }
-    else {
-        explanation.setAttribute("visible", "true");
-    }
-}
-// unified click on answer event handler
-function clickAnswerHandler(event) {
-    const el = event.target;
-    checkAnswerEventHandler(el);
-    // show Explanation
-    let answer = getTagRecursive(el, "answer");
-    if (answer.getElementsByTagName('explanation').length == 0) {
-        console.log("There is no explanation");
-    }
-    else {
-        showExplanation(answer);
-    }
-}
-// check click for correct answer
-// depending on question type show either
-// - for multiplechoice just clicked answer
-// - for singlechoice all answers
-function checkAnswerEventHandler(el) {
-    let question_type = getTagRecursive(el, "question").getAttribute("type");
-    if (question_type == "multiplechoice") {
-        let answer = getTagRecursive(el, "answer");
-        showAnswer(answer);
-    }
-    else if (question_type == "singlechoice") {
-        let answers = getTagRecursive(el, "question").getElementsByTagName("answer");
-        for (let i = (answers === null || answers === void 0 ? void 0 : answers.length) - 1; i >= 0; i--) {
-            let answer = answers[i];
-            showAnswer(answer);
-        }
-    }
-}
-// showAnswer
-// show icons and highlight answer
-function showAnswer(answer) {
-    answer.setAttribute("clicked", "true");
-    let img = answer.getElementsByTagName("img")[0];
-    if (answer.getAttribute("correct") == "true") {
-        img.setAttribute("src", Ressources.check_solid);
-    }
-    else {
-        img.setAttribute("src", Ressources.xmark_solid);
-    }
-}
+// function questionChangeHandler(event: Event) {
+//   // get Questionnaire attributes
+//   let el: HTMLElement = event.target as HTMLElement;
+//   let button = el.getAttribute("id");
+//   let questionnaire: HTMLElement = getTagRecursive(el, "questionnaire") as HTMLElement;
+//   let total_questions: number = parseInt(questionnaire.getAttribute("total_questions") as string);
+//   let current_question: number = parseInt(questionnaire.getAttribute("current_question") as string);
+//   let questions = questionnaire.getElementsByTagName("question");
+//   let min_qid: number = 0;
+//   let max_qid: number = total_questions - 1;
+//   let qid = current_question - 1;
+//   // change question
+//   // if button is "prev"
+//   switch (button) {
+//     case "prev_button":
+//       let prev_qid = current_question - 1;
+//       // change visibility to the previous question
+//       questions[qid].removeAttribute("visible");
+//       questions[qid - 1].setAttribute("visible", "true");
+//       // change question overview text
+//       questionnaire.setAttribute("current_question", prev_qid.toString());
+//       questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + prev_qid.toString() + " of " + total_questions;
+//       //hide button if button to first question
+//       if (prev_qid - 1 == min_qid) {
+//         el.setAttribute("style", "visibility:hidden;");
+//       }
+//       // show next-Button
+//       el.nextElementSibling ?.setAttribute("style", "visibility:visible;");
+//       break;
+//
+//     case "next_button":
+//       let next_qid = qid + 1;
+//       questions[qid].removeAttribute("visible");
+//       questions[next_qid].setAttribute("visible", "true");
+//       //change question overview text
+//       questionnaire.setAttribute("current_question", (current_question + 1).toString());
+//       questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + (current_question + 1).toString() + " of " + total_questions;
+//       // hide button if button to last question
+//       if (next_qid == max_qid) {
+//         el.setAttribute("style", "visibility:hidden;");
+//       }
+//       //show prev_button
+//       el.previousElementSibling ?.setAttribute("style", "visibility:visible;");
+//       break;
+//
+//     default:
+//       console.log("No Button caused this EventHandler", button);
+//       break;
+//   }
+//
+//
+// }
+//
+//
+//
+// // CollapseEventHandler
+// // Handles Collapse Event for shoowing explanation texts
+// function collapseEventHandler(event: Event) {
+//   const el = event.target as HTMLElement;
+//   const question: HTMLElement = getTagRecursive(el, "question") as HTMLElement;
+//   const answers: HTMLCollection = question.getElementsByTagName("answer") as HTMLCollection;
+//   //change icons and collapse
+//   if (el.getAttribute("clicked") == "true") {
+//     el.setAttribute("src", Ressources.plus_solid);
+//     el.setAttribute("clicked", "false");
+//     for (let i = answers.length - 1; i >= 0; i--) {
+//       let answer = answers[i] as HTMLElement;
+//       let explanation = answer.getElementsByTagName("explanation")[0];
+//       (explanation != undefined) ? explanation.removeAttribute("visible"): "";
+//     }
+//   }
+//   else {
+//     el.setAttribute("src", Ressources.minus_solid);
+//     el.setAttribute("clicked", "true");
+//     for (let i = answers.length - 1; i >= 0; i--) {
+//       let answer = answers[i] as HTMLElement;
+//       let explanation = answer.getElementsByTagName("explanation")[0];
+//       (explanation != undefined) ? explanation.setAttribute("visible", "true"): "";
+//     }
+//   }
+// }
+// // show <explanation>
+// //Answer->DOM Manipulation
+// function showExplanation(answer: HTMLElement) {
+//   let explanation: HTMLElement = answer.getElementsByTagName("explanation")[0] as HTMLElement;
+//   if (explanation.getAttribute("visible") == "true") {
+//     explanation.removeAttribute("visible");
+//   }
+//   else {
+//     explanation.setAttribute("visible", "true");
+//   }
+// }
+// // unified click on answer event handler
+// function clickAnswerHandler(event: Event) {
+//   const el = event.target as HTMLElement;
+//   checkAnswerEventHandler(el);
+//   // show Explanation
+//   let answer = getTagRecursive(el, "answer");
+//   if (answer.getElementsByTagName('explanation').length == 0){
+//     console.log("There is no explanation");
+//   }
+//   else{
+//     showExplanation(answer);
+//   }
+// }
+//
+//
+// // check click for correct answer
+// // depending on question type show either
+// // - for multiplechoice just clicked answer
+// // - for singlechoice all answers
+// function checkAnswerEventHandler(el: HTMLElement) {
+//   let question_type = getTagRecursive(el, "question").getAttribute("type");
+//   if (question_type == "multiplechoice") {
+//     let answer = getTagRecursive(el, "answer");
+//     showAnswer(answer);
+//   }
+//   else if (question_type == "singlechoice") {
+//     let answers = getTagRecursive(el, "question").getElementsByTagName("answer") as HTMLCollection;
+//     for (let i = answers ?.length - 1; i >= 0; i--) {
+//       let answer: HTMLElement = answers[i] as HTMLElement;
+//       showAnswer(answer);
+//     }
+//   }
+// }
+// // showAnswer
+// // show icons and highlight answer
+// function showAnswer(answer: HTMLElement) {
+//   answer.setAttribute("clicked", "true");
+//   let img = answer.getElementsByTagName("img")[0];
+//   if (answer.getAttribute("correct") == "true") {
+//     img.setAttribute("src", Ressources.check_solid);
+//   }
+//   else {
+//     img.setAttribute("src", Ressources.xmark_solid);
+//   }
+// }
 var Ressources;
 (function (Ressources) {
-    Ressources.angle_left_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAy
-NTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMTkyIDQ0OGMtOC4xODggMC0xNi4zOC0zLjEyNS0y
-Mi42Mi05LjM3NWwtMTYwLTE2MGMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNWwxNjAt
-MTYwYzEyLjUtMTIuNSAzMi43NS0xMi41IDQ1LjI1IDBzMTIuNSAzMi43NSAwIDQ1LjI1TDc3
-LjI1IDI1NmwxMzcuNCAxMzcuNGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1QzIwOC40
-IDQ0NC45IDIwMC4yIDQ0OCAxOTIgNDQ4eiIvPjwvc3ZnPg==`;
-    Ressources.angle_right_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAy
-NTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNjQgNDQ4Yy04LjE4OCAwLTE2LjM4LTMuMTI1LTIy
-LjYyLTkuMzc1Yy0xMi41LTEyLjUtMTIuNS0zMi43NSAwLTQ1LjI1TDE3OC44IDI1Nkw0MS4z
-OCAxMTguNmMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNXMzMi43NS0xMi41IDQ1LjI1
-IDBsMTYwIDE2MGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1bC0xNjAgMTYwQzgwLjM4
-IDQ0NC45IDcyLjE5IDQ0OCA2NCA0NDh6Ii8+PC9zdmc+`;
-    Ressources.check_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDM4LjYgMTA1LjRDNDUxLjEgMTE3LjkgNDUxLjEg
-MTM4LjEgNDM4LjYgMTUwLjZMMTgyLjYgNDA2LjZDMTcwLjEgNDE5LjEgMTQ5LjkgNDE5LjEg
-MTM3LjQgNDA2LjZMOS4zNzIgMjc4LjZDLTMuMTI0IDI2Ni4xLTMuMTI0IDI0NS45IDkuMzcy
-IDIzMy40QzIxLjg3IDIyMC45IDQyLjEzIDIyMC45IDU0LjYzIDIzMy40TDE1OS4xIDMzOC43
-TDM5My40IDEwNS40QzQwNS45IDkyLjg4IDQyNi4xIDkyLjg4IDQzOC42IDEwNS40SDQzOC42
-eiIvPjwvc3ZnPg==`;
-    Ressources.circle_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1
-MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNTEyIDI1NkM1MTIgMzk3LjQgMzk3LjQgNTEyIDI1
-NiA1MTJDMTE0LjYgNTEyIDAgMzk3LjQgMCAyNTZDMCAxMTQuNiAxMTQuNiAwIDI1NiAwQzM5
-Ny40IDAgNTEyIDExNC42IDUxMiAyNTZ6TTI1NiA0OEMxNDEuMSA0OCA0OCAxNDEuMSA0OCAy
-NTZDNDggMzcwLjkgMTQxLjEgNDY0IDI1NiA0NjRDMzcwLjkgNDY0IDQ2NCAzNzAuOSA0NjQg
-MjU2QzQ2NCAxNDEuMSAzNzAuOSA0OCAyNTYgNDh6Ii8+PC9zdmc+`;
-    Ressources.minus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMy
-LTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTMxLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIg
-MzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8+PC9zdmc+`;
-    Ressources.plus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDMyIDI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMy
-IDMyLjAxSDI1NnYxNDRjMCAxNy42OS0xNC4zMyAzMS45OS0zMiAzMS45OXMtMzItMTQuMy0z
-Mi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5
-IDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQu
-MzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8+PC9z
-dmc+`;
-    Ressources.square_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0
-NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzg0IDMyQzQxOS4zIDMyIDQ0OCA2MC42NSA0NDgg
-OTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42NSA0ODAgMCA0NTEu
-MyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMzg0IDgwSDY0QzU1LjE2
-IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0MzIgNjQgNDMySDM4NEMz
-OTIuOCA0MzIgNDAwIDQyNC44IDQwMCA0MTZWOTZDNDAwIDg3LjE2IDM5Mi44IDgwIDM4NCA4
-MHoiLz48L3N2Zz4=`;
-    Ressources.xmark_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAz
-MjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAt
-IGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21l
-LmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRp
-Y29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIu
-NzUgMCA0NS4yNUMzMDQuNCA0MTIuOSAyOTYuMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUt
-MjIuNjItOS4zNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQx
-NiAzMiA0MTZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1
-IDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1
-IDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41
-LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1
-LjRMMzEwLjYgMzYxLjR6Ii8+PC9zdmc+`;
-    Ressources.style = `questionnaire {
+    Ressources.angle_down_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzODQgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMTkyIDM4NGMtOC4xODggMC0xNi4zOC0zLjEyNS0yMi42Mi05LjM3NWwtMTYwLTE2MGMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNXMzMi43NS0xMi41IDQ1LjI1IDBMMTkyIDMwNi44bDEzNy40LTEzNy40YzEyLjUtMTIuNSAzMi43NS0xMi41IDQ1LjI1IDBzMTIuNSAzMi43NSAwIDQ1LjI1bC0xNjAgMTYwQzIwOC40IDM4MC45IDIwMC4yIDM4NCAxOTIgMzg0eiIvPjwvc3ZnPg==`;
+    Ressources.angle_left_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMTkyIDQ0OGMtOC4xODggMC0xNi4zOC0zLjEyNS0yMi42Mi05LjM3NWwtMTYwLTE2MGMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNWwxNjAtMTYwYzEyLjUtMTIuNSAzMi43NS0xMi41IDQ1LjI1IDBzMTIuNSAzMi43NSAwIDQ1LjI1TDc3LjI1IDI1NmwxMzcuNCAxMzcuNGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1QzIwOC40IDQ0NC45IDIwMC4yIDQ0OCAxOTIgNDQ4eiIvPjwvc3ZnPg==`;
+    Ressources.angle_right_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNjQgNDQ4Yy04LjE4OCAwLTE2LjM4LTMuMTI1LTIyLjYyLTkuMzc1Yy0xMi41LTEyLjUtMTIuNS0zMi43NSAwLTQ1LjI1TDE3OC44IDI1Nkw0MS4zOCAxMTguNmMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNXMzMi43NS0xMi41IDQ1LjI1IDBsMTYwIDE2MGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1bC0xNjAgMTYwQzgwLjM4IDQ0NC45IDcyLjE5IDQ0OCA2NCA0NDh6Ii8+PC9zdmc+`;
+    Ressources.angle_up_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzODQgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzUyIDM1MmMtOC4xODggMC0xNi4zOC0zLjEyNS0yMi42Mi05LjM3NUwxOTIgMjA1LjNsLTEzNy40IDEzNy40Yy0xMi41IDEyLjUtMzIuNzUgMTIuNS00NS4yNSAwcy0xMi41LTMyLjc1IDAtNDUuMjVsMTYwLTE2MGMxMi41LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwbDE2MCAxNjBjMTIuNSAxMi41IDEyLjUgMzIuNzUgMCA0NS4yNUMzNjguNCAzNDguOSAzNjAuMiAzNTIgMzUyIDM1MnoiLz48L3N2Zz4=`;
+    Ressources.check_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDM4LjYgMTA1LjRDNDUxLjEgMTE3LjkgNDUxLjEgMTM4LjEgNDM4LjYgMTUwLjZMMTgyLjYgNDA2LjZDMTcwLjEgNDE5LjEgMTQ5LjkgNDE5LjEgMTM3LjQgNDA2LjZMOS4zNzIgMjc4LjZDLTMuMTI0IDI2Ni4xLTMuMTI0IDI0NS45IDkuMzcyIDIzMy40QzIxLjg3IDIyMC45IDQyLjEzIDIyMC45IDU0LjYzIDIzMy40TDE1OS4xIDMzOC43TDM5My40IDEwNS40QzQwNS45IDkyLjg4IDQyNi4xIDkyLjg4IDQzOC42IDEwNS40SDQzOC42eiIvPjwvc3ZnPg==`;
+    Ressources.circle_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNTEyIDI1NkM1MTIgMzk3LjQgMzk3LjQgNTEyIDI1NiA1MTJDMTE0LjYgNTEyIDAgMzk3LjQgMCAyNTZDMCAxMTQuNiAxMTQuNiAwIDI1NiAwQzM5Ny40IDAgNTEyIDExNC42IDUxMiAyNTZ6TTI1NiA0OEMxNDEuMSA0OCA0OCAxNDEuMSA0OCAyNTZDNDggMzcwLjkgMTQxLjEgNDY0IDI1NiA0NjRDMzcwLjkgNDY0IDQ2NCAzNzAuOSA0NjQgMjU2QzQ2NCAxNDEuMSAzNzAuOSA0OCAyNTYgNDh6Ii8+PC9zdmc+`;
+    Ressources.minus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTMxLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIgMzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8+PC9zdmc+`;
+    Ressources.plus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDMyIDI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMyIDMyLjAxSDI1NnYxNDRjMCAxNy42OS0xNC4zMyAzMS45OS0zMiAzMS45OXMtMzItMTQuMy0zMi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5IDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQuMzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8+PC9zdmc+`;
+    Ressources.square_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzg0IDMyQzQxOS4zIDMyIDQ0OCA2MC42NSA0NDggOTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42NSA0ODAgMCA0NTEuMyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMzg0IDgwSDY0QzU1LjE2IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0MzIgNjQgNDMySDM4NEMzOTIuOCA0MzIgNDAwIDQyNC44IDQwMCA0MTZWOTZDNDAwIDg3LjE2IDM5Mi44IDgwIDM4NCA4MHoiLz48L3N2Zz4=`;
+    Ressources.xmark_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIuNzUgMCA0NS4yNUMzMDQuNCA0MTIuOSAyOTYuMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUtMjIuNjItOS4zNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQxNiAzMiA0MTZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1IDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1IDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1LjRMMzEwLjYgMzYxLjR6Ii8+PC9zdmc+`;
+    Ressources.style = `/* ERROR MESSAGE */
+questionnaire .error-wrapper{
+  display:block;
+  max-width: 600px;
+  border: 5px solid red;
+   margin: 0 auto;
+  padding:0 20px;
+}
+questionnaire .error-header{
+
+}
+questionnaire .error-box{
+font-size:16pt;
+line-height:1.5em;
+}
+
+questionnaire .error-message{
+  font-family:monospace;
+  font-size:12pt;
+}
+
+/* QUESTIONNAIRE */
+/* Basic layout */
+questionnaire {
   display: block;
   margin: 40px 0 100px ;
 }
-
 questionnaire .content-wrapper {
   display: flex;
   flex-wrap: wrap;
@@ -558,9 +578,7 @@ questionnaire .content-wrapper {
   padding: 10px;
   justify-content: center;
 }
-questionnaire question{
-  display:none;
-}
+
 questionnaire .question-overview{
 margin: 0 auto 10px;
 font-size:1.1em;
@@ -587,16 +605,29 @@ questionnaire .question-footer{
   justify-content: center;
 }
 
-questionnaire [visible=true]{
-    display:block;
-}
-
-questionnaire .wrapper-answer {
+questionnaire .wrapper-answer, questionnaire explanation {
   border: 1px solid #eee;
   padding: 5px 12px;
   font-size: 14pt;
   margin: 15px 0 0;
   width:90%;
+}
+questionnaire explanation {
+  margin-top: 0;
+  border-top: 0;
+}
+questionnaire answer[correct="true"] explanation {
+  border: 2px solid lightgreen;
+  border-top: 0;
+}
+questionnaire answer[correct="false"] explanation {
+  border: 2px solid lightpink;
+  border-top: 0;
+}
+
+questionnaire .wrapper-answer:hover {
+  cursor: pointer;
+  background-color: #eee;
 }
 
 questionnaire answer p {
@@ -605,15 +636,6 @@ questionnaire answer p {
   /*font-size: 12pt;
   border: 1px solid #000;
   width:100%;*/
-}
-
-questionnaire .wrapper-answer:hover, questionnaire img:hover, questionnaire .change-question-button:hover {
-  cursor: pointer;
-  /*background-color: #ddd;*/
-}
-
-questionnaire .wrapper-answer:hover {
-  background-color: #eee;
 }
 
 
@@ -635,7 +657,7 @@ questionnaire answer [visible=true] p {
   border: 0;
 }
 
-questionnaire img {
+questionnaire .answer-mark, questionnaire .expander, questionnaire .collapser {
   height: 1em;
   align-self: center;
 }
@@ -650,47 +672,115 @@ questionnaire .wrapper-answer > div, questionnaire .question-header > div {
   align-self: center;
 }
 
-questionnaire [clicked=true] .wrapper-answer, questionnaire [clicked=true] .wrapper-answer:hover{
-  background-color:#d30000;
-}
-
-questionnaire [clicked=true][correct=true] .wrapper-answer{
-  background-color:#aceb84;
-}
-
-questionnaire .change-question-button{
-  padding:15px;
-  margin:0 15px;
-  border: 4px solid #bbb;
-  border-radius: 7px;
-  font-size:1.3em;
-}
-questionnaire .change-question-button:hover{
-  background-color: #bbb;
-}
-
 @media (min-width: 768px) {
   questionnaire question {
     max-width: 600px;
   }
 }
-.error-wrapper{
+
+/* FEEDBACK */
+/* text */
+questionnaire .correct-text, questionnaire .wrong-text {
+  display: inline-flex;
+  width: 100%;
+  justify-content: center;
+  display: none;
+}
+
+questionnaire question[answer="correct"] .correct-text {
+  display: inline-flex;
+  color: darkgreen;
+}
+questionnaire question[answer="correct"] {
+  border: 1px solid green;
+}
+
+questionnaire question[answer="wrong"] .wrong-text {
+  display: inline-flex;
+  color: darkred;
+}
+questionnaire question[answer="wrong"] {
+  border: 1px solid darkred;
+}
+
+/* answers */
+questionnaire question[answer="pending"] answer[selected="true"] .wrapper-answer {
+  border: 2px solid grey;
+}
+/* *="o" means correct or wrong, not pending */
+questionnaire question[answer*="o"] answer[correct="true"][selected="true"] .wrapper-answer {
+  border: 2px solid green;
+}
+questionnaire question[answer*="o"] answer[correct="true"] .wrapper-answer {
+  background-color: lightgreen;
+}
+questionnaire question[answer*="o"] answer[correct="false"][selected="true"] .wrapper-answer {
+  border: 2px solid darkred;
+  background-color: lightpink;
+}
+
+/* explanation */
+/* manually expanded explanation */
+questionnaire .collapser, questionnaire .expander {
+  display: none;
+}
+questionnaire .answer-text-container {
+  flex-grow: 4;
+}
+
+questionnaire question[answer*="o"] .expander {
+  display: block;
+}
+
+questionnaire question[answer*="o"] answer[expanded="true"] explanation {
+  display: block;
+}
+questionnaire question[answer*="o"] answer[expanded="true"] .expander {
+  display: none;
+}
+questionnaire question[answer*="o"] answer[expanded="true"] .collapser {
+  display: block;
+}
+
+/* NAVIGATION */
+/* only show question that has been set visible */
+questionnaire question{
+  display:none;
+}
+questionnaire [visible=true]{
   display:block;
-  max-width: 600px;
-  border: 5px solid red;
-   margin: 0 auto;
-  padding:0 20px;
-}
-.error-header{
-
-}
-.error-box{
-font-size:16pt;
-line-height:1.5em;
 }
 
-.error-message{
-  font-family:monospace;
-  font-size:12pt;
+/* button styles */
+questionnaire .submit-button, questionnaire .next-button {
+  padding:15px;
+  margin:5px 15px;
+  margin-top: 15px;
+  border: 4px solid #bbb;
+  border-radius: 7px;
+  font-size:1.3em;
+}
+questionnaire .submit-button:hover, questionnaire .next-button:hover{
+  background-color: #bbb;
+  cursor:pointer;
+}
+
+/* show submit-button for unanswered multiplechoice questions */
+questionnaire .submit-button {
+  display: none;
+}
+questionnaire question[type="multiplechoice"][answer="pending"] .submit-button {
+  display: block;
+}
+
+/* show next-button for answered questions */
+questionnaire .next-button {
+  display: block;
+}
+questionnaire question[answer="pending"] .next-button {
+  display: none;
+}
+questionnaire question:last-of-type .next-button {
+  display: none;
 }`;
 })(Ressources || (Ressources = {}));

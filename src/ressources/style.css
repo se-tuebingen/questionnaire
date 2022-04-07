@@ -1,8 +1,30 @@
+/* ERROR MESSAGE */
+questionnaire .error-wrapper{
+  display:block;
+  max-width: 600px;
+  border: 5px solid red;
+   margin: 0 auto;
+  padding:0 20px;
+}
+questionnaire .error-header{
+
+}
+questionnaire .error-box{
+font-size:16pt;
+line-height:1.5em;
+}
+
+questionnaire .error-message{
+  font-family:monospace;
+  font-size:12pt;
+}
+
+/* QUESTIONNAIRE */
+/* Basic layout */
 questionnaire {
   display: block;
   margin: 40px 0 100px ;
 }
-
 questionnaire .content-wrapper {
   display: flex;
   flex-wrap: wrap;
@@ -11,9 +33,7 @@ questionnaire .content-wrapper {
   padding: 10px;
   justify-content: center;
 }
-questionnaire question{
-  display:none;
-}
+
 questionnaire .question-overview{
 margin: 0 auto 10px;
 font-size:1.1em;
@@ -40,16 +60,29 @@ questionnaire .question-footer{
   justify-content: center;
 }
 
-questionnaire [visible=true]{
-    display:block;
-}
-
-questionnaire .wrapper-answer {
+questionnaire .wrapper-answer, questionnaire explanation {
   border: 1px solid #eee;
   padding: 5px 12px;
   font-size: 14pt;
   margin: 15px 0 0;
   width:90%;
+}
+questionnaire explanation {
+  margin-top: 0;
+  border-top: 0;
+}
+questionnaire answer[correct="true"] explanation {
+  border: 2px solid lightgreen;
+  border-top: 0;
+}
+questionnaire answer[correct="false"] explanation {
+  border: 2px solid lightpink;
+  border-top: 0;
+}
+
+questionnaire .wrapper-answer:hover {
+  cursor: pointer;
+  background-color: #eee;
 }
 
 questionnaire answer p {
@@ -58,15 +91,6 @@ questionnaire answer p {
   /*font-size: 12pt;
   border: 1px solid #000;
   width:100%;*/
-}
-
-questionnaire .wrapper-answer:hover, questionnaire img:hover, questionnaire .change-question-button:hover {
-  cursor: pointer;
-  /*background-color: #ddd;*/
-}
-
-questionnaire .wrapper-answer:hover {
-  background-color: #eee;
 }
 
 
@@ -88,7 +112,7 @@ questionnaire answer [visible=true] p {
   border: 0;
 }
 
-questionnaire img {
+questionnaire .answer-mark, questionnaire .expander, questionnaire .collapser {
   height: 1em;
   align-self: center;
 }
@@ -103,46 +127,114 @@ questionnaire .wrapper-answer > div, questionnaire .question-header > div {
   align-self: center;
 }
 
-questionnaire [clicked=true] .wrapper-answer, questionnaire [clicked=true] .wrapper-answer:hover{
-  background-color:#d30000;
-}
-
-questionnaire [clicked=true][correct=true] .wrapper-answer{
-  background-color:#aceb84;
-}
-
-questionnaire .change-question-button{
-  padding:15px;
-  margin:0 15px;
-  border: 4px solid #bbb;
-  border-radius: 7px;
-  font-size:1.3em;
-}
-questionnaire .change-question-button:hover{
-  background-color: #bbb;
-}
-
 @media (min-width: 768px) {
   questionnaire question {
     max-width: 600px;
   }
 }
-.error-wrapper{
+
+/* FEEDBACK */
+/* text */
+questionnaire .correct-text, questionnaire .wrong-text {
+  display: inline-flex;
+  width: 100%;
+  justify-content: center;
+  display: none;
+}
+
+questionnaire question[answer="correct"] .correct-text {
+  display: inline-flex;
+  color: darkgreen;
+}
+questionnaire question[answer="correct"] {
+  border: 1px solid green;
+}
+
+questionnaire question[answer="wrong"] .wrong-text {
+  display: inline-flex;
+  color: darkred;
+}
+questionnaire question[answer="wrong"] {
+  border: 1px solid darkred;
+}
+
+/* answers */
+questionnaire question[answer="pending"] answer[selected="true"] .wrapper-answer {
+  border: 2px solid grey;
+}
+/* *="o" means correct or wrong, not pending */
+questionnaire question[answer*="o"] answer[correct="true"][selected="true"] .wrapper-answer {
+  border: 2px solid green;
+}
+questionnaire question[answer*="o"] answer[correct="true"] .wrapper-answer {
+  background-color: lightgreen;
+}
+questionnaire question[answer*="o"] answer[correct="false"][selected="true"] .wrapper-answer {
+  border: 2px solid darkred;
+  background-color: lightpink;
+}
+
+/* explanation */
+/* manually expanded explanation */
+questionnaire .collapser, questionnaire .expander {
+  display: none;
+}
+questionnaire .answer-text-container {
+  flex-grow: 4;
+}
+
+questionnaire question[answer*="o"] .expander {
+  display: block;
+}
+
+questionnaire question[answer*="o"] answer[expanded="true"] explanation {
+  display: block;
+}
+questionnaire question[answer*="o"] answer[expanded="true"] .expander {
+  display: none;
+}
+questionnaire question[answer*="o"] answer[expanded="true"] .collapser {
+  display: block;
+}
+
+/* NAVIGATION */
+/* only show question that has been set visible */
+questionnaire question{
+  display:none;
+}
+questionnaire [visible=true]{
   display:block;
-  max-width: 600px;
-  border: 5px solid red;
-   margin: 0 auto;
-  padding:0 20px;
-}
-.error-header{
-
-}
-.error-box{
-font-size:16pt;
-line-height:1.5em;
 }
 
-.error-message{
-  font-family:monospace;
-  font-size:12pt;
+/* button styles */
+questionnaire .submit-button, questionnaire .next-button {
+  padding:15px;
+  margin:5px 15px;
+  margin-top: 15px;
+  border: 4px solid #bbb;
+  border-radius: 7px;
+  font-size:1.3em;
+}
+questionnaire .submit-button:hover, questionnaire .next-button:hover{
+  background-color: #bbb;
+  cursor:pointer;
+}
+
+/* show submit-button for unanswered multiplechoice questions */
+questionnaire .submit-button {
+  display: none;
+}
+questionnaire question[type="multiplechoice"][answer="pending"] .submit-button {
+  display: block;
+}
+
+/* show next-button for answered questions */
+questionnaire .next-button {
+  display: block;
+}
+questionnaire question[answer="pending"] .next-button {
+  display: none;
+}
+questionnaire question:last-of-type .next-button {
+  display: none;
 }

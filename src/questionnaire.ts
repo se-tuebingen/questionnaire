@@ -66,7 +66,7 @@ function parseAnswer(answer: HTMLElement): Answer {
   };
 }
 
-
+// ############### main function
 function setup() {
   // setup style
   const styleNode = document.createElement('style');
@@ -97,86 +97,106 @@ window.onload = setup;
 // - question
 
 // ### RENDER FUNCTIONS ###
+
+// - state is stored in the DOM via attributes
+// - as much hiding/showing as possible is done via css classes depending
+//   on those attributes
+
+// ### Questionnaire
+// <questionnaire>
+//  - total_questions
+//  - current_question
 function renderQuestionnaire(questionnaire: Questionnaire) {
   const root = questionnaire.rootElement;
   root.setAttribute("total_questions", "" + questionnaire.questions.length);
   root.setAttribute("current_question", "1");
 
-  const overview_text = oneQuestionOnly("overview_text");
-  const buttons = oneQuestionOnly("buttons");
   root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
-      ${overview_text}
+      ${(questionnaire.questions.length == 1) ? '' : `Question 1 of ${questionnaire.questions.length}`}
       </div>
       ${questionnaire.questions.map(renderQuestion).join('')}
-      <div class="question-footer">
-      ${buttons}
-      </div>
     </div>
   `;
-
-  // Local functions
-  function oneQuestionOnly(pos: string) {
-    switch (pos) {
-      // if only one question exists, ignore question overview text
-      case "overview_text":
-        if (questionnaire.questions.length == 1) {
-          return "";
-        }
-        else {
-          return `Question 1 of ${questionnaire.questions.length}`;
-        }
-      // if only one question exists, ignore "prev", "next" buttons.
-      case "buttons":
-        if (questionnaire.questions.length == 1) {
-          return "";
-        }
-        else {
-          return `
-          <div class="change-question-button"
-               id="prev_button"
-               style="visibility:hidden;"
-               onclick="questionChangeHandler(event)">
-               prev
-          </div>
-          <div class="change-question-button"
-               id="next_button"
-               onclick="questionChangeHandler(event)">
-               next
-          </div>
-          `;
-        }
-      default:
-        break;
-    }
-  }
 }
 
-// renderQuestions
-// if validation fails return false, else return html-string
+// ### Question
+// <question>
+//  - type: "singlechoice"|"multiplechoice"
+//  - visible: "true" or not present
+//  - answer: "pending"|"correct"|"wrong"
 function renderQuestion(question: Question, index: number) {
-  // if (validateAttribute(question) == true) {
   return `
-    <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
+    <question type="${question.type}"
+              ${index == 0 ? 'visible="true"' : ''}
+              answer="pending">
+      <div class="correct-text">
+        <p>Correct!</p>
+      </div>
+      <div class="wrong-text">
+        <p>Wrong!</p>
+      </div>
       <div class="question-header">
         <div>${question.text.map(nodeOuterHTML).join('')}</div>
-        <img src="${Ressources.plus_solid}" onclick="collapseEventHandler(event)">
       </div>
       ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
+      <div class="question-footer">
+        <div class="next-button" onClick="showNextQuestion(event)">
+          Next
+        </div>
+        <div class="submit-button" onClick="submitAnswer(event)">
+          Submit
+        </div>
+      </div>
     </question>
   `;
 }
-//  else {
-//    return "";
-//  }
-//}
 
+// event handlers:
+// continue
+function showNextQuestion(event: Event) {
+  const el: HTMLElement = event.target as HTMLElement;
+  const currentQuestion: HTMLElement = getTagRecursive(el, "question");
+  const questionnaire: HTMLElement = getTagRecursive(currentQuestion, "questionnaire");
+
+  // update header
+  const total_questions: number = parseInt(questionnaire.getAttribute("total_questions") as string);
+  const current_question: number = parseInt(questionnaire.getAttribute("current_question") as string);
+
+  if(current_question == total_questions) {
+    console.error("Tried to show next question, but we are already at the last question. Emitted by:", currentQuestion, el);
+    return;
+  }
+
+  questionnaire.setAttribute("current_question", (current_question + 1).toString());
+  questionnaire.getElementsByClassName("question-overview")[0].textContent = `Question ${current_question + 1} of ${total_questions}`;
+
+  // update visibility
+  currentQuestion.nextElementSibling?.setAttribute('visible', 'true');
+  currentQuestion.removeAttribute('visible');
+
+}
+// submit
+function submitAnswer(event: Event) {
+  const el: HTMLElement = event.target as HTMLElement;
+  const question: HTMLElement = getTagRecursive(el, "question");
+
+  const answers = question.getElementsByTagName('answer');
+  const correct = Array.from(answers).every(a =>
+    a.getAttribute('correct') == a.getAttribute('selected'));
+  question.setAttribute('answer', correct ? 'correct' : 'wrong');
+}
+
+// ### Answer
+// <answer>
+//  - correct: "true"|"false"
+//  - selected: "true"|"false"
 function renderAnswer(type: Questiontype, answer: Answer) {
   return `
-  <answer correct="${answer.correct ? 'true' : 'false'}">
-    <div class="wrapper-answer" onclick="clickAnswerHandler(event)">
-      <img src="${type == 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular}">
+  <answer correct="${answer.correct ? 'true' : 'false'}" selected="false">
+    <div class="wrapper-answer" onclick="selectAnswer(event)">
+      <img class="answer-mark" src="${type == 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular}">
       <div>
         ${answer.text.map(nodeOuterHTML).join('')}
         ${(answer.explanation == undefined)? '' : answer.explanation.outerHTML}
@@ -185,7 +205,7 @@ function renderAnswer(type: Questiontype, answer: Answer) {
   </answer>
   `;
 }
-
+// helper
 function nodeOuterHTML(x: Node) {
   const outerHTML = (x as HTMLElement).outerHTML;
   if (outerHTML == undefined) {
@@ -198,8 +218,27 @@ function nodeOuterHTML(x: Node) {
   console.log("outerHTML:" + outerHTML);
   return outerHTML;
 }
+// event handler
+function selectAnswer(event: Event) {
+  const el: HTMLElement = event.target as HTMLElement;
+  const answer: HTMLElement = getTagRecursive(el, 'answer');
+  const answermark: HTMLElement = answer.getElementsByClassName('answer-mark')[0] as HTMLElement;
+  const question: HTMLElement = getTagRecursive(answer, 'question');
+  if(answer.getAttribute('selected') == 'false') {
+    answer.setAttribute('selected', 'true');
+    answermark.setAttribute('src', Ressources.xmark_solid);
+    if(question.getAttribute('type') == 'singlechoice') {
+      submitAnswer(event);
+    }
+  } else {
+    answer.setAttribute('selected', 'false');
+    // we know it must be multiple choice - else we could not unselect stuff
+    answermark.setAttribute('src', Ressources.square_regular);
+  }
+}
 
-// renderError
+// ### Error
+// render Function
 function renderError(current_el: HTMLElement, message: string) {
   const el_name = current_el.localName;
   const questionnaire = getTagRecursive(current_el, "questionnaire");
@@ -220,6 +259,17 @@ function renderError(current_el: HTMLElement, message: string) {
   questionnaire.innerHTML = error_html;
   console.log(error_html);
 }
+// helper
+// escape HTML TAGS
+function escapeHtml(str: string) {
+  return str.replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+}
+
 
 // ######### VALIDATION METHODS ##########
 
@@ -346,23 +396,7 @@ function validateAttribute(question: Question) {
 
 
 // ######## HELPER FUNCTIONS #######
-// makeDiv
-// ClassName as String -> HTMLDivElement
-function makeDiv(css_name: string) {
-  const new_div = document.createElement("div");
-  new_div.setAttribute("class", css_name);
-  return new_div;
-}
-// escapeHtml
-// escape HTML TAGS
-function escapeHtml(str: string) {
-  return str.replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 
-}
 // getTagRecursive from a child element
 // if element has TagName
 // return;
@@ -383,140 +417,140 @@ function getTagRecursive(el: HTMLElement, tag: string) {
 // EVENT AFTER BUTTON "prev" OR "next" CLICK
 // questionChangeHandler
 // EventHandler -> DOM Manipulation
-function questionChangeHandler(event: Event) {
-  // get Questionnaire attributes
-  let el: HTMLElement = event.target as HTMLElement;
-  let button = el.getAttribute("id");
-  let questionnaire: HTMLElement = getTagRecursive(el, "questionnaire") as HTMLElement;
-  let total_questions: number = parseInt(questionnaire.getAttribute("total_questions") as string);
-  let current_question: number = parseInt(questionnaire.getAttribute("current_question") as string);
-  let questions = questionnaire.getElementsByTagName("question");
-  let min_qid: number = 0;
-  let max_qid: number = total_questions - 1;
-  let qid = current_question - 1;
-  // change question
-  // if button is "prev"
-  switch (button) {
-    case "prev_button":
-      let prev_qid = current_question - 1;
-      // change visibility to the previous question
-      questions[qid].removeAttribute("visible");
-      questions[qid - 1].setAttribute("visible", "true");
-      // change question overview text
-      questionnaire.setAttribute("current_question", prev_qid.toString());
-      questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + prev_qid.toString() + " of " + total_questions;
-      //hide button if button to first question
-      if (prev_qid - 1 == min_qid) {
-        el.setAttribute("style", "visibility:hidden;");
-      }
-      // show next-Button
-      el.nextElementSibling ?.setAttribute("style", "visibility:visible;");
-      break;
-
-    case "next_button":
-      let next_qid = qid + 1;
-      questions[qid].removeAttribute("visible");
-      questions[next_qid].setAttribute("visible", "true");
-      //change question overview text
-      questionnaire.setAttribute("current_question", (current_question + 1).toString());
-      questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + (current_question + 1).toString() + " of " + total_questions;
-      // hide button if button to last question
-      if (next_qid == max_qid) {
-        el.setAttribute("style", "visibility:hidden;");
-      }
-      //show prev_button
-      el.previousElementSibling ?.setAttribute("style", "visibility:visible;");
-      break;
-
-    default:
-      console.log("No Button caused this EventHandler", button);
-      break;
-  }
-
-
-}
-
-
-
-// CollapseEventHandler
-// Handles Collapse Event for shoowing explanation texts
-function collapseEventHandler(event: Event) {
-  const el = event.target as HTMLElement;
-  const question: HTMLElement = getTagRecursive(el, "question") as HTMLElement;
-  const answers: HTMLCollection = question.getElementsByTagName("answer") as HTMLCollection;
-  //change icons and collapse
-  if (el.getAttribute("clicked") == "true") {
-    el.setAttribute("src", Ressources.plus_solid);
-    el.setAttribute("clicked", "false");
-    for (let i = answers.length - 1; i >= 0; i--) {
-      let answer = answers[i] as HTMLElement;
-      let explanation = answer.getElementsByTagName("explanation")[0];
-      (explanation != undefined) ? explanation.removeAttribute("visible"): "";
-    }
-  }
-  else {
-    el.setAttribute("src", Ressources.minus_solid);
-    el.setAttribute("clicked", "true");
-    for (let i = answers.length - 1; i >= 0; i--) {
-      let answer = answers[i] as HTMLElement;
-      let explanation = answer.getElementsByTagName("explanation")[0];
-      (explanation != undefined) ? explanation.setAttribute("visible", "true"): "";
-    }
-  }
-}
-// show <explanation>
-//Answer->DOM Manipulation
-function showExplanation(answer: HTMLElement) {
-  let explanation: HTMLElement = answer.getElementsByTagName("explanation")[0] as HTMLElement;
-  if (explanation.getAttribute("visible") == "true") {
-    explanation.removeAttribute("visible");
-  }
-  else {
-    explanation.setAttribute("visible", "true");
-  }
-}
-// unified click on answer event handler
-function clickAnswerHandler(event: Event) {
-  const el = event.target as HTMLElement;
-  checkAnswerEventHandler(el);
-  // show Explanation
-  let answer = getTagRecursive(el, "answer");
-  if (answer.getElementsByTagName('explanation').length == 0){
-    console.log("There is no explanation");
-  }
-  else{
-    showExplanation(answer);
-  }
-}
-
-
-// check click for correct answer
-// depending on question type show either
-// - for multiplechoice just clicked answer
-// - for singlechoice all answers
-function checkAnswerEventHandler(el: HTMLElement) {
-  let question_type = getTagRecursive(el, "question").getAttribute("type");
-  if (question_type == "multiplechoice") {
-    let answer = getTagRecursive(el, "answer");
-    showAnswer(answer);
-  }
-  else if (question_type == "singlechoice") {
-    let answers = getTagRecursive(el, "question").getElementsByTagName("answer") as HTMLCollection;
-    for (let i = answers ?.length - 1; i >= 0; i--) {
-      let answer: HTMLElement = answers[i] as HTMLElement;
-      showAnswer(answer);
-    }
-  }
-}
-// showAnswer
-// show icons and highlight answer
-function showAnswer(answer: HTMLElement) {
-  answer.setAttribute("clicked", "true");
-  let img = answer.getElementsByTagName("img")[0];
-  if (answer.getAttribute("correct") == "true") {
-    img.setAttribute("src", Ressources.check_solid);
-  }
-  else {
-    img.setAttribute("src", Ressources.xmark_solid);
-  }
-}
+// function questionChangeHandler(event: Event) {
+//   // get Questionnaire attributes
+//   let el: HTMLElement = event.target as HTMLElement;
+//   let button = el.getAttribute("id");
+//   let questionnaire: HTMLElement = getTagRecursive(el, "questionnaire") as HTMLElement;
+//   let total_questions: number = parseInt(questionnaire.getAttribute("total_questions") as string);
+//   let current_question: number = parseInt(questionnaire.getAttribute("current_question") as string);
+//   let questions = questionnaire.getElementsByTagName("question");
+//   let min_qid: number = 0;
+//   let max_qid: number = total_questions - 1;
+//   let qid = current_question - 1;
+//   // change question
+//   // if button is "prev"
+//   switch (button) {
+//     case "prev_button":
+//       let prev_qid = current_question - 1;
+//       // change visibility to the previous question
+//       questions[qid].removeAttribute("visible");
+//       questions[qid - 1].setAttribute("visible", "true");
+//       // change question overview text
+//       questionnaire.setAttribute("current_question", prev_qid.toString());
+//       questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + prev_qid.toString() + " of " + total_questions;
+//       //hide button if button to first question
+//       if (prev_qid - 1 == min_qid) {
+//         el.setAttribute("style", "visibility:hidden;");
+//       }
+//       // show next-Button
+//       el.nextElementSibling ?.setAttribute("style", "visibility:visible;");
+//       break;
+//
+//     case "next_button":
+//       let next_qid = qid + 1;
+//       questions[qid].removeAttribute("visible");
+//       questions[next_qid].setAttribute("visible", "true");
+//       //change question overview text
+//       questionnaire.setAttribute("current_question", (current_question + 1).toString());
+//       questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + (current_question + 1).toString() + " of " + total_questions;
+//       // hide button if button to last question
+//       if (next_qid == max_qid) {
+//         el.setAttribute("style", "visibility:hidden;");
+//       }
+//       //show prev_button
+//       el.previousElementSibling ?.setAttribute("style", "visibility:visible;");
+//       break;
+//
+//     default:
+//       console.log("No Button caused this EventHandler", button);
+//       break;
+//   }
+//
+//
+// }
+//
+//
+//
+// // CollapseEventHandler
+// // Handles Collapse Event for shoowing explanation texts
+// function collapseEventHandler(event: Event) {
+//   const el = event.target as HTMLElement;
+//   const question: HTMLElement = getTagRecursive(el, "question") as HTMLElement;
+//   const answers: HTMLCollection = question.getElementsByTagName("answer") as HTMLCollection;
+//   //change icons and collapse
+//   if (el.getAttribute("clicked") == "true") {
+//     el.setAttribute("src", Ressources.plus_solid);
+//     el.setAttribute("clicked", "false");
+//     for (let i = answers.length - 1; i >= 0; i--) {
+//       let answer = answers[i] as HTMLElement;
+//       let explanation = answer.getElementsByTagName("explanation")[0];
+//       (explanation != undefined) ? explanation.removeAttribute("visible"): "";
+//     }
+//   }
+//   else {
+//     el.setAttribute("src", Ressources.minus_solid);
+//     el.setAttribute("clicked", "true");
+//     for (let i = answers.length - 1; i >= 0; i--) {
+//       let answer = answers[i] as HTMLElement;
+//       let explanation = answer.getElementsByTagName("explanation")[0];
+//       (explanation != undefined) ? explanation.setAttribute("visible", "true"): "";
+//     }
+//   }
+// }
+// // show <explanation>
+// //Answer->DOM Manipulation
+// function showExplanation(answer: HTMLElement) {
+//   let explanation: HTMLElement = answer.getElementsByTagName("explanation")[0] as HTMLElement;
+//   if (explanation.getAttribute("visible") == "true") {
+//     explanation.removeAttribute("visible");
+//   }
+//   else {
+//     explanation.setAttribute("visible", "true");
+//   }
+// }
+// // unified click on answer event handler
+// function clickAnswerHandler(event: Event) {
+//   const el = event.target as HTMLElement;
+//   checkAnswerEventHandler(el);
+//   // show Explanation
+//   let answer = getTagRecursive(el, "answer");
+//   if (answer.getElementsByTagName('explanation').length == 0){
+//     console.log("There is no explanation");
+//   }
+//   else{
+//     showExplanation(answer);
+//   }
+// }
+//
+//
+// // check click for correct answer
+// // depending on question type show either
+// // - for multiplechoice just clicked answer
+// // - for singlechoice all answers
+// function checkAnswerEventHandler(el: HTMLElement) {
+//   let question_type = getTagRecursive(el, "question").getAttribute("type");
+//   if (question_type == "multiplechoice") {
+//     let answer = getTagRecursive(el, "answer");
+//     showAnswer(answer);
+//   }
+//   else if (question_type == "singlechoice") {
+//     let answers = getTagRecursive(el, "question").getElementsByTagName("answer") as HTMLCollection;
+//     for (let i = answers ?.length - 1; i >= 0; i--) {
+//       let answer: HTMLElement = answers[i] as HTMLElement;
+//       showAnswer(answer);
+//     }
+//   }
+// }
+// // showAnswer
+// // show icons and highlight answer
+// function showAnswer(answer: HTMLElement) {
+//   answer.setAttribute("clicked", "true");
+//   let img = answer.getElementsByTagName("img")[0];
+//   if (answer.getAttribute("correct") == "true") {
+//     img.setAttribute("src", Ressources.check_solid);
+//   }
+//   else {
+//     img.setAttribute("src", Ressources.xmark_solid);
+//   }
+// }

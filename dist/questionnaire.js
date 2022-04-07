@@ -37,6 +37,7 @@ function parseAnswer(answer) {
         rootElement: answer
     };
 }
+// ############### main function
 function setup() {
     // setup style
     const styleNode = document.createElement('style');
@@ -65,82 +66,94 @@ window.onload = setup;
 // - answer
 // - question
 // ### RENDER FUNCTIONS ###
+// - state is stored in the DOM via attributes
+// - as much hiding/showing as possible is done via css classes depending
+//   on those attributes
+// ### Questionnaire
+// <questionnaire>
+//  - total_questions
+//  - current_question
 function renderQuestionnaire(questionnaire) {
     const root = questionnaire.rootElement;
     root.setAttribute("total_questions", "" + questionnaire.questions.length);
     root.setAttribute("current_question", "1");
-    const overview_text = oneQuestionOnly("overview_text");
-    const buttons = oneQuestionOnly("buttons");
     root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
-      ${overview_text}
+      ${(questionnaire.questions.length == 1) ? '' : `Question 1 of ${questionnaire.questions.length}`}
       </div>
       ${questionnaire.questions.map(renderQuestion).join('')}
-      <div class="question-footer">
-      ${buttons}
-      </div>
     </div>
   `;
-    // Local functions
-    function oneQuestionOnly(pos) {
-        switch (pos) {
-            // if only one question exists, ignore question overview text
-            case "overview_text":
-                if (questionnaire.questions.length == 1) {
-                    return "";
-                }
-                else {
-                    return `Question 1 of ${questionnaire.questions.length}`;
-                }
-            // if only one question exists, ignore "prev", "next" buttons.
-            case "buttons":
-                if (questionnaire.questions.length == 1) {
-                    return "";
-                }
-                else {
-                    return `
-          <div class="change-question-button"
-               id="prev_button"
-               style="visibility:hidden;"
-               onclick="questionChangeHandler(event)">
-               prev
-          </div>
-          <div class="change-question-button"
-               id="next_button"
-               onclick="questionChangeHandler(event)">
-               next
-          </div>
-          `;
-                }
-            default:
-                break;
-        }
-    }
 }
-// renderQuestions
-// if validation fails return false, else return html-string
+// ### Question
+// <question>
+//  - type: "singlechoice"|"multiplechoice"
+//  - visible: "true" or not present
+//  - answer: "pending"|"correct"|"wrong"
 function renderQuestion(question, index) {
-    // if (validateAttribute(question) == true) {
     return `
-    <question type="${question.type}" ${index == 0 ? 'visible="true"' : ''}>
+    <question type="${question.type}"
+              ${index == 0 ? 'visible="true"' : ''}
+              answer="pending">
+      <div class="correct-text">
+        <p>Correct!</p>
+      </div>
+      <div class="wrong-text">
+        <p>Wrong!</p>
+      </div>
       <div class="question-header">
         <div>${question.text.map(nodeOuterHTML).join('')}</div>
-        <img src="${Ressources.plus_solid}" onclick="collapseEventHandler(event)">
       </div>
       ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
+      <div class="question-footer">
+        <div class="next-button" onClick="showNextQuestion(event)">
+          Next
+        </div>
+        <div class="submit-button" onClick="submitAnswer(event)">
+          Submit
+        </div>
+      </div>
     </question>
   `;
 }
-//  else {
-//    return "";
-//  }
-//}
+// event handlers:
+// continue
+function showNextQuestion(event) {
+    var _a;
+    const el = event.target;
+    const currentQuestion = getTagRecursive(el, "question");
+    const questionnaire = getTagRecursive(currentQuestion, "questionnaire");
+    // update header
+    const total_questions = parseInt(questionnaire.getAttribute("total_questions"));
+    const current_question = parseInt(questionnaire.getAttribute("current_question"));
+    if (current_question == total_questions) {
+        console.error("Tried to show next question, but we are already at the last question. Emitted by:", currentQuestion, el);
+        return;
+    }
+    questionnaire.setAttribute("current_question", (current_question + 1).toString());
+    questionnaire.getElementsByClassName("question-overview")[0].textContent = `Question ${current_question + 1} of ${total_questions}`;
+    // update visibility
+    (_a = currentQuestion.nextElementSibling) === null || _a === void 0 ? void 0 : _a.setAttribute('visible', 'true');
+    currentQuestion.removeAttribute('visible');
+}
+// submit
+function submitAnswer(event) {
+    const el = event.target;
+    const question = getTagRecursive(el, "question");
+    const answers = question.getElementsByTagName('answer');
+    const correct = Array.from(answers).every(a => a.getAttribute('correct') == a.getAttribute('selected'));
+    question.setAttribute('answer', correct ? 'correct' : 'wrong');
+}
+// ### Answer
+// <answer>
+//  - correct: "true"|"false"
+//  - selected: "true"|"false"
 function renderAnswer(type, answer) {
     return `
-  <answer correct="${answer.correct ? 'true' : 'false'}">
-    <div class="wrapper-answer" onclick="clickAnswerHandler(event)">
-      <img src="${type == 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular}">
+  <answer correct="${answer.correct ? 'true' : 'false'}" selected="false">
+    <div class="wrapper-answer" onclick="selectAnswer(event)">
+      <img class="answer-mark" src="${type == 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular}">
       <div>
         ${answer.text.map(nodeOuterHTML).join('')}
         ${(answer.explanation == undefined) ? '' : answer.explanation.outerHTML}
@@ -149,6 +162,7 @@ function renderAnswer(type, answer) {
   </answer>
   `;
 }
+// helper
 function nodeOuterHTML(x) {
     const outerHTML = x.outerHTML;
     if (outerHTML == undefined) {
@@ -161,7 +175,27 @@ function nodeOuterHTML(x) {
     console.log("outerHTML:" + outerHTML);
     return outerHTML;
 }
-// renderError
+// event handler
+function selectAnswer(event) {
+    const el = event.target;
+    const answer = getTagRecursive(el, 'answer');
+    const answermark = answer.getElementsByClassName('answer-mark')[0];
+    const question = getTagRecursive(answer, 'question');
+    if (answer.getAttribute('selected') == 'false') {
+        answer.setAttribute('selected', 'true');
+        answermark.setAttribute('src', Ressources.xmark_solid);
+        if (question.getAttribute('type') == 'singlechoice') {
+            submitAnswer(event);
+        }
+    }
+    else {
+        answer.setAttribute('selected', 'false');
+        // we know it must be multiple choice - else we could not unselect stuff
+        answermark.setAttribute('src', Ressources.square_regular);
+    }
+}
+// ### Error
+// render Function
 function renderError(current_el, message) {
     const el_name = current_el.localName;
     const questionnaire = getTagRecursive(current_el, "questionnaire");
@@ -181,6 +215,15 @@ function renderError(current_el, message) {
   `;
     questionnaire.innerHTML = error_html;
     console.log(error_html);
+}
+// helper
+// escape HTML TAGS
+function escapeHtml(str) {
+    return str.replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
 }
 // ######### VALIDATION METHODS ##########
 // validateQuestionnaireStructure
@@ -304,22 +347,6 @@ function validateAttribute(question) {
     }
 }
 // ######## HELPER FUNCTIONS #######
-// makeDiv
-// ClassName as String -> HTMLDivElement
-function makeDiv(css_name) {
-    const new_div = document.createElement("div");
-    new_div.setAttribute("class", css_name);
-    return new_div;
-}
-// escapeHtml
-// escape HTML TAGS
-function escapeHtml(str) {
-    return str.replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-}
 // getTagRecursive from a child element
 // if element has TagName
 // return;
@@ -338,135 +365,143 @@ function getTagRecursive(el, tag) {
 // EVENT AFTER BUTTON "prev" OR "next" CLICK
 // questionChangeHandler
 // EventHandler -> DOM Manipulation
-function questionChangeHandler(event) {
-    var _a, _b;
-    // get Questionnaire attributes
-    let el = event.target;
-    let button = el.getAttribute("id");
-    let questionnaire = getTagRecursive(el, "questionnaire");
-    let total_questions = parseInt(questionnaire.getAttribute("total_questions"));
-    let current_question = parseInt(questionnaire.getAttribute("current_question"));
-    let questions = questionnaire.getElementsByTagName("question");
-    let min_qid = 0;
-    let max_qid = total_questions - 1;
-    let qid = current_question - 1;
-    // change question
-    // if button is "prev"
-    switch (button) {
-        case "prev_button":
-            let prev_qid = current_question - 1;
-            // change visibility to the previous question
-            questions[qid].removeAttribute("visible");
-            questions[qid - 1].setAttribute("visible", "true");
-            // change question overview text
-            questionnaire.setAttribute("current_question", prev_qid.toString());
-            questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + prev_qid.toString() + " of " + total_questions;
-            //hide button if button to first question
-            if (prev_qid - 1 == min_qid) {
-                el.setAttribute("style", "visibility:hidden;");
-            }
-            // show next-Button
-            (_a = el.nextElementSibling) === null || _a === void 0 ? void 0 : _a.setAttribute("style", "visibility:visible;");
-            break;
-        case "next_button":
-            let next_qid = qid + 1;
-            questions[qid].removeAttribute("visible");
-            questions[next_qid].setAttribute("visible", "true");
-            //change question overview text
-            questionnaire.setAttribute("current_question", (current_question + 1).toString());
-            questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + (current_question + 1).toString() + " of " + total_questions;
-            // hide button if button to last question
-            if (next_qid == max_qid) {
-                el.setAttribute("style", "visibility:hidden;");
-            }
-            //show prev_button
-            (_b = el.previousElementSibling) === null || _b === void 0 ? void 0 : _b.setAttribute("style", "visibility:visible;");
-            break;
-        default:
-            console.log("No Button caused this EventHandler", button);
-            break;
-    }
-}
-// CollapseEventHandler
-// Handles Collapse Event for shoowing explanation texts
-function collapseEventHandler(event) {
-    const el = event.target;
-    const question = getTagRecursive(el, "question");
-    const answers = question.getElementsByTagName("answer");
-    //change icons and collapse
-    if (el.getAttribute("clicked") == "true") {
-        el.setAttribute("src", Ressources.plus_solid);
-        el.setAttribute("clicked", "false");
-        for (let i = answers.length - 1; i >= 0; i--) {
-            let answer = answers[i];
-            let explanation = answer.getElementsByTagName("explanation")[0];
-            (explanation != undefined) ? explanation.removeAttribute("visible") : "";
-        }
-    }
-    else {
-        el.setAttribute("src", Ressources.minus_solid);
-        el.setAttribute("clicked", "true");
-        for (let i = answers.length - 1; i >= 0; i--) {
-            let answer = answers[i];
-            let explanation = answer.getElementsByTagName("explanation")[0];
-            (explanation != undefined) ? explanation.setAttribute("visible", "true") : "";
-        }
-    }
-}
-// show <explanation>
-//Answer->DOM Manipulation
-function showExplanation(answer) {
-    let explanation = answer.getElementsByTagName("explanation")[0];
-    if (explanation.getAttribute("visible") == "true") {
-        explanation.removeAttribute("visible");
-    }
-    else {
-        explanation.setAttribute("visible", "true");
-    }
-}
-// unified click on answer event handler
-function clickAnswerHandler(event) {
-    const el = event.target;
-    checkAnswerEventHandler(el);
-    // show Explanation
-    let answer = getTagRecursive(el, "answer");
-    if (answer.getElementsByTagName('explanation').length == 0) {
-        console.log("There is no explanation");
-    }
-    else {
-        showExplanation(answer);
-    }
-}
-// check click for correct answer
-// depending on question type show either
-// - for multiplechoice just clicked answer
-// - for singlechoice all answers
-function checkAnswerEventHandler(el) {
-    let question_type = getTagRecursive(el, "question").getAttribute("type");
-    if (question_type == "multiplechoice") {
-        let answer = getTagRecursive(el, "answer");
-        showAnswer(answer);
-    }
-    else if (question_type == "singlechoice") {
-        let answers = getTagRecursive(el, "question").getElementsByTagName("answer");
-        for (let i = (answers === null || answers === void 0 ? void 0 : answers.length) - 1; i >= 0; i--) {
-            let answer = answers[i];
-            showAnswer(answer);
-        }
-    }
-}
-// showAnswer
-// show icons and highlight answer
-function showAnswer(answer) {
-    answer.setAttribute("clicked", "true");
-    let img = answer.getElementsByTagName("img")[0];
-    if (answer.getAttribute("correct") == "true") {
-        img.setAttribute("src", Ressources.check_solid);
-    }
-    else {
-        img.setAttribute("src", Ressources.xmark_solid);
-    }
-}
+// function questionChangeHandler(event: Event) {
+//   // get Questionnaire attributes
+//   let el: HTMLElement = event.target as HTMLElement;
+//   let button = el.getAttribute("id");
+//   let questionnaire: HTMLElement = getTagRecursive(el, "questionnaire") as HTMLElement;
+//   let total_questions: number = parseInt(questionnaire.getAttribute("total_questions") as string);
+//   let current_question: number = parseInt(questionnaire.getAttribute("current_question") as string);
+//   let questions = questionnaire.getElementsByTagName("question");
+//   let min_qid: number = 0;
+//   let max_qid: number = total_questions - 1;
+//   let qid = current_question - 1;
+//   // change question
+//   // if button is "prev"
+//   switch (button) {
+//     case "prev_button":
+//       let prev_qid = current_question - 1;
+//       // change visibility to the previous question
+//       questions[qid].removeAttribute("visible");
+//       questions[qid - 1].setAttribute("visible", "true");
+//       // change question overview text
+//       questionnaire.setAttribute("current_question", prev_qid.toString());
+//       questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + prev_qid.toString() + " of " + total_questions;
+//       //hide button if button to first question
+//       if (prev_qid - 1 == min_qid) {
+//         el.setAttribute("style", "visibility:hidden;");
+//       }
+//       // show next-Button
+//       el.nextElementSibling ?.setAttribute("style", "visibility:visible;");
+//       break;
+//
+//     case "next_button":
+//       let next_qid = qid + 1;
+//       questions[qid].removeAttribute("visible");
+//       questions[next_qid].setAttribute("visible", "true");
+//       //change question overview text
+//       questionnaire.setAttribute("current_question", (current_question + 1).toString());
+//       questionnaire.getElementsByClassName("question-overview")[0].textContent = "Question " + (current_question + 1).toString() + " of " + total_questions;
+//       // hide button if button to last question
+//       if (next_qid == max_qid) {
+//         el.setAttribute("style", "visibility:hidden;");
+//       }
+//       //show prev_button
+//       el.previousElementSibling ?.setAttribute("style", "visibility:visible;");
+//       break;
+//
+//     default:
+//       console.log("No Button caused this EventHandler", button);
+//       break;
+//   }
+//
+//
+// }
+//
+//
+//
+// // CollapseEventHandler
+// // Handles Collapse Event for shoowing explanation texts
+// function collapseEventHandler(event: Event) {
+//   const el = event.target as HTMLElement;
+//   const question: HTMLElement = getTagRecursive(el, "question") as HTMLElement;
+//   const answers: HTMLCollection = question.getElementsByTagName("answer") as HTMLCollection;
+//   //change icons and collapse
+//   if (el.getAttribute("clicked") == "true") {
+//     el.setAttribute("src", Ressources.plus_solid);
+//     el.setAttribute("clicked", "false");
+//     for (let i = answers.length - 1; i >= 0; i--) {
+//       let answer = answers[i] as HTMLElement;
+//       let explanation = answer.getElementsByTagName("explanation")[0];
+//       (explanation != undefined) ? explanation.removeAttribute("visible"): "";
+//     }
+//   }
+//   else {
+//     el.setAttribute("src", Ressources.minus_solid);
+//     el.setAttribute("clicked", "true");
+//     for (let i = answers.length - 1; i >= 0; i--) {
+//       let answer = answers[i] as HTMLElement;
+//       let explanation = answer.getElementsByTagName("explanation")[0];
+//       (explanation != undefined) ? explanation.setAttribute("visible", "true"): "";
+//     }
+//   }
+// }
+// // show <explanation>
+// //Answer->DOM Manipulation
+// function showExplanation(answer: HTMLElement) {
+//   let explanation: HTMLElement = answer.getElementsByTagName("explanation")[0] as HTMLElement;
+//   if (explanation.getAttribute("visible") == "true") {
+//     explanation.removeAttribute("visible");
+//   }
+//   else {
+//     explanation.setAttribute("visible", "true");
+//   }
+// }
+// // unified click on answer event handler
+// function clickAnswerHandler(event: Event) {
+//   const el = event.target as HTMLElement;
+//   checkAnswerEventHandler(el);
+//   // show Explanation
+//   let answer = getTagRecursive(el, "answer");
+//   if (answer.getElementsByTagName('explanation').length == 0){
+//     console.log("There is no explanation");
+//   }
+//   else{
+//     showExplanation(answer);
+//   }
+// }
+//
+//
+// // check click for correct answer
+// // depending on question type show either
+// // - for multiplechoice just clicked answer
+// // - for singlechoice all answers
+// function checkAnswerEventHandler(el: HTMLElement) {
+//   let question_type = getTagRecursive(el, "question").getAttribute("type");
+//   if (question_type == "multiplechoice") {
+//     let answer = getTagRecursive(el, "answer");
+//     showAnswer(answer);
+//   }
+//   else if (question_type == "singlechoice") {
+//     let answers = getTagRecursive(el, "question").getElementsByTagName("answer") as HTMLCollection;
+//     for (let i = answers ?.length - 1; i >= 0; i--) {
+//       let answer: HTMLElement = answers[i] as HTMLElement;
+//       showAnswer(answer);
+//     }
+//   }
+// }
+// // showAnswer
+// // show icons and highlight answer
+// function showAnswer(answer: HTMLElement) {
+//   answer.setAttribute("clicked", "true");
+//   let img = answer.getElementsByTagName("img")[0];
+//   if (answer.getAttribute("correct") == "true") {
+//     img.setAttribute("src", Ressources.check_solid);
+//   }
+//   else {
+//     img.setAttribute("src", Ressources.xmark_solid);
+//   }
+// }
 var Ressources;
 (function (Ressources) {
     Ressources.angle_left_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMTkyIDQ0OGMtOC4xODggMC0xNi4zOC0zLjEyNS0yMi42Mi05LjM3NWwtMTYwLTE2MGMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNWwxNjAtMTYwYzEyLjUtMTIuNSAzMi43NS0xMi41IDQ1LjI1IDBzMTIuNSAzMi43NSAwIDQ1LjI1TDc3LjI1IDI1NmwxMzcuNCAxMzcuNGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1QzIwOC40IDQ0NC45IDIwMC4yIDQ0OCAxOTIgNDQ4eiIvPjwvc3ZnPg==`;
@@ -477,11 +512,33 @@ var Ressources;
     Ressources.plus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDMyIDI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMyIDMyLjAxSDI1NnYxNDRjMCAxNy42OS0xNC4zMyAzMS45OS0zMiAzMS45OXMtMzItMTQuMy0zMi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5IDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQuMzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8+PC9zdmc+`;
     Ressources.square_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzg0IDMyQzQxOS4zIDMyIDQ0OCA2MC42NSA0NDggOTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42NSA0ODAgMCA0NTEuMyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMzg0IDgwSDY0QzU1LjE2IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0MzIgNjQgNDMySDM4NEMzOTIuOCA0MzIgNDAwIDQyNC44IDQwMCA0MTZWOTZDNDAwIDg3LjE2IDM5Mi44IDgwIDM4NCA4MHoiLz48L3N2Zz4=`;
     Ressources.xmark_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIuNzUgMCA0NS4yNUMzMDQuNCA0MTIuOSAyOTYuMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUtMjIuNjItOS4zNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQxNiAzMiA0MTZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1IDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1IDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1LjRMMzEwLjYgMzYxLjR6Ii8+PC9zdmc+`;
-    Ressources.style = `questionnaire {
+    Ressources.style = `/* ERROR MESSAGE */
+questionnaire .error-wrapper{
+  display:block;
+  max-width: 600px;
+  border: 5px solid red;
+   margin: 0 auto;
+  padding:0 20px;
+}
+questionnaire .error-header{
+
+}
+questionnaire .error-box{
+font-size:16pt;
+line-height:1.5em;
+}
+
+questionnaire .error-message{
+  font-family:monospace;
+  font-size:12pt;
+}
+
+/* QUESTIONNAIRE */
+/* Basic layout */
+questionnaire {
   display: block;
   margin: 40px 0 100px ;
 }
-
 questionnaire .content-wrapper {
   display: flex;
   flex-wrap: wrap;
@@ -490,9 +547,7 @@ questionnaire .content-wrapper {
   padding: 10px;
   justify-content: center;
 }
-questionnaire question{
-  display:none;
-}
+
 questionnaire .question-overview{
 margin: 0 auto 10px;
 font-size:1.1em;
@@ -517,10 +572,6 @@ questionnaire .question-header {
 
 questionnaire .question-footer{
   justify-content: center;
-}
-
-questionnaire [visible=true]{
-    display:block;
 }
 
 questionnaire .wrapper-answer {
@@ -590,39 +641,81 @@ questionnaire [clicked=true][correct=true] .wrapper-answer{
   background-color:#aceb84;
 }
 
-questionnaire .change-question-button{
-  padding:15px;
-  margin:0 15px;
-  border: 4px solid #bbb;
-  border-radius: 7px;
-  font-size:1.3em;
-}
-questionnaire .change-question-button:hover{
-  background-color: #bbb;
-}
-
 @media (min-width: 768px) {
   questionnaire question {
     max-width: 600px;
   }
 }
-.error-wrapper{
+
+/* FEEDBACK */
+/* text */
+questionnaire .correct-text, questionnaire .wrong-text {
+  display: inline-flex;
+  width: 100%;
+  justify-content: center;
+  display: none;
+}
+
+questionnaire question[answer="correct"] .correct-text {
+  display: inline-flex;
+  color: darkgreen;
+}
+
+questionnaire question[answer="wrong"] .wrong-text {
+  display: inline-flex;
+  color: darkred;
+}
+
+/* answers */
+/* *="o" means correct or wrong, not pending */
+questionnaire question[answer*="o"] answer[correct="true"][selected="true"] .wrapper-answer {
+  border: 2px solid green;
+}
+questionnaire question[answer*="o"] answer[correct="true"] .wrapper-answer {
+  background-color: lightgreen;
+}
+questionnaire question[answer*="o"] answer[correct="false"][selected="true"] .wrapper-answer {
+  background-color: lightpink;
+}
+
+/* NAVIGATION */
+/* only show question that has been set visible */
+questionnaire question{
+  display:none;
+}
+questionnaire [visible=true]{
   display:block;
-  max-width: 600px;
-  border: 5px solid red;
-   margin: 0 auto;
-  padding:0 20px;
-}
-.error-header{
-
-}
-.error-box{
-font-size:16pt;
-line-height:1.5em;
 }
 
-.error-message{
-  font-family:monospace;
-  font-size:12pt;
+/* button styles */
+questionnaire .submit-button, questionnaire .next-button {
+  padding:15px;
+  margin:5px 15px;
+  border: 4px solid #bbb;
+  border-radius: 7px;
+  font-size:1.3em;
+}
+questionnaire .submit-button:hover, questionnaire .next-button:hover{
+  background-color: #bbb;
+  cursor:pointer;
+}
+
+/* show submit-button for unanswered multiplechoice questions */
+questionnaire .submit-button {
+  display: none;
+}
+questionnaire question[type="multiplechoice"][answer="pending"] .submit-button {
+  display: block;
+}
+
+/* show next-button for answered questions */
+questionnaire .next-button {
+  display: block;
+}
+questionnaire question[answer="pending"] .next-button {
+  display: none;
+}
+questionnaire question:last-of-type .next-button {
+  display: none;
 }`;
 })(Ressources || (Ressources = {}));

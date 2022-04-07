@@ -7,11 +7,33 @@ export const minus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3
 export const plus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDMyIDI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMyIDMyLjAxSDI1NnYxNDRjMCAxNy42OS0xNC4zMyAzMS45OS0zMiAzMS45OXMtMzItMTQuMy0zMi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5IDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQuMzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8+PC9zdmc+`;
 export const square_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzg0IDMyQzQxOS4zIDMyIDQ0OCA2MC42NSA0NDggOTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42NSA0ODAgMCA0NTEuMyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMzg0IDgwSDY0QzU1LjE2IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0MzIgNjQgNDMySDM4NEMzOTIuOCA0MzIgNDAwIDQyNC44IDQwMCA0MTZWOTZDNDAwIDg3LjE2IDM5Mi44IDgwIDM4NCA4MHoiLz48L3N2Zz4=`;
 export const xmark_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMjAgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzEwLjYgMzYxLjRjMTIuNSAxMi41IDEyLjUgMzIuNzUgMCA0NS4yNUMzMDQuNCA0MTIuOSAyOTYuMiA0MTYgMjg4IDQxNnMtMTYuMzgtMy4xMjUtMjIuNjItOS4zNzVMMTYwIDMwMS4zTDU0LjYzIDQwNi42QzQ4LjM4IDQxMi45IDQwLjE5IDQxNiAzMiA0MTZTMTUuNjMgNDEyLjkgOS4zNzUgNDA2LjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1IDAtNDUuMjVsMTA1LjQtMTA1LjRMOS4zNzUgMTUwLjZjLTEyLjUtMTIuNS0xMi41LTMyLjc1IDAtNDUuMjVzMzIuNzUtMTIuNSA0NS4yNSAwTDE2MCAyMTAuOGwxMDUuNC0xMDUuNGMxMi41LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwczEyLjUgMzIuNzUgMCA0NS4yNWwtMTA1LjQgMTA1LjRMMzEwLjYgMzYxLjR6Ii8+PC9zdmc+`;
-export const style = `questionnaire {
+export const style = `/* ERROR MESSAGE */
+questionnaire .error-wrapper{
+  display:block;
+  max-width: 600px;
+  border: 5px solid red;
+   margin: 0 auto;
+  padding:0 20px;
+}
+questionnaire .error-header{
+
+}
+questionnaire .error-box{
+font-size:16pt;
+line-height:1.5em;
+}
+
+questionnaire .error-message{
+  font-family:monospace;
+  font-size:12pt;
+}
+
+/* QUESTIONNAIRE */
+/* Basic layout */
+questionnaire {
   display: block;
   margin: 40px 0 100px ;
 }
-
 questionnaire .content-wrapper {
   display: flex;
   flex-wrap: wrap;
@@ -20,9 +42,7 @@ questionnaire .content-wrapper {
   padding: 10px;
   justify-content: center;
 }
-questionnaire question{
-  display:none;
-}
+
 questionnaire .question-overview{
 margin: 0 auto 10px;
 font-size:1.1em;
@@ -47,10 +67,6 @@ questionnaire .question-header {
 
 questionnaire .question-footer{
   justify-content: center;
-}
-
-questionnaire [visible=true]{
-    display:block;
 }
 
 questionnaire .wrapper-answer {
@@ -120,39 +136,81 @@ questionnaire [clicked=true][correct=true] .wrapper-answer{
   background-color:#aceb84;
 }
 
-questionnaire .change-question-button{
-  padding:15px;
-  margin:0 15px;
-  border: 4px solid #bbb;
-  border-radius: 7px;
-  font-size:1.3em;
-}
-questionnaire .change-question-button:hover{
-  background-color: #bbb;
-}
-
 @media (min-width: 768px) {
   questionnaire question {
     max-width: 600px;
   }
 }
-.error-wrapper{
+
+/* FEEDBACK */
+/* text */
+questionnaire .correct-text, questionnaire .wrong-text {
+  display: inline-flex;
+  width: 100%;
+  justify-content: center;
+  display: none;
+}
+
+questionnaire question[answer="correct"] .correct-text {
+  display: inline-flex;
+  color: darkgreen;
+}
+
+questionnaire question[answer="wrong"] .wrong-text {
+  display: inline-flex;
+  color: darkred;
+}
+
+/* answers */
+/* *="o" means correct or wrong, not pending */
+questionnaire question[answer*="o"] answer[correct="true"][selected="true"] .wrapper-answer {
+  border: 2px solid green;
+}
+questionnaire question[answer*="o"] answer[correct="true"] .wrapper-answer {
+  background-color: lightgreen;
+}
+questionnaire question[answer*="o"] answer[correct="false"][selected="true"] .wrapper-answer {
+  background-color: lightpink;
+}
+
+/* NAVIGATION */
+/* only show question that has been set visible */
+questionnaire question{
+  display:none;
+}
+questionnaire [visible=true]{
   display:block;
-  max-width: 600px;
-  border: 5px solid red;
-   margin: 0 auto;
-  padding:0 20px;
-}
-.error-header{
-
-}
-.error-box{
-font-size:16pt;
-line-height:1.5em;
 }
 
-.error-message{
-  font-family:monospace;
-  font-size:12pt;
+/* button styles */
+questionnaire .submit-button, questionnaire .next-button {
+  padding:15px;
+  margin:5px 15px;
+  border: 4px solid #bbb;
+  border-radius: 7px;
+  font-size:1.3em;
+}
+questionnaire .submit-button:hover, questionnaire .next-button:hover{
+  background-color: #bbb;
+  cursor:pointer;
+}
+
+/* show submit-button for unanswered multiplechoice questions */
+questionnaire .submit-button {
+  display: none;
+}
+questionnaire question[type="multiplechoice"][answer="pending"] .submit-button {
+  display: block;
+}
+
+/* show next-button for answered questions */
+questionnaire .next-button {
+  display: block;
+}
+questionnaire question[answer="pending"] .next-button {
+  display: none;
+}
+questionnaire question:last-of-type .next-button {
+  display: none;
 }`;
 }

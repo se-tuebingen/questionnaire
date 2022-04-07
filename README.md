@@ -2,34 +2,13 @@
 [Etherpad](http://160.uk.to/pad/p/interactive-textbooks)
 [![Generate HTML & PDF](https://github.com/se-tuebingen/interactive-textbooks/actions/workflows/publish.yml/badge.svg)](https://github.com/se-tuebingen/interactive-textbooks/actions/workflows/publish.yml)
 
-## What is this Repository?
+## What can this module do?
 
-This is sort of an exchange playground for Linus and Florian to develop
-HTML/JS Modules for use in lecture materials.
+With this module, you can create simple HTML quizzes (questionnaires) with single- or multiplechoice questions by
+- providing HTML with custom tags (HTML5)
+- and including a single JavaScript file
 
-## Development
-
-### Requirements
-
-For the JavaScript module, [TypeScript](https://www.typescriptlang.org/download) is required. Once you have [nodejs](https://nodejs.org/en/download/) installed, you can simply run `npm install -g typescript`.
-
-For the Scribble module, you need to have [Racket](https://download.racket-lang.org/) installed. For PDF-Generation, you also need to have LaTex installed, more specifically on Linux Systems the `texlive-extra` and `texlive-fonts-extra` packages, on Mac Systems via the Homebrew-Installer `texlive`.
-
-For the time being, this repository uses bash for helper scripts, which should work fine on Linux and Mac Systems, for Windows users an emulator like Cygwin or Mingw should do.
-
-### Compilation and Targets
-
-Executing `tsc` in project root creates the single-file drop-in questionnaire module from the `src` folder.
-
-Because the goal is to provide on single JavaScript file, Styles and SVG icons are provided as String ressources in `ressources.ts`.
-This module is generated from the contents of the `ressources` folder (`style.css` and the `svg`-files in the `icons` folder) by running `bundle-ressources.sh`.
-So any changes in those files are only applied after running this script!
-
-For ease of use, there is also a Makefile, so you can simply
-run
-- `make all` to bundle ressources and compile the JavaScript plugin, and
-- `make test` to execute the tests - currently this only compiles a scribble test document in pdf and html
-
+There is also a module for Scribble (the Racket documentation tool), which not only generates the correct HTML, but also printable LaTex code in a custom location with the solutions as rotated text.
 
 ## How to use
 
@@ -40,10 +19,14 @@ In order to use the JavaScript module, one only needs to create HTML in the corr
 <questionnaire>
   <question type="singlechoice"><!-- or multiplechoice-->
     Question Text
-    <answer correct="false">
-      Answer Text
+    <distractor>
+      Wrong Answer Text
       <explanation>Explanation Text</explanation>
-    </answer>
+    </distractor>
+    <solution>
+      Correct answer text
+      <!-- explanation is optional -->
+    </solution>
     <!-- etc.. -->
   </question>
   <!-- etc. ... -->
@@ -96,9 +79,33 @@ There are also some styling options for the LaTex output that can be passed as k
   - `"inline"` below the questions
 - `#:explain` Whether to include explanations in the solution (default: `#t`)
 
-## Tests
+## Development
+
+### Requirements
+
+For the JavaScript module, [TypeScript](https://www.typescriptlang.org/download) is required. Once you have [nodejs](https://nodejs.org/en/download/) installed, you can simply run `npm install -g typescript`.
+
+For the Scribble module, you need to have [Racket](https://download.racket-lang.org/) installed. For PDF-Generation, you also need to have LaTex installed, more specifically on Linux Systems the `texlive-extra` and `texlive-fonts-extra` packages, on Mac Systems via the Homebrew-Installer `texlive`. _Note that on MacOS, you need to run `raco scribble` instead of `scribble` to compile documents (works fine with linux, too, and is the default in the provided scripts)._
+
+For the time being, this repository uses bash for helper scripts, which should work fine on Linux and Mac Systems, for Windows users an emulator like Cygwin or Mingw should do.
+
+### Compilation and Targets
+
+Executing `tsc` in project root creates the single-file drop-in questionnaire module from the `src` folder.
+
+Because the goal is to provide on single JavaScript file, Styles and SVG icons are provided as String ressources in `ressources.ts`.
+This module is generated from the contents of the `ressources` folder (`style.css` and the `svg`-files in the `icons` folder) by running `bundle-ressources.sh`.
+So any changes in those files are only applied after running this script!
+
+For ease of use, there is also a Makefile, so you can simply
+run
+- `make all` to bundle ressources and compile the JavaScript plugin, and
+- `make test` to execute the tests - currently this only compiles a scribble test document in pdf and html
+
+### Tests
 
 - `questionnaire-test.html` loads the JavaScript plugin into a plain HTML page.
+- `error-fail-testcase.html` demonstrates what happens if you provide incorrect HTML
 - Executing `make test` or running `test.sh` in the `scribble-plugin` folder tests the Scribble plugin and generates PDF- and HTML output.
 
 ## Ressources

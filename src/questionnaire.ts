@@ -163,7 +163,7 @@ function renderQuestion(question: Question, index: number) {
         <div>${question.text.map(nodeOuterHTML).join('')}</div>
         <img src="${Ressources.plus_solid}" onclick="collapseEventHandler(event)">
       </div>
-      ${question.answers.map(renderAnswer).join('')}
+      ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
     </question>
   `;
 }
@@ -172,11 +172,11 @@ function renderQuestion(question: Question, index: number) {
 //  }
 //}
 
-function renderAnswer(answer: Answer) {
+function renderAnswer(type: Questiontype, answer: Answer) {
   return `
   <answer correct="${answer.correct ? 'true' : 'false'}">
     <div class="wrapper-answer" onclick="clickAnswerHandler(event)">
-      <img src="${Ressources.circle_regular}">
+      <img src="${type == 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular}">
       <div>
         ${answer.text.map(nodeOuterHTML).join('')}
         ${(answer.explanation == undefined)? '' : answer.explanation.outerHTML}

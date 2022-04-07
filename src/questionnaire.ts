@@ -183,9 +183,18 @@ function submitAnswer(event: Event) {
   const question: HTMLElement = getTagRecursive(el, "question");
 
   const answers = question.getElementsByTagName('answer');
+
+  // check correctness
   const correct = Array.from(answers).every(a =>
     a.getAttribute('correct') == a.getAttribute('selected'));
   question.setAttribute('answer', correct ? 'correct' : 'wrong');
+
+  // expand necessary explanations, if present
+  Array.from(answers).map(a => {
+    if(a.getAttribute('selected') != a.getAttribute('correct')) {
+      a.setAttribute('expanded', 'true');
+    }
+  });
 }
 
 // ### Answer
@@ -194,14 +203,24 @@ function submitAnswer(event: Event) {
 //  - selected: "true"|"false"
 function renderAnswer(type: Questiontype, answer: Answer) {
   return `
-  <answer correct="${answer.correct ? 'true' : 'false'}" selected="false">
+  <answer correct="${answer.correct ? 'true' : 'false'}"
+          selected="false"
+          expanded="false">
     <div class="wrapper-answer" onclick="selectAnswer(event)">
       <img class="answer-mark" src="${type == 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular}">
-      <div>
+      <div class="answer-text-container">
         ${answer.text.map(nodeOuterHTML).join('')}
-        ${(answer.explanation == undefined)? '' : answer.explanation.outerHTML}
       </div>
+      ${answer.explanation == undefined ? '' : `
+        <img class="expander"
+             title="show explanation"
+             src="${Ressources.angle_down_solid}">
+        <img class="collapser"
+             title="hide explanation"
+             src="${Ressources.angle_up_solid}">
+      `}
     </div>
+    ${(answer.explanation == undefined)? '' : answer.explanation.outerHTML}
   </answer>
   `;
 }
@@ -222,19 +241,30 @@ function nodeOuterHTML(x: Node) {
 function selectAnswer(event: Event) {
   const el: HTMLElement = event.target as HTMLElement;
   const answer: HTMLElement = getTagRecursive(el, 'answer');
-  const answermark: HTMLElement = answer.getElementsByClassName('answer-mark')[0] as HTMLElement;
   const question: HTMLElement = getTagRecursive(answer, 'question');
-  if(answer.getAttribute('selected') == 'false') {
-    answer.setAttribute('selected', 'true');
-    answermark.setAttribute('src', Ressources.xmark_solid);
-    if(question.getAttribute('type') == 'singlechoice') {
-      submitAnswer(event);
+  if(question.getAttribute('answer') == 'pending') {
+    // toggle answer selection
+    const answermark: HTMLElement = answer.getElementsByClassName('answer-mark')[0] as HTMLElement;
+    if(answer.getAttribute('selected') == 'false') {
+      answer.setAttribute('selected', 'true');
+      answermark.setAttribute('src', Ressources.xmark_solid);
+      if(question.getAttribute('type') == 'singlechoice') {
+        submitAnswer(event);
+      }
+    } else {
+      answer.setAttribute('selected', 'false');
+      // we know it must be multiple choice - else we could not unselect stuff
+      answermark.setAttribute('src', Ressources.square_regular);
     }
   } else {
-    answer.setAttribute('selected', 'false');
-    // we know it must be multiple choice - else we could not unselect stuff
-    answermark.setAttribute('src', Ressources.square_regular);
+    // toggle showing of explanation
+    if(answer.getAttribute('expanded') == 'true') {
+      answer.setAttribute('expanded', 'false');
+    } else {
+      answer.setAttribute('expanded', 'true');
+    }
   }
+
 }
 
 // ### Error

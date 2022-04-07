@@ -142,8 +142,15 @@ function submitAnswer(event) {
     const el = event.target;
     const question = getTagRecursive(el, "question");
     const answers = question.getElementsByTagName('answer');
+    // check correctness
     const correct = Array.from(answers).every(a => a.getAttribute('correct') == a.getAttribute('selected'));
     question.setAttribute('answer', correct ? 'correct' : 'wrong');
+    // expand necessary explanations, if present
+    Array.from(answers).map(a => {
+        if (a.getAttribute('selected') != a.getAttribute('correct')) {
+            a.setAttribute('expanded', 'true');
+        }
+    });
 }
 // ### Answer
 // <answer>
@@ -151,14 +158,24 @@ function submitAnswer(event) {
 //  - selected: "true"|"false"
 function renderAnswer(type, answer) {
     return `
-  <answer correct="${answer.correct ? 'true' : 'false'}" selected="false">
+  <answer correct="${answer.correct ? 'true' : 'false'}"
+          selected="false"
+          expanded="false">
     <div class="wrapper-answer" onclick="selectAnswer(event)">
       <img class="answer-mark" src="${type == 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular}">
-      <div>
+      <div class="answer-text-container">
         ${answer.text.map(nodeOuterHTML).join('')}
-        ${(answer.explanation == undefined) ? '' : answer.explanation.outerHTML}
       </div>
+      ${answer.explanation == undefined ? '' : `
+        <img class="expander"
+             title="show explanation"
+             src="${Ressources.angle_down_solid}">
+        <img class="collapser"
+             title="hide explanation"
+             src="${Ressources.angle_up_solid}">
+      `}
     </div>
+    ${(answer.explanation == undefined) ? '' : answer.explanation.outerHTML}
   </answer>
   `;
 }
@@ -179,19 +196,31 @@ function nodeOuterHTML(x) {
 function selectAnswer(event) {
     const el = event.target;
     const answer = getTagRecursive(el, 'answer');
-    const answermark = answer.getElementsByClassName('answer-mark')[0];
     const question = getTagRecursive(answer, 'question');
-    if (answer.getAttribute('selected') == 'false') {
-        answer.setAttribute('selected', 'true');
-        answermark.setAttribute('src', Ressources.xmark_solid);
-        if (question.getAttribute('type') == 'singlechoice') {
-            submitAnswer(event);
+    if (question.getAttribute('answer') == 'pending') {
+        // toggle answer selection
+        const answermark = answer.getElementsByClassName('answer-mark')[0];
+        if (answer.getAttribute('selected') == 'false') {
+            answer.setAttribute('selected', 'true');
+            answermark.setAttribute('src', Ressources.xmark_solid);
+            if (question.getAttribute('type') == 'singlechoice') {
+                submitAnswer(event);
+            }
+        }
+        else {
+            answer.setAttribute('selected', 'false');
+            // we know it must be multiple choice - else we could not unselect stuff
+            answermark.setAttribute('src', Ressources.square_regular);
         }
     }
     else {
-        answer.setAttribute('selected', 'false');
-        // we know it must be multiple choice - else we could not unselect stuff
-        answermark.setAttribute('src', Ressources.square_regular);
+        // toggle showing of explanation
+        if (answer.getAttribute('expanded') == 'true') {
+            answer.setAttribute('expanded', 'false');
+        }
+        else {
+            answer.setAttribute('expanded', 'true');
+        }
     }
 }
 // ### Error
@@ -504,8 +533,10 @@ function getTagRecursive(el, tag) {
 // }
 var Ressources;
 (function (Ressources) {
+    Ressources.angle_down_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzODQgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMTkyIDM4NGMtOC4xODggMC0xNi4zOC0zLjEyNS0yMi42Mi05LjM3NWwtMTYwLTE2MGMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNXMzMi43NS0xMi41IDQ1LjI1IDBMMTkyIDMwNi44bDEzNy40LTEzNy40YzEyLjUtMTIuNSAzMi43NS0xMi41IDQ1LjI1IDBzMTIuNSAzMi43NSAwIDQ1LjI1bC0xNjAgMTYwQzIwOC40IDM4MC45IDIwMC4yIDM4NCAxOTIgMzg0eiIvPjwvc3ZnPg==`;
     Ressources.angle_left_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMTkyIDQ0OGMtOC4xODggMC0xNi4zOC0zLjEyNS0yMi42Mi05LjM3NWwtMTYwLTE2MGMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNWwxNjAtMTYwYzEyLjUtMTIuNSAzMi43NS0xMi41IDQ1LjI1IDBzMTIuNSAzMi43NSAwIDQ1LjI1TDc3LjI1IDI1NmwxMzcuNCAxMzcuNGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1QzIwOC40IDQ0NC45IDIwMC4yIDQ0OCAxOTIgNDQ4eiIvPjwvc3ZnPg==`;
     Ressources.angle_right_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNjQgNDQ4Yy04LjE4OCAwLTE2LjM4LTMuMTI1LTIyLjYyLTkuMzc1Yy0xMi41LTEyLjUtMTIuNS0zMi43NSAwLTQ1LjI1TDE3OC44IDI1Nkw0MS4zOCAxMTguNmMtMTIuNS0xMi41LTEyLjUtMzIuNzUgMC00NS4yNXMzMi43NS0xMi41IDQ1LjI1IDBsMTYwIDE2MGMxMi41IDEyLjUgMTIuNSAzMi43NSAwIDQ1LjI1bC0xNjAgMTYwQzgwLjM4IDQ0NC45IDcyLjE5IDQ0OCA2NCA0NDh6Ii8+PC9zdmc+`;
+    Ressources.angle_up_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzODQgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzUyIDM1MmMtOC4xODggMC0xNi4zOC0zLjEyNS0yMi42Mi05LjM3NUwxOTIgMjA1LjNsLTEzNy40IDEzNy40Yy0xMi41IDEyLjUtMzIuNzUgMTIuNS00NS4yNSAwcy0xMi41LTMyLjc1IDAtNDUuMjVsMTYwLTE2MGMxMi41LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwbDE2MCAxNjBjMTIuNSAxMi41IDEyLjUgMzIuNzUgMCA0NS4yNUMzNjguNCAzNDguOSAzNjAuMiAzNTIgMzUyIDM1MnoiLz48L3N2Zz4=`;
     Ressources.check_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDM4LjYgMTA1LjRDNDUxLjEgMTE3LjkgNDUxLjEgMTM4LjEgNDM4LjYgMTUwLjZMMTgyLjYgNDA2LjZDMTcwLjEgNDE5LjEgMTQ5LjkgNDE5LjEgMTM3LjQgNDA2LjZMOS4zNzIgMjc4LjZDLTMuMTI0IDI2Ni4xLTMuMTI0IDI0NS45IDkuMzcyIDIzMy40QzIxLjg3IDIyMC45IDQyLjEzIDIyMC45IDU0LjYzIDIzMy40TDE1OS4xIDMzOC43TDM5My40IDEwNS40QzQwNS45IDkyLjg4IDQyNi4xIDkyLjg4IDQzOC42IDEwNS40SDQzOC42eiIvPjwvc3ZnPg==`;
     Ressources.circle_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNTEyIDI1NkM1MTIgMzk3LjQgMzk3LjQgNTEyIDI1NiA1MTJDMTE0LjYgNTEyIDAgMzk3LjQgMCAyNTZDMCAxMTQuNiAxMTQuNiAwIDI1NiAwQzM5Ny40IDAgNTEyIDExNC42IDUxMiAyNTZ6TTI1NiA0OEMxNDEuMSA0OCA0OCAxNDEuMSA0OCAyNTZDNDggMzcwLjkgMTQxLjEgNDY0IDI1NiA0NjRDMzcwLjkgNDY0IDQ2NCAzNzAuOSA0NjQgMjU2QzQ2NCAxNDEuMSAzNzAuOSA0OCAyNTYgNDh6Ii8+PC9zdmc+`;
     Ressources.minus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTMxLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIgMzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8+PC9zdmc+`;
@@ -574,12 +605,29 @@ questionnaire .question-footer{
   justify-content: center;
 }
 
-questionnaire .wrapper-answer {
+questionnaire .wrapper-answer, questionnaire explanation {
   border: 1px solid #eee;
   padding: 5px 12px;
   font-size: 14pt;
   margin: 15px 0 0;
   width:90%;
+}
+questionnaire explanation {
+  margin-top: 0;
+  border-top: 0;
+}
+questionnaire answer[correct="true"] explanation {
+  border: 2px solid lightgreen;
+  border-top: 0;
+}
+questionnaire answer[correct="false"] explanation {
+  border: 2px solid lightpink;
+  border-top: 0;
+}
+
+questionnaire .wrapper-answer:hover {
+  cursor: pointer;
+  background-color: #eee;
 }
 
 questionnaire answer p {
@@ -588,15 +636,6 @@ questionnaire answer p {
   /*font-size: 12pt;
   border: 1px solid #000;
   width:100%;*/
-}
-
-questionnaire .wrapper-answer:hover, questionnaire img:hover, questionnaire .change-question-button:hover {
-  cursor: pointer;
-  /*background-color: #ddd;*/
-}
-
-questionnaire .wrapper-answer:hover {
-  background-color: #eee;
 }
 
 
@@ -618,7 +657,7 @@ questionnaire answer [visible=true] p {
   border: 0;
 }
 
-questionnaire img {
+questionnaire .answer-mark, questionnaire .expander, questionnaire .collapser {
   height: 1em;
   align-self: center;
 }
@@ -631,14 +670,6 @@ questionnaire p {
 questionnaire .wrapper-answer > div, questionnaire .question-header > div {
   margin: 0.5em;
   align-self: center;
-}
-
-questionnaire [clicked=true] .wrapper-answer, questionnaire [clicked=true] .wrapper-answer:hover{
-  background-color:#d30000;
-}
-
-questionnaire [clicked=true][correct=true] .wrapper-answer{
-  background-color:#aceb84;
 }
 
 @media (min-width: 768px) {
@@ -660,13 +691,22 @@ questionnaire question[answer="correct"] .correct-text {
   display: inline-flex;
   color: darkgreen;
 }
+questionnaire question[answer="correct"] {
+  border: 1px solid green;
+}
 
 questionnaire question[answer="wrong"] .wrong-text {
   display: inline-flex;
   color: darkred;
 }
+questionnaire question[answer="wrong"] {
+  border: 1px solid darkred;
+}
 
 /* answers */
+questionnaire question[answer="pending"] answer[selected="true"] .wrapper-answer {
+  border: 2px solid grey;
+}
 /* *="o" means correct or wrong, not pending */
 questionnaire question[answer*="o"] answer[correct="true"][selected="true"] .wrapper-answer {
   border: 2px solid green;
@@ -675,7 +715,31 @@ questionnaire question[answer*="o"] answer[correct="true"] .wrapper-answer {
   background-color: lightgreen;
 }
 questionnaire question[answer*="o"] answer[correct="false"][selected="true"] .wrapper-answer {
+  border: 2px solid darkred;
   background-color: lightpink;
+}
+
+/* explanation */
+/* manually expanded explanation */
+questionnaire .collapser, questionnaire .expander {
+  display: none;
+}
+questionnaire .answer-text-container {
+  flex-grow: 4;
+}
+
+questionnaire question[answer*="o"] .expander {
+  display: block;
+}
+
+questionnaire question[answer*="o"] answer[expanded="true"] explanation {
+  display: block;
+}
+questionnaire question[answer*="o"] answer[expanded="true"] .expander {
+  display: none;
+}
+questionnaire question[answer*="o"] answer[expanded="true"] .collapser {
+  display: block;
 }
 
 /* NAVIGATION */
@@ -691,6 +755,7 @@ questionnaire [visible=true]{
 questionnaire .submit-button, questionnaire .next-button {
   padding:15px;
   margin:5px 15px;
+  margin-top: 15px;
   border: 4px solid #bbb;
   border-radius: 7px;
   font-size:1.3em;

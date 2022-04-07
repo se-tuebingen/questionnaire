@@ -60,12 +60,29 @@ questionnaire .question-footer{
   justify-content: center;
 }
 
-questionnaire .wrapper-answer {
+questionnaire .wrapper-answer, questionnaire explanation {
   border: 1px solid #eee;
   padding: 5px 12px;
   font-size: 14pt;
   margin: 15px 0 0;
   width:90%;
+}
+questionnaire explanation {
+  margin-top: 0;
+  border-top: 0;
+}
+questionnaire answer[correct="true"] explanation {
+  border: 2px solid lightgreen;
+  border-top: 0;
+}
+questionnaire answer[correct="false"] explanation {
+  border: 2px solid lightpink;
+  border-top: 0;
+}
+
+questionnaire .wrapper-answer:hover {
+  cursor: pointer;
+  background-color: #eee;
 }
 
 questionnaire answer p {
@@ -74,15 +91,6 @@ questionnaire answer p {
   /*font-size: 12pt;
   border: 1px solid #000;
   width:100%;*/
-}
-
-questionnaire .wrapper-answer:hover, questionnaire img:hover, questionnaire .change-question-button:hover {
-  cursor: pointer;
-  /*background-color: #ddd;*/
-}
-
-questionnaire .wrapper-answer:hover {
-  background-color: #eee;
 }
 
 
@@ -104,7 +112,7 @@ questionnaire answer [visible=true] p {
   border: 0;
 }
 
-questionnaire img {
+questionnaire .answer-mark, questionnaire .expander, questionnaire .collapser {
   height: 1em;
   align-self: center;
 }
@@ -117,22 +125,6 @@ questionnaire p {
 questionnaire .wrapper-answer > div, questionnaire .question-header > div {
   margin: 0.5em;
   align-self: center;
-}
-
-/* TODO
-  - mark selected
-  - show/hide explanations
-  - manually show/hide explanations
-  - de-textify questions header
-  - maybe a frame instead of right/wrong?
-  - remove unnecessary handlers + styles
-*/
-questionnaire [clicked=true] .wrapper-answer, questionnaire [clicked=true] .wrapper-answer:hover{
-  background-color:#d30000;
-}
-
-questionnaire [clicked=true][correct=true] .wrapper-answer{
-  background-color:#aceb84;
 }
 
 @media (min-width: 768px) {
@@ -154,13 +146,22 @@ questionnaire question[answer="correct"] .correct-text {
   display: inline-flex;
   color: darkgreen;
 }
+questionnaire question[answer="correct"] {
+  border: 1px solid green;
+}
 
 questionnaire question[answer="wrong"] .wrong-text {
   display: inline-flex;
   color: darkred;
 }
+questionnaire question[answer="wrong"] {
+  border: 1px solid darkred;
+}
 
 /* answers */
+questionnaire question[answer="pending"] answer[selected="true"] .wrapper-answer {
+  border: 2px solid grey;
+}
 /* *="o" means correct or wrong, not pending */
 questionnaire question[answer*="o"] answer[correct="true"][selected="true"] .wrapper-answer {
   border: 2px solid green;
@@ -169,7 +170,31 @@ questionnaire question[answer*="o"] answer[correct="true"] .wrapper-answer {
   background-color: lightgreen;
 }
 questionnaire question[answer*="o"] answer[correct="false"][selected="true"] .wrapper-answer {
+  border: 2px solid darkred;
   background-color: lightpink;
+}
+
+/* explanation */
+/* manually expanded explanation */
+questionnaire .collapser, questionnaire .expander {
+  display: none;
+}
+questionnaire .answer-text-container {
+  flex-grow: 4;
+}
+
+questionnaire question[answer*="o"] .expander {
+  display: block;
+}
+
+questionnaire question[answer*="o"] answer[expanded="true"] explanation {
+  display: block;
+}
+questionnaire question[answer*="o"] answer[expanded="true"] .expander {
+  display: none;
+}
+questionnaire question[answer*="o"] answer[expanded="true"] .collapser {
+  display: block;
 }
 
 /* NAVIGATION */
@@ -185,6 +210,7 @@ questionnaire [visible=true]{
 questionnaire .submit-button, questionnaire .next-button {
   padding:15px;
   margin:5px 15px;
+  margin-top: 15px;
   border: 4px solid #bbb;
   border-radius: 7px;
   font-size:1.3em;

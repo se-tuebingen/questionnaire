@@ -686,19 +686,24 @@ questionnaire .correct-text, questionnaire .wrong-text {
   justify-content: center;
   display: none;
 }
-
 questionnaire question[answer="correct"] .correct-text {
   display: inline-flex;
   color: darkgreen;
 }
-questionnaire question[answer="correct"] {
-  border: 1px solid green;
-}
-
 questionnaire question[answer="wrong"] .wrong-text {
   display: inline-flex;
   color: darkred;
 }
+
+/* question border */
+questionnaire question[answer="pending"] {
+  border: 1px solid silver;
+}
+
+questionnaire question[answer="correct"] {
+  border: 1px solid green;
+}
+
 questionnaire question[answer="wrong"] {
   border: 1px solid darkred;
 }

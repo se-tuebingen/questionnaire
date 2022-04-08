@@ -69,10 +69,13 @@ window.onload = setup;
 // - state is stored in the DOM via attributes
 // - as much hiding/showing as possible is done via css classes depending
 //   on those attributes
+// store initial State after rendering for re-access
+const renderedQuestionnaires = [];
 // ### Questionnaire
 // <questionnaire>
 //  - total_questions
 //  - current_question
+//  - render_id
 function renderQuestionnaire(questionnaire) {
     const root = questionnaire.rootElement;
     root.setAttribute("total_questions", "" + questionnaire.questions.length);
@@ -86,8 +89,19 @@ function renderQuestionnaire(questionnaire) {
              onclick="gotoQuestion(event)"></p>`).join('')}
       </div>
       ${questionnaire.questions.map(renderQuestion).join('')}
+      ${questionnaire.questions.length <= 1 ? '' : `
+      <div class="summary">
+        <div class="summary-bar-container">
+          <div class="summary-bar"></div>
+        </div>
+        <p class="summary-text"></p>
+        <button onclick="resetQuestionnaire(event)"
+                class="reset-button">Reset</button>
+      </div>
+      `}
     </div>
   `;
+    root.setAttribute('render_id', (renderedQuestionnaires.push(root.innerHTML) - 1).toString());
 }
 function gotoQuestion(e) {
     const el = e.target;
@@ -105,6 +119,9 @@ function gotoQuestion(e) {
             q.removeAttribute('visible');
         }
     });
+    // hide summary
+    const summary = questionnaire.getElementsByClassName('summary')[0];
+    summary.removeAttribute('visible');
     // set bubble class
     const bubbles = questionnaire.getElementsByClassName('bubble');
     Array.from(bubbles).map(b => {
@@ -115,6 +132,12 @@ function gotoQuestion(e) {
             b.classList.remove('bubble-current');
         }
     });
+}
+function resetQuestionnaire(e) {
+    const el = e.target;
+    const questionnaire = getTagRecursive(el, 'questionnaire');
+    questionnaire.setAttribute('current_question', '1');
+    questionnaire.innerHTML = renderedQuestionnaires[parseInt(questionnaire.getAttribute('render_id'))];
 }
 // ### Question
 // <question>
@@ -159,11 +182,32 @@ function showNextQuestion(event) {
     const total_questions = parseInt(questionnaire.getAttribute("total_questions"));
     const current_question = parseInt(questionnaire.getAttribute("current_question"));
     if (current_question == total_questions) {
-        console.error("Tried to show next question, but we are already at the last question. Emitted by:", currentQuestion, el);
-        return;
+        // update questionnaire
+        questionnaire.setAttribute('current_question', '0');
+        // ### compute summary
+        const questions = Array.from(questionnaire.getElementsByTagName('question'));
+        const correct = questions.filter(q => q.getAttribute('answer') == 'correct').length;
+        const ratio = (correct / questions.length);
+        const percentage = (ratio * 100).toPrecision(3);
+        // adjust bar length
+        const summaryBar = questionnaire.getElementsByClassName('summary-bar')[0];
+        summaryBar.innerHTML = `${percentage}%`;
+        summaryBar.style.width = `${percentage}%`;
+        summaryBar.animate([
+            { width: 0 },
+            { width: `${percentage}%`, easing: 'ease-out' }
+        ], 2000);
+        // adjust text
+        const feedbacks = ['Keep trying!', 'Okay', 'Better Luck next time!',
+            'Not bad!', 'Great!', 'Perfect!'];
+        const summaryText = questionnaire.getElementsByClassName('summary-text')[0];
+        summaryText.innerHTML = feedbacks[Math.floor(ratio * 0.99 * feedbacks.length)];
     }
-    questionnaire.setAttribute("current_question", (current_question + 1).toString());
-    // questionnaire.getElementsByClassName("question-overview")[0].textContent = `Question ${current_question + 1} of ${total_questions}`;
+    else {
+        // update questionnaire
+        questionnaire.setAttribute("current_question", (current_question + 1).toString());
+    }
+    // update header
     const bubbles = questionnaire.getElementsByClassName('bubble');
     Array.from(bubbles).map(b => {
         if (b.getAttribute('question') == '' + (current_question + 1)) {
@@ -637,7 +681,7 @@ questionnaire .question-overview{
 margin: 0 auto 10px;
 font-size:1.1em;
 }
-questionnaire question{
+questionnaire question, questionnaire .summary {
   width: 90%;
   margin: 0 auto;
   font-size: 18pt;
@@ -806,12 +850,15 @@ questionnaire question[answer*="o"] answer[expanded="true"] .collapser {
 questionnaire question{
   display:none;
 }
+questionnaire .summary {
+  display: none;
+}
 questionnaire [visible=true]{
   display:block;
 }
 
 /* button styles */
-questionnaire .submit-button, questionnaire .next-button {
+questionnaire .submit-button, questionnaire .next-button, questionnaire .reset-button {
   padding:15px;
   margin:5px 15px;
   margin-top: 15px;
@@ -819,7 +866,7 @@ questionnaire .submit-button, questionnaire .next-button {
   border-radius: 7px;
   font-size:1.3em;
 }
-questionnaire .submit-button:hover, questionnaire .next-button:hover{
+questionnaire .submit-button:hover, questionnaire .next-button:hover, questionnaire .reset-button:hover {
   background-color: #bbb;
   cursor:pointer;
 }
@@ -839,9 +886,9 @@ questionnaire .next-button {
 questionnaire question[answer="pending"] .next-button {
   display: none;
 }
-questionnaire question:last-of-type .next-button {
+/* questionnaire question:last-of-type .next-button {
   display: none;
-}
+} */
 
 /* NAVIGATION/SUMMARY BUBBLES */
 questionnaire .question-overview {
@@ -880,5 +927,27 @@ questionnaire .bubble-correct {
 questionnaire .bubble-wrong {
   background-color: lightpink;
   border-color: darkred;
+}
+
+/* SUMMARY */
+questionnaire .summary[visible="true"] {
+  display: block;
+  text-align: center;
+  border: 1px solid silver;
+}
+questionnaire .summary-bar-container {
+  width: 100%;
+  background-color: azure;
+  margin: 1em;
+}
+questionnaire .summary-bar {
+  background-color: lightgreen;
+  border: 1px solid darkgreen;
+  padding: 0.25em;
+  width: 1%;
+  transition: all 10s ease-out;
+}
+questionnaire[current_question="0"] .question-overview{
+  margin-bottom: -0.5em;
 }`;
 })(Ressources || (Ressources = {}));

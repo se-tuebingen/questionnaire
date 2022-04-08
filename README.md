@@ -110,6 +110,12 @@ run
 
 ## Ressources
 
+### CSS
+
+[CSS named colors list](https://www.quackit.com/css/color/charts/css_color_names_chart.cfm)
+
+[CSS Flexbox guide](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
+
 ### Scribble etc
 
 [Overview of Scribble Document Types](https://docs.racket-lang.org/scribble/core.html#%28part._parts%29) - Everything Scribble-Related should be in the same documentation.

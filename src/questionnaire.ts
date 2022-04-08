@@ -102,10 +102,14 @@ window.onload = setup;
 // - as much hiding/showing as possible is done via css classes depending
 //   on those attributes
 
+// store initial State after rendering for re-access
+const renderedQuestionnaires: string[] = [];
+
 // ### Questionnaire
 // <questionnaire>
 //  - total_questions
 //  - current_question
+//  - render_id
 function renderQuestionnaire(questionnaire: Questionnaire) {
   const root = questionnaire.rootElement;
   root.setAttribute("total_questions", "" + questionnaire.questions.length);
@@ -120,8 +124,19 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
              onclick="gotoQuestion(event)"></p>`).join('')}
       </div>
       ${questionnaire.questions.map(renderQuestion).join('')}
+      ${questionnaire.questions.length <= 1 ? '' : `
+      <div class="summary">
+        <div class="summary-bar-container">
+          <div class="summary-bar"></div>
+        </div>
+        <p class="summary-text"></p>
+        <button onclick="resetQuestionnaire(event)"
+                class="reset-button">Reset</button>
+      </div>
+      `}
     </div>
   `;
+  root.setAttribute('render_id', (renderedQuestionnaires.push(root.innerHTML) - 1).toString());
 }
 
 function gotoQuestion(e: Event) {
@@ -142,6 +157,10 @@ function gotoQuestion(e: Event) {
     }
   });
 
+  // hide summary
+  const summary = questionnaire.getElementsByClassName('summary')[0] as HTMLElement;
+  summary.removeAttribute('visible');
+
   // set bubble class
   const bubbles = questionnaire.getElementsByClassName('bubble');
   Array.from(bubbles).map(b => {
@@ -151,6 +170,14 @@ function gotoQuestion(e: Event) {
       b.classList.remove('bubble-current');
     }
   });
+
+}
+
+function resetQuestionnaire(e: Event) {
+  const el: HTMLElement = e.target as HTMLElement;
+  const questionnaire = getTagRecursive(el, 'questionnaire');
+  questionnaire.setAttribute('current_question', '1');
+  questionnaire.innerHTML = renderedQuestionnaires[parseInt(questionnaire.getAttribute('render_id') as string)] as string;
 
 }
 
@@ -199,12 +226,35 @@ function showNextQuestion(event: Event) {
   const current_question: number = parseInt(questionnaire.getAttribute("current_question") as string);
 
   if(current_question == total_questions) {
-    console.error("Tried to show next question, but we are already at the last question. Emitted by:", currentQuestion, el);
-    return;
+    // update questionnaire
+    questionnaire.setAttribute('current_question', '0');
+
+    // ### compute summary
+    const questions = Array.from(questionnaire.getElementsByTagName('question'));
+    const correct = questions.filter(q => q.getAttribute('answer') == 'correct').length;
+    const ratio = (correct / questions.length);
+    const percentage = (ratio * 100).toPrecision(3);
+
+    // adjust bar length
+    const summaryBar = questionnaire.getElementsByClassName('summary-bar')[0] as HTMLElement;
+    summaryBar.innerHTML = `${percentage}%`;
+    summaryBar.style.width = `${percentage}%`;
+    summaryBar.animate([
+      { width: 0 },
+      { width: `${percentage}%`, easing: 'ease-out'}
+    ], 2000);
+
+    // adjust text
+    const feedbacks = ['Keep trying!', 'Okay', 'Better Luck next time!',
+                       'Not bad!', 'Great!', 'Perfect!'];
+    const summaryText = questionnaire.getElementsByClassName('summary-text')[0] as HTMLElement;
+    summaryText.innerHTML = feedbacks[Math.floor(ratio * 0.99 * feedbacks.length)];
+  } else {
+    // update questionnaire
+    questionnaire.setAttribute("current_question", (current_question + 1).toString());
   }
 
-  questionnaire.setAttribute("current_question", (current_question + 1).toString());
-  // questionnaire.getElementsByClassName("question-overview")[0].textContent = `Question ${current_question + 1} of ${total_questions}`;
+  // update header
   const bubbles = questionnaire.getElementsByClassName('bubble');
   Array.from(bubbles).map(b => {
     if(b.getAttribute('question') == '' + (current_question + 1)) {

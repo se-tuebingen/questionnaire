@@ -50,7 +50,7 @@ questionnaire .question-overview{
 margin: 0 auto 10px;
 font-size:1.1em;
 }
-questionnaire question{
+questionnaire question, questionnaire .summary {
   width: 90%;
   margin: 0 auto;
   font-size: 18pt;
@@ -219,12 +219,15 @@ questionnaire question[answer*="o"] answer[expanded="true"] .collapser {
 questionnaire question{
   display:none;
 }
+questionnaire .summary {
+  display: none;
+}
 questionnaire [visible=true]{
   display:block;
 }
 
 /* button styles */
-questionnaire .submit-button, questionnaire .next-button {
+questionnaire .submit-button, questionnaire .next-button, questionnaire .reset-button {
   padding:15px;
   margin:5px 15px;
   margin-top: 15px;
@@ -232,7 +235,7 @@ questionnaire .submit-button, questionnaire .next-button {
   border-radius: 7px;
   font-size:1.3em;
 }
-questionnaire .submit-button:hover, questionnaire .next-button:hover{
+questionnaire .submit-button:hover, questionnaire .next-button:hover, questionnaire .reset-button:hover {
   background-color: #bbb;
   cursor:pointer;
 }
@@ -252,9 +255,9 @@ questionnaire .next-button {
 questionnaire question[answer="pending"] .next-button {
   display: none;
 }
-questionnaire question:last-of-type .next-button {
+/* questionnaire question:last-of-type .next-button {
   display: none;
-}
+} */
 
 /* NAVIGATION/SUMMARY BUBBLES */
 questionnaire .question-overview {
@@ -293,5 +296,27 @@ questionnaire .bubble-correct {
 questionnaire .bubble-wrong {
   background-color: lightpink;
   border-color: darkred;
+}
+
+/* SUMMARY */
+questionnaire .summary[visible="true"] {
+  display: block;
+  text-align: center;
+  border: 1px solid silver;
+}
+questionnaire .summary-bar-container {
+  width: 100%;
+  background-color: azure;
+  margin: 1em;
+}
+questionnaire .summary-bar {
+  background-color: lightgreen;
+  border: 1px solid darkgreen;
+  padding: 0.25em;
+  width: 1%;
+  transition: all 10s ease-out;
+}
+questionnaire[current_question="0"] .question-overview{
+  margin-bottom: -0.5em;
 }`;
 }

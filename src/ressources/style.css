@@ -243,3 +243,42 @@ questionnaire question[answer="pending"] .next-button {
 questionnaire question:last-of-type .next-button {
   display: none;
 }
+
+/* NAVIGATION/SUMMARY BUBBLES */
+questionnaire .question-overview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: -1em;
+  z-index: 1000;
+}
+questionnaire .bubble {
+  height: 1em;
+  width: 1em;
+  border: 1px solid transparent;
+  border-radius: 0.5em;
+  display: inline-flex;
+  margin: 0 0.25em;
+}
+questionnaire .bubble:hover {
+  cursor: pointer;
+  transform: scale(0.9);
+}
+questionnaire .bubble-pending {
+  background-color: white;
+  border-color: silver;
+}
+questionnaire .bubble-current {
+  height: 2em;
+  width: 2em;
+  border-radius: 1em;
+  background-color: azure;
+}
+questionnaire .bubble-correct {
+  background-color: lightgreen;
+  border-color: darkgreen;
+}
+questionnaire .bubble-wrong {
+  background-color: lightpink;
+  border-color: darkred;
+}

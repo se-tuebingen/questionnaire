@@ -114,11 +114,44 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
   root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
-      ${(questionnaire.questions.length == 1) ? '' : `Question 1 of ${questionnaire.questions.length}`}
+      ${questionnaire.questions.map((_,i) => `
+        <p   class="bubble bubble-pending ${i == 0 ? 'bubble-current' : ''}"
+             question="${i + 1}"
+             onclick="gotoQuestion(event)"></p>`).join('')}
       </div>
       ${questionnaire.questions.map(renderQuestion).join('')}
     </div>
   `;
+}
+
+function gotoQuestion(e: Event) {
+  const el :HTMLElement = e.target as HTMLElement;
+  const navTarget = el.getAttribute('question') as string;
+
+  // set current question
+  const questionnaire: HTMLElement = getTagRecursive(el, 'questionnaire');
+  questionnaire.setAttribute('current_question', navTarget);
+
+  // set question visible
+  const questions = questionnaire.getElementsByTagName('question');
+  Array.from(questions).map(q => {
+    if(q.getAttribute('number') == navTarget) {
+      q.setAttribute('visible', 'true');
+    } else {
+      q.removeAttribute('visible');
+    }
+  });
+
+  // set bubble class
+  const bubbles = questionnaire.getElementsByClassName('bubble');
+  Array.from(bubbles).map(b => {
+    if(b.getAttribute('question') == navTarget) {
+      b.classList.add('bubble-current');
+    } else {
+      b.classList.remove('bubble-current');
+    }
+  });
+
 }
 
 // ### Question
@@ -130,6 +163,7 @@ function renderQuestion(question: Question, index: number) {
   return `
     <question type="${question.type}"
               ${index == 0 ? 'visible="true"' : ''}
+              number="${index + 1}"
               answer="pending">
       <div class="correct-text">
         <p>Correct!</p>
@@ -170,7 +204,15 @@ function showNextQuestion(event: Event) {
   }
 
   questionnaire.setAttribute("current_question", (current_question + 1).toString());
-  questionnaire.getElementsByClassName("question-overview")[0].textContent = `Question ${current_question + 1} of ${total_questions}`;
+  // questionnaire.getElementsByClassName("question-overview")[0].textContent = `Question ${current_question + 1} of ${total_questions}`;
+  const bubbles = questionnaire.getElementsByClassName('bubble');
+  Array.from(bubbles).map(b => {
+    if(b.getAttribute('question') == '' + (current_question + 1)) {
+      b.classList.add('bubble-current');
+    } else {
+      b.classList.remove('bubble-current');
+    }
+  });
 
   // update visibility
   currentQuestion.nextElementSibling?.setAttribute('visible', 'true');
@@ -187,7 +229,23 @@ function submitAnswer(event: Event) {
   // check correctness
   const correct = Array.from(answers).every(a =>
     a.getAttribute('correct') == a.getAttribute('selected'));
+
+  // update question
   question.setAttribute('answer', correct ? 'correct' : 'wrong');
+
+  // update bubble
+  const questionnaire: HTMLElement = getTagRecursive(question, 'questionnaire');
+  const bubbles = questionnaire.getElementsByClassName('bubble');
+  Array.from(bubbles).filter(b =>
+    b.getAttribute('question') == question.getAttribute('number')
+  ).map(b => {
+    b.classList.remove('bubble-pending');
+    if(correct) {
+      b.classList.add('bubble-correct');
+    } else {
+      b.classList.add('bubble-wrong');
+    }
+  });
 
   // expand necessary explanations, if present
   Array.from(answers).map(a => {

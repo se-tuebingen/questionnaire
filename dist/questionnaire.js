@@ -86,7 +86,8 @@ function renderQuestionnaire(questionnaire) {
       ${questionnaire.questions.map((_, i) => `
         <p   class="bubble bubble-pending ${i == 0 ? 'bubble-current' : ''}"
              question="${i + 1}"
-             onclick="gotoQuestion(event)"></p>`).join('')}
+             onclick="gotoQuestion(event)"
+             title="Go to Question ${i + 1}"></p>`).join('')}
       </div>
       ${questionnaire.questions.map(renderQuestion).join('')}
       ${questionnaire.questions.length <= 1 ? '' : `
@@ -96,7 +97,8 @@ function renderQuestionnaire(questionnaire) {
         </div>
         <p class="summary-text"></p>
         <button onclick="resetQuestionnaire(event)"
-                class="reset-button">Reset</button>
+                class="reset-button"
+                title="delete answers and start fresh">Reset</button>
       </div>
       `}
     </div>
@@ -161,10 +163,12 @@ function renderQuestion(question, index) {
       </div>
       ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
       <div class="question-footer">
-        <div class="next-button" onClick="showNextQuestion(event)">
+        <div class="next-button" onClick="showNextQuestion(event)"
+             title="show next question">
           Next
         </div>
-        <div class="submit-button" onClick="submitAnswer(event)">
+        <div class="submit-button" onClick="submitAnswer(event)"
+             title="submit answers and check if they are correct">
           Submit
         </div>
       </div>
@@ -191,17 +195,21 @@ function showNextQuestion(event) {
         const percentage = (ratio * 100).toPrecision(3);
         // adjust bar length
         const summaryBar = questionnaire.getElementsByClassName('summary-bar')[0];
-        summaryBar.innerHTML = `${percentage}%`;
+        summaryBar.innerHTML = '?';
         summaryBar.style.width = `${percentage}%`;
         summaryBar.animate([
             { width: 0 },
             { width: `${percentage}%`, easing: 'ease-out' }
-        ], 2000);
-        // adjust text
-        const feedbacks = ['Keep trying!', 'Okay', 'Better Luck next time!',
-            'Not bad!', 'Great!', 'Perfect!'];
-        const summaryText = questionnaire.getElementsByClassName('summary-text')[0];
-        summaryText.innerHTML = feedbacks[Math.floor(ratio * 0.99 * feedbacks.length)];
+        ], 1000);
+        // show text after animation
+        window.setTimeout(() => {
+            summaryBar.innerHTML = `${percentage}%`;
+            // adjust text
+            const feedbacks = ['Keep trying!', 'Okay', 'Better Luck next time!',
+                'Not bad!', 'Great!', 'Perfect!'];
+            const summaryText = questionnaire.getElementsByClassName('summary-text')[0];
+            summaryText.innerHTML = feedbacks[Math.floor(ratio * 0.99 * feedbacks.length)];
+        }, 1000);
     }
     else {
         // update questionnaire
@@ -886,9 +894,9 @@ questionnaire .next-button {
 questionnaire question[answer="pending"] .next-button {
   display: none;
 }
-/* questionnaire question:last-of-type .next-button {
+questionnaire question:last-child .next-button {
   display: none;
-} */
+}
 
 /* NAVIGATION/SUMMARY BUBBLES */
 questionnaire .question-overview {

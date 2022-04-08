@@ -243,9 +243,9 @@ questionnaire .next-button {
 questionnaire question[answer="pending"] .next-button {
   display: none;
 }
-/* questionnaire question:last-of-type .next-button {
+questionnaire question:last-child .next-button {
   display: none;
-} */
+}
 
 /* NAVIGATION/SUMMARY BUBBLES */
 questionnaire .question-overview {

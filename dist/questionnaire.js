@@ -69,10 +69,13 @@ window.onload = setup;
 // - state is stored in the DOM via attributes
 // - as much hiding/showing as possible is done via css classes depending
 //   on those attributes
+// store initial State after rendering for re-access
+const renderedQuestionnaires = [];
 // ### Questionnaire
 // <questionnaire>
 //  - total_questions
 //  - current_question
+//  - render_id
 function renderQuestionnaire(questionnaire) {
     const root = questionnaire.rootElement;
     root.setAttribute("total_questions", "" + questionnaire.questions.length);
@@ -80,11 +83,63 @@ function renderQuestionnaire(questionnaire) {
     root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
-      ${(questionnaire.questions.length == 1) ? '' : `Question 1 of ${questionnaire.questions.length}`}
+      ${questionnaire.questions.map((_, i) => `
+        <p   class="bubble bubble-pending ${i == 0 ? 'bubble-current' : ''}"
+             question="${i + 1}"
+             onclick="gotoQuestion(event)"
+             title="Go to Question ${i + 1}"></p>`).join('')}
       </div>
       ${questionnaire.questions.map(renderQuestion).join('')}
+      ${questionnaire.questions.length <= 1 ? '' : `
+      <div class="summary">
+        <div class="summary-bar-container">
+          <div class="summary-bar"></div>
+        </div>
+        <p class="summary-text"></p>
+        <button onclick="resetQuestionnaire(event)"
+                class="reset-button"
+                title="delete answers and start fresh">Reset</button>
+      </div>
+      `}
     </div>
   `;
+    root.setAttribute('render_id', (renderedQuestionnaires.push(root.innerHTML) - 1).toString());
+}
+function gotoQuestion(e) {
+    const el = e.target;
+    const navTarget = el.getAttribute('question');
+    // set current question
+    const questionnaire = getTagRecursive(el, 'questionnaire');
+    questionnaire.setAttribute('current_question', navTarget);
+    // set question visible
+    const questions = questionnaire.getElementsByTagName('question');
+    Array.from(questions).map(q => {
+        if (q.getAttribute('number') == navTarget) {
+            q.setAttribute('visible', 'true');
+        }
+        else {
+            q.removeAttribute('visible');
+        }
+    });
+    // hide summary
+    const summary = questionnaire.getElementsByClassName('summary')[0];
+    summary.removeAttribute('visible');
+    // set bubble class
+    const bubbles = questionnaire.getElementsByClassName('bubble');
+    Array.from(bubbles).map(b => {
+        if (b.getAttribute('question') == navTarget) {
+            b.classList.add('bubble-current');
+        }
+        else {
+            b.classList.remove('bubble-current');
+        }
+    });
+}
+function resetQuestionnaire(e) {
+    const el = e.target;
+    const questionnaire = getTagRecursive(el, 'questionnaire');
+    questionnaire.setAttribute('current_question', '1');
+    questionnaire.innerHTML = renderedQuestionnaires[parseInt(questionnaire.getAttribute('render_id'))];
 }
 // ### Question
 // <question>
@@ -95,6 +150,7 @@ function renderQuestion(question, index) {
     return `
     <question type="${question.type}"
               ${index == 0 ? 'visible="true"' : ''}
+              number="${index + 1}"
               answer="pending">
       <div class="correct-text">
         <p>Correct!</p>
@@ -107,10 +163,12 @@ function renderQuestion(question, index) {
       </div>
       ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
       <div class="question-footer">
-        <div class="next-button" onClick="showNextQuestion(event)">
+        <div class="next-button" onClick="showNextQuestion(event)"
+             title="show next question">
           Next
         </div>
-        <div class="submit-button" onClick="submitAnswer(event)">
+        <div class="submit-button" onClick="submitAnswer(event)"
+             title="submit answers and check if they are correct">
           Submit
         </div>
       </div>
@@ -128,11 +186,45 @@ function showNextQuestion(event) {
     const total_questions = parseInt(questionnaire.getAttribute("total_questions"));
     const current_question = parseInt(questionnaire.getAttribute("current_question"));
     if (current_question == total_questions) {
-        console.error("Tried to show next question, but we are already at the last question. Emitted by:", currentQuestion, el);
-        return;
+        // update questionnaire
+        questionnaire.setAttribute('current_question', '0');
+        // ### compute summary
+        const questions = Array.from(questionnaire.getElementsByTagName('question'));
+        const correct = questions.filter(q => q.getAttribute('answer') == 'correct').length;
+        const ratio = (correct / questions.length);
+        const percentage = (ratio * 100).toPrecision(3);
+        // adjust bar length
+        const summaryBar = questionnaire.getElementsByClassName('summary-bar')[0];
+        summaryBar.innerHTML = '?';
+        summaryBar.style.width = `${percentage}%`;
+        summaryBar.animate([
+            { width: 0 },
+            { width: `${percentage}%`, easing: 'ease-out' }
+        ], 1000);
+        // show text after animation
+        window.setTimeout(() => {
+            summaryBar.innerHTML = `${percentage}%`;
+            // adjust text
+            const feedbacks = ['Keep trying!', 'Okay', 'Better Luck next time!',
+                'Not bad!', 'Great!', 'Perfect!'];
+            const summaryText = questionnaire.getElementsByClassName('summary-text')[0];
+            summaryText.innerHTML = feedbacks[Math.floor(ratio * 0.99 * feedbacks.length)];
+        }, 1000);
     }
-    questionnaire.setAttribute("current_question", (current_question + 1).toString());
-    questionnaire.getElementsByClassName("question-overview")[0].textContent = `Question ${current_question + 1} of ${total_questions}`;
+    else {
+        // update questionnaire
+        questionnaire.setAttribute("current_question", (current_question + 1).toString());
+    }
+    // update header
+    const bubbles = questionnaire.getElementsByClassName('bubble');
+    Array.from(bubbles).map(b => {
+        if (b.getAttribute('question') == '' + (current_question + 1)) {
+            b.classList.add('bubble-current');
+        }
+        else {
+            b.classList.remove('bubble-current');
+        }
+    });
     // update visibility
     (_a = currentQuestion.nextElementSibling) === null || _a === void 0 ? void 0 : _a.setAttribute('visible', 'true');
     currentQuestion.removeAttribute('visible');
@@ -144,7 +236,20 @@ function submitAnswer(event) {
     const answers = question.getElementsByTagName('answer');
     // check correctness
     const correct = Array.from(answers).every(a => a.getAttribute('correct') == a.getAttribute('selected'));
+    // update question
     question.setAttribute('answer', correct ? 'correct' : 'wrong');
+    // update bubble
+    const questionnaire = getTagRecursive(question, 'questionnaire');
+    const bubbles = questionnaire.getElementsByClassName('bubble');
+    Array.from(bubbles).filter(b => b.getAttribute('question') == question.getAttribute('number')).map(b => {
+        b.classList.remove('bubble-pending');
+        if (correct) {
+            b.classList.add('bubble-correct');
+        }
+        else {
+            b.classList.add('bubble-wrong');
+        }
+    });
     // expand necessary explanations, if present
     Array.from(answers).map(a => {
         if (a.getAttribute('selected') != a.getAttribute('correct')) {
@@ -539,6 +644,7 @@ var Ressources;
     Ressources.angle_up_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzODQgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzUyIDM1MmMtOC4xODggMC0xNi4zOC0zLjEyNS0yMi42Mi05LjM3NUwxOTIgMjA1LjNsLTEzNy40IDEzNy40Yy0xMi41IDEyLjUtMzIuNzUgMTIuNS00NS4yNSAwcy0xMi41LTMyLjc1IDAtNDUuMjVsMTYwLTE2MGMxMi41LTEyLjUgMzIuNzUtMTIuNSA0NS4yNSAwbDE2MCAxNjBjMTIuNSAxMi41IDEyLjUgMzIuNzUgMCA0NS4yNUMzNjguNCAzNDguOSAzNjAuMiAzNTIgMzUyIDM1MnoiLz48L3N2Zz4=`;
     Ressources.check_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDM4LjYgMTA1LjRDNDUxLjEgMTE3LjkgNDUxLjEgMTM4LjEgNDM4LjYgMTUwLjZMMTgyLjYgNDA2LjZDMTcwLjEgNDE5LjEgMTQ5LjkgNDE5LjEgMTM3LjQgNDA2LjZMOS4zNzIgMjc4LjZDLTMuMTI0IDI2Ni4xLTMuMTI0IDI0NS45IDkuMzcyIDIzMy40QzIxLjg3IDIyMC45IDQyLjEzIDIyMC45IDU0LjYzIDIzMy40TDE1OS4xIDMzOC43TDM5My40IDEwNS40QzQwNS45IDkyLjg4IDQyNi4xIDkyLjg4IDQzOC42IDEwNS40SDQzOC42eiIvPjwvc3ZnPg==`;
     Ressources.circle_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNTEyIDI1NkM1MTIgMzk3LjQgMzk3LjQgNTEyIDI1NiA1MTJDMTE0LjYgNTEyIDAgMzk3LjQgMCAyNTZDMCAxMTQuNiAxMTQuNiAwIDI1NiAwQzM5Ny40IDAgNTEyIDExNC42IDUxMiAyNTZ6TTI1NiA0OEMxNDEuMSA0OCA0OCAxNDEuMSA0OCAyNTZDNDggMzcwLjkgMTQxLjEgNDY0IDI1NiA0NjRDMzcwLjkgNDY0IDQ2NCAzNzAuOSA0NjQgMjU2QzQ2NCAxNDEuMSAzNzAuOSA0OCAyNTYgNDh6Ii8+PC9zdmc+`;
+    Ressources.circle_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNTEyIDI1NkM1MTIgMzk3LjQgMzk3LjQgNTEyIDI1NiA1MTJDMTE0LjYgNTEyIDAgMzk3LjQgMCAyNTZDMCAxMTQuNiAxMTQuNiAwIDI1NiAwQzM5Ny40IDAgNTEyIDExNC42IDUxMiAyNTZ6Ii8+PC9zdmc+`;
     Ressources.minus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDAwIDI4OGgtMzUyYy0xNy42OSAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMxLTMxLjk5IDMyLTMxLjk5aDM1MmMxNy42OSAwIDMyIDE0LjMgMzIgMzEuOTlTNDE3LjcgMjg4IDQwMCAyODh6Ii8+PC9zdmc+`;
     Ressources.plus_solid = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4wIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNNDMyIDI1NmMwIDE3LjY5LTE0LjMzIDMyLjAxLTMyIDMyLjAxSDI1NnYxNDRjMCAxNy42OS0xNC4zMyAzMS45OS0zMiAzMS45OXMtMzItMTQuMy0zMi0zMS45OXYtMTQ0SDQ4Yy0xNy42NyAwLTMyLTE0LjMyLTMyLTMyLjAxczE0LjMzLTMxLjk5IDMyLTMxLjk5SDE5MnYtMTQ0YzAtMTcuNjkgMTQuMzMtMzIuMDEgMzItMzIuMDFzMzIgMTQuMzIgMzIgMzIuMDF2MTQ0aDE0NEM0MTcuNyAyMjQgNDMyIDIzOC4zIDQzMiAyNTZ6Ii8+PC9zdmc+`;
     Ressources.square_regular = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tISBGb250IEF3ZXNvbWUgUHJvIDYuMS4xIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlIChDb21tZXJjaWFsIExpY2Vuc2UpIENvcHlyaWdodCAyMDIyIEZvbnRpY29ucywgSW5jLiAtLT48cGF0aCBkPSJNMzg0IDMyQzQxOS4zIDMyIDQ0OCA2MC42NSA0NDggOTZWNDE2QzQ0OCA0NTEuMyA0MTkuMyA0ODAgMzg0IDQ4MEg2NEMyOC42NSA0ODAgMCA0NTEuMyAwIDQxNlY5NkMwIDYwLjY1IDI4LjY1IDMyIDY0IDMySDM4NHpNMzg0IDgwSDY0QzU1LjE2IDgwIDQ4IDg3LjE2IDQ4IDk2VjQxNkM0OCA0MjQuOCA1NS4xNiA0MzIgNjQgNDMySDM4NEMzOTIuOCA0MzIgNDAwIDQyNC44IDQwMCA0MTZWOTZDNDAwIDg3LjE2IDM5Mi44IDgwIDM4NCA4MHoiLz48L3N2Zz4=`;
@@ -583,7 +689,7 @@ questionnaire .question-overview{
 margin: 0 auto 10px;
 font-size:1.1em;
 }
-questionnaire question{
+questionnaire question, questionnaire .summary {
   width: 90%;
   margin: 0 auto;
   font-size: 18pt;
@@ -686,19 +792,24 @@ questionnaire .correct-text, questionnaire .wrong-text {
   justify-content: center;
   display: none;
 }
-
 questionnaire question[answer="correct"] .correct-text {
   display: inline-flex;
   color: darkgreen;
 }
-questionnaire question[answer="correct"] {
-  border: 1px solid green;
-}
-
 questionnaire question[answer="wrong"] .wrong-text {
   display: inline-flex;
   color: darkred;
 }
+
+/* question border */
+questionnaire question[answer="pending"] {
+  border: 1px solid silver;
+}
+
+questionnaire question[answer="correct"] {
+  border: 1px solid green;
+}
+
 questionnaire question[answer="wrong"] {
   border: 1px solid darkred;
 }
@@ -747,12 +858,15 @@ questionnaire question[answer*="o"] answer[expanded="true"] .collapser {
 questionnaire question{
   display:none;
 }
+questionnaire .summary {
+  display: none;
+}
 questionnaire [visible=true]{
   display:block;
 }
 
 /* button styles */
-questionnaire .submit-button, questionnaire .next-button {
+questionnaire .submit-button, questionnaire .next-button, questionnaire .reset-button {
   padding:15px;
   margin:5px 15px;
   margin-top: 15px;
@@ -760,7 +874,7 @@ questionnaire .submit-button, questionnaire .next-button {
   border-radius: 7px;
   font-size:1.3em;
 }
-questionnaire .submit-button:hover, questionnaire .next-button:hover{
+questionnaire .submit-button:hover, questionnaire .next-button:hover, questionnaire .reset-button:hover {
   background-color: #bbb;
   cursor:pointer;
 }
@@ -780,7 +894,68 @@ questionnaire .next-button {
 questionnaire question[answer="pending"] .next-button {
   display: none;
 }
-questionnaire question:last-of-type .next-button {
+questionnaire question:last-child .next-button {
   display: none;
+}
+
+/* NAVIGATION/SUMMARY BUBBLES */
+questionnaire .question-overview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: -1em;
+  z-index: 1000;
+}
+questionnaire .bubble {
+  height: 1em;
+  width: 1em;
+  border: 1px solid transparent;
+  border-radius: 0.5em;
+  display: inline-flex;
+  margin: 0 0.25em;
+}
+questionnaire .bubble:hover {
+  cursor: pointer;
+  transform: scale(0.9);
+}
+questionnaire .bubble-pending {
+  background-color: white;
+  border-color: silver;
+}
+questionnaire .bubble-current {
+  height: 2em;
+  width: 2em;
+  border-radius: 1em;
+  background-color: azure;
+}
+questionnaire .bubble-correct {
+  background-color: lightgreen;
+  border-color: darkgreen;
+}
+questionnaire .bubble-wrong {
+  background-color: lightpink;
+  border-color: darkred;
+}
+
+/* SUMMARY */
+questionnaire .summary[visible="true"] {
+  display: block;
+  text-align: center;
+  border: 1px solid silver;
+}
+questionnaire .summary-bar-container {
+  width: 100%;
+  background-color: azure;
+  margin: 1em;
+}
+questionnaire .summary-bar {
+  background-color: lightgreen;
+  border: 1px solid darkgreen;
+  padding: 0.25em;
+  width: 1%;
+  transition: all 10s ease-out;
+}
+questionnaire[current_question="0"] .question-overview{
+  margin-bottom: -0.5em;
 }`;
 })(Ressources || (Ressources = {}));

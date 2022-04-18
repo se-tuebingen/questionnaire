@@ -12,7 +12,7 @@ interface Questionnaire {
   questions: Question[];
 };
 
-type Questiontype = "singlechoice" | "multiplechoice" | null;
+type Questiontype = "singlechoice" | "multiplechoice";
 
 interface Question {
   type: Questiontype;
@@ -40,7 +40,7 @@ function parseQuestionnaire(questionnaire: HTMLElement): Questionnaire {
 }
 
 function parseQuestion(question: HTMLElement): Question {
-  const type = question.getAttribute('type') as Questiontype;
+  const type = question.getAttribute('type') as Questiontype | null;
   const solution_number = question.getElementsByTagName("solution").length;
   const text = Array.from(question.childNodes as NodeList)
     .filter(x => (x as HTMLElement).tagName != 'DISTRACTOR'
@@ -49,7 +49,7 @@ function parseQuestion(question: HTMLElement): Question {
     .filter(x => (x as HTMLElement).tagName == 'DISTRACTOR'
       || (x as HTMLElement).tagName == 'SOLUTION');
   return {
-    type: getQuestionType(type, solution_number, question),
+    type: getQuestionType(type, solution_number, question) as Questiontype,
     text: text,
     answers: answers.map(x => parseAnswer(x as HTMLElement)),
     solutionNumber: solution_number,
@@ -72,9 +72,6 @@ function getQuestionType(type: Questiontype |  null, solution_number: number, q
     else if (solution_number > 1) {
       console.log("type: multiplechoice");
       return "multiplechoice";
-    }
-    else {
-      return null;
     }
   }
 }
@@ -410,8 +407,7 @@ function selectAnswer(event: Event) {
 
 // ### Error
 // render Function
-function renderError(current_el: HTMLElement, message: string) {
-  const el_name = current_el.localName;
+function renderError(current_el: HTMLElement, error:string, message: string) {
   const questionnaire = getTagRecursive(current_el, "questionnaire");
   const error_html = `
   <div class="error-wrapper">
@@ -419,8 +415,7 @@ function renderError(current_el: HTMLElement, message: string) {
       <h2> Why do I see this red funny box?</h2>
     </div>
     <div class="error-box">
-    <p>There was a syntax error with:
-    &lt;${el_name}&gt;</p>
+    <p>${error}</p>
     </div>
     <pre class="error-message">
     ${escapeHtml(message)}
@@ -498,8 +493,9 @@ function validateStructure(el: HTMLElement) {
     if (parent ?.tagName == tag || parent ?.tagName == tag_two) {
       return true;
     } else {
-      let msg = `HTML structure is invalid: Please check your input at:  ${parent ?.outerHTML}`;
-      renderError(el, msg);
+      let err = `HTML structure is invalid: Please check your input at: `;
+      let msg = parent ?.outerHTML as string;
+      renderError(el, err, msg);
       return false;
     }
   }
@@ -521,32 +517,31 @@ function validateQuestionAttributes(question:Question){
   const solutions:number = question.solutionNumber;
   // if only 1 or less answers exists
   if (answers < 2) {
-    let msg = `You need to provide at least two answers for one question:  ${question.rootElement.outerHTML}`;
-    renderError(question.rootElement, msg);
+    let err = `You need to provide at least two answers for one &lt;question&gt;:`;
+    let msg =  question.rootElement.outerHTML;
+    renderError(question.rootElement, err, msg);
     return false;
   }
   // if there is no solution
   else if (solutions == 0) {
-    let msg = `There is no correct answer in this question: ${question.rootElement.outerHTML}`;
-    renderError(question.rootElement, msg);
-    return false;
-  }
-  // if optional attribute is not assigned correctly
-  else if (type == null) {
-    let msg = `Optional attribute &lt;question type='' &gt; is not set correctly assigned: ${question.rootElement.outerHTML}`;
-    renderError(question.rootElement, msg);
+    let err = `This question has no &lt;solution&gt;:`;
+    let msg = question.rootElement.outerHTML;
+    renderError(question.rootElement, err, msg);
     return false;
   }
   // if type is multiplechoice but doesnt match with solutions
   else if(type == "multiplechoice" && solutions < 2){
-    let msg = `Optional attribute &lt;question type='multiplechoice' &gt; doesnt match with number of solutions: ${question.rootElement.outerHTML}`;
-    renderError(question.rootElement, msg);
+    let err = `Optional attribute &lt;question type='multiplechoice'&gt; doesnt match with number of solutions:`;
+    let msg = question.rootElement.outerHTML;
+    renderError(question.rootElement, err, msg);
     return false;
   }
   // if type is singlechoice but doesnt match with solutions
   else if (type == "singlechoice" && solutions > 1){
-    let msg = `Optional attribute &lt;question type='singlechoice' &gt; doesnt match with number of solutions: ${question.rootElement.outerHTML}`;
-    renderError(question.rootElement, msg);
+    let err = `Optional attribute &lt;question type='singlechoice'&gt; doesnt match with number of solutions:`;
+    let msg = question.rootElement.outerHTML;
+    renderError(question.rootElement, err, msg);
+    return false;
   }
 return true;
 }

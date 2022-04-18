@@ -10,12 +10,16 @@
       padding: 0;
       font-family: monospace;
     }
+    h1{
+      text-align:center;
+      font-weight:normal;
+    }
   </style>
 </head>
 
 <body>
   <!-- VALIDATING GIVEN HTML STRUCTURE -->
-  <!-- <question> has not <questionnaire> as parentElement -->
+  <h1> &lt;question&gt; has no &lt;questionnaire&gt; as parentElement</h1>
   <questionnaire>
     <question type="singlechoice">
       <distractor>
@@ -49,7 +53,7 @@
   </questionnaire>
 
   <!-- VALIDATING NECESSARY ATTRIBUTE -->
-  <!-- only <distractor> no <solution> -->
+  <h1> only &lt;distractor&gt; no &lt;solution&gt; </h1>
   <questionnaire>
     <question>
       What is TS? (multiple-choice)
@@ -80,7 +84,7 @@
     </question>
   </questionnaire>
   <!-- VALIDATING NECESSARY ATTRIBUTE -->
-  <!-- only one answer in this questiom -->
+  <h1> only one answer in this question</h1>
   <questionnaire type="singlechoice">
     <question>
       What is TS? (multiple-choice)
@@ -92,7 +96,7 @@
       </solution>
     </question>
   </questionnaire>
-  <!-- optional question type is not assigned correctly -> ignore -->
+  <!-- <h1> optional question type is not assigned correctly -> ignore </h1>
   <questionnaire>
     <question type="random">
       What is an example question? (single-choice)
@@ -125,8 +129,42 @@
       </distractor>
     </question>
 
+  </questionnaire> -->
+
+  <h1>multiple choice is set but only one &lt;solution&gt;</h1>
+  <questionnaire>
+    <question type="multiplechoice">
+      Is this magic?
+      <distractor>
+        YES
+      </distractor>
+      <distractor>
+        NO
+      </distractor>
+      <solution>
+        MAYBE
+      </solution>
+    </question>
   </questionnaire>
 
+  <h1> single choice is set but more than one &lt;solution&gt; </h1>
+  <questionnaire>
+    <question type="singlechoice">
+      What is this?
+      <solution>
+        GOOD
+      </solution>
+      <solution>
+        YES
+      </solution>
+      <distractor>
+        MAGIC
+      </distractor>
+      <distractor>
+        NO
+      </distractor>
+    </question>
+  </questionnaire>
   <!-- <div id="touch_event_test" style="padding:1000px; background-color:#666; margin:40px 0;">
   </div> -->
 </body>

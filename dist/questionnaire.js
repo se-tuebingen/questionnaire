@@ -361,8 +361,10 @@ function renderError(current_el, error, message) {
     <div class="error-box">
     <p>${error}</p>
     </div>
-    <pre class="error-message">
+    <pre>
+    <code class="error-message">
     ${escapeHtml(message)}
+    </code>
     </pre>
   </div>
   `;
@@ -750,17 +752,28 @@ questionnaire .error-wrapper{
    margin: 0 auto;
   padding:0 20px;
 }
-questionnaire .error-header{
-
+.error-header h2{
+margin: 10px 0;
 }
 questionnaire .error-box{
 font-size:16pt;
 line-height:1.5em;
 }
 
-questionnaire .error-message{
+.error-message{
   font-family:monospace;
   font-size:12pt;
+}
+
+questionnaire pre code {
+  display: block;
+  background: none;
+  white-space: pre;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: scroll;
+  max-width: 100%;
+  min-width: 100px;
+  padding: 0;
 }
 
 /* QUESTIONNAIRE */

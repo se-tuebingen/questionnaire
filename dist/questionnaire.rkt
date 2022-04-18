@@ -11,7 +11,7 @@
 (provide questionnaire question solution distractor explanation texquestions q)
 
 ;;;;;;;;;;; Type Definitions
-(define questiontypes (or/c "singlechoice" "multiplechoice"))
+(define questiontypes (or/c "singlechoice" "multiplechoice" ""))
 (define texsolutionstyles (or/c "inline" "margin"))
  ; one-of does not work with strings
 (define arbitrary-content?

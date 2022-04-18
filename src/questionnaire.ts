@@ -417,8 +417,10 @@ function renderError(current_el: HTMLElement, error:string, message: string) {
     <div class="error-box">
     <p>${error}</p>
     </div>
-    <pre class="error-message">
+    <pre>
+    <code class="error-message">
     ${escapeHtml(message)}
+    </code>
     </pre>
   </div>
   `;

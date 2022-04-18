@@ -18,7 +18,7 @@
   <!-- <question> has not <questionnaire> as parentElement -->
   <questionnaire>
     <question type="singlechoice">
-      <answer>
+      <distractor>
         <question type="multiplechoice">
           What is TS? (multiple-choice)
           Torso Syndrome
@@ -26,76 +26,89 @@
             No, there is no such thing
           </explanation>
         </question>
-      </answer>
-      <answer correct="true">
+      </distractor>
+      <solution>
         TypeScript
         <explanation>
           This is correct
         </explanation>
-      </answer>
-      <answer>
+      </solution>
+      <distractor>
         Thin Slice
         <explanation>
           No, there is no such thing
         </explanation>
-      </answer>
-      <answer correct="true">
+      </distractor>
+      <solution>
         Team Speak
         <explanation>
           Also correct.
         </explanation>
-      </answer>
+      </solution>
     </question>
   </questionnaire>
 
   <!-- VALIDATING NECESSARY ATTRIBUTE -->
-  <!-- <answer has no correct attribute -->
+  <!-- only <distractor> no <solution> -->
   <questionnaire>
-    <question type="multiplechoice">
+    <question>
       What is TS? (multiple-choice)
-      <answer>
+      <distractor>
         Torso Syndrome
         <explanation>
           No, there is no such thing
         </explanation>
-      </answer>
-      <answer>
+      </distractor>
+      <distractor>
         TypeScript
         <explanation>
           This is correct
         </explanation>
-      </answer>
-      <answer>
+      </distractor>
+      <distractor>
         Thin Slice
         <explanation>
           No, there is no such thing
         </explanation>
-      </answer>
-      <answer>
+      </distractor>
+      <distractor>
         Team Speak
         <explanation>
           Also correct.
         </explanation>
-      </answer>
+      </distractor>
     </question>
   </questionnaire>
-<!-- question.type is not the appropriate type-->
+  <!-- VALIDATING NECESSARY ATTRIBUTE -->
+  <!-- only one answer in this questiom -->
+  <questionnaire type="singlechoice">
+    <question>
+      What is TS? (multiple-choice)
+      <solution>
+        TypeScript
+        <explanation>
+          This is correct
+        </explanation>
+      </solution>
+    </question>
+  </questionnaire>
+  <!-- optional question type is not assigned correctly -> ignore -->
   <questionnaire>
     <question type="random">
       What is an example question? (single-choice)
-      <answer>
+      <distractor>
         Some good old-fashioned dialog
         <explanation>
           No, there is no such thing. This will be a way longer text than other answer-explanation-texts, just for the fun of observing text-wrapping onto the next lines.
         </explanation>
-      </answer>
-      <answer correct="true">
+      </distractor>
+      <solution>
         For trying stuff
         <explanation>
           This is correct
         </explanation>
-      </answer>
-      <answer>
+      </solution>
+      <distractor>
         lorem ipsum
         <explanation>
           Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
@@ -109,7 +122,7 @@
 
           Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse
         </explanation>
-      </answer>
+      </distractor>
     </question>
 
   </questionnaire>

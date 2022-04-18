@@ -249,3 +249,5 @@ This questionnaire tests proper handling of those cases:
   ]
 ]
 @texquestions[]
+
+@section{Error Test Cases}

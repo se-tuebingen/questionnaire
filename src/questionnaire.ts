@@ -12,12 +12,13 @@ interface Questionnaire {
   questions: Question[];
 };
 
-type Questiontype = "singlechoice" | "multiplechoice";
+type Questiontype = "singlechoice" | "multiplechoice" | null;
 
 interface Question {
   type: Questiontype;
   text: Node[];
   answers: Answer[];
+  solutionNumber: number;
   rootElement: HTMLElement;
 };
 
@@ -31,14 +32,16 @@ interface Answer {
 // ########### PARSE METHODS
 
 function parseQuestionnaire(questionnaire: HTMLElement): Questionnaire {
+  const questions = Array.from(questionnaire.children as HTMLCollection);
   return {
     rootElement: questionnaire,
-    questions: Array.from(questionnaire.children as HTMLCollection).map(x => parseQuestion(x as HTMLElement))
+    questions: questions.map(x => parseQuestion(x as HTMLElement))
   };
 }
 
 function parseQuestion(question: HTMLElement): Question {
   const type = question.getAttribute('type') as Questiontype;
+  const solution_number = question.getElementsByTagName("solution").length;
   const text = Array.from(question.childNodes as NodeList)
     .filter(x => (x as HTMLElement).tagName != 'DISTRACTOR'
       && (x as HTMLElement).tagName != 'SOLUTION');
@@ -46,11 +49,34 @@ function parseQuestion(question: HTMLElement): Question {
     .filter(x => (x as HTMLElement).tagName == 'DISTRACTOR'
       || (x as HTMLElement).tagName == 'SOLUTION');
   return {
-    type: type,
+    type: getQuestionType(type, solution_number, question),
     text: text,
     answers: answers.map(x => parseAnswer(x as HTMLElement)),
+    solutionNumber: solution_number,
     rootElement: question
   };
+}
+// String, Number, HTMLElement -> String | DOM Manipulation
+// optional singlechoice / multiplechoice attribute
+// automatically assigns the correct type, if not given single- or multiplechoice
+// if optional attribute is assigned throw an error for invalid arguments
+function getQuestionType(type: Questiontype |  null, solution_number: number, question: HTMLElement) {
+  if (type == "singlechoice" || type == "multiplechoice") {
+    return type;
+  }
+  else {
+    if (solution_number == 1) {
+      console.log("type: singlechoice");
+      return "singlechoice";
+    }
+    else if (solution_number > 1) {
+      console.log("type: multiplechoice");
+      return "multiplechoice";
+    }
+    else {
+      return null;
+    }
+  }
 }
 
 function parseAnswer(answer: HTMLElement): Answer {
@@ -77,15 +103,14 @@ function setup() {
   for (let i = q_col.length - 1; i >= 0; i--) {
     const questionnaire: HTMLElement = q_col[i] as HTMLElement;
     // validate htmL Structure before parsing
-        if (validateQuestionnaireStructure(questionnaire) == true) {
-    const r = parseQuestionnaire(questionnaire);
-    console.log(r);
-    // Possible ValidationPoint (Attributes)
-    renderQuestionnaire(r);
-        }
-        else {
-    //DO NOTHING
-        }
+    if (validateQuestionnaireStructure(questionnaire) == true) {
+      const r = parseQuestionnaire(questionnaire);
+      console.log(r);
+      if (validateQuesionnaireAttributes(r) == true) {
+        // Possible ValidationPoint (Attributes)
+        renderQuestionnaire(r);
+      }
+    }
   }
 }
 window.onload = setup;
@@ -118,7 +143,7 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
   root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
-      ${questionnaire.questions.map((_,i) => `
+      ${questionnaire.questions.map((_, i) => `
         <p   class="bubble bubble-pending ${i == 0 ? 'bubble-current' : ''}"
              question="${i + 1}"
              onclick="gotoQuestion(event)"
@@ -142,7 +167,7 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
 }
 
 function gotoQuestion(e: Event) {
-  const el :HTMLElement = e.target as HTMLElement;
+  const el: HTMLElement = e.target as HTMLElement;
   const navTarget = el.getAttribute('question') as string;
 
   // set current question
@@ -152,7 +177,7 @@ function gotoQuestion(e: Event) {
   // set question visible
   const questions = questionnaire.getElementsByTagName('question');
   Array.from(questions).map(q => {
-    if(q.getAttribute('number') == navTarget) {
+    if (q.getAttribute('number') == navTarget) {
       q.setAttribute('visible', 'true');
     } else {
       q.removeAttribute('visible');
@@ -166,7 +191,7 @@ function gotoQuestion(e: Event) {
   // set bubble class
   const bubbles = questionnaire.getElementsByClassName('bubble');
   Array.from(bubbles).map(b => {
-    if(b.getAttribute('question') == navTarget) {
+    if (b.getAttribute('question') == navTarget) {
       b.classList.add('bubble-current');
     } else {
       b.classList.remove('bubble-current');
@@ -229,7 +254,7 @@ function showNextQuestion(event: Event) {
   const total_questions: number = parseInt(questionnaire.getAttribute("total_questions") as string);
   const current_question: number = parseInt(questionnaire.getAttribute("current_question") as string);
 
-  if(current_question == total_questions) {
+  if (current_question == total_questions) {
     // update questionnaire
     questionnaire.setAttribute('current_question', '0');
 
@@ -245,14 +270,14 @@ function showNextQuestion(event: Event) {
     summaryBar.style.width = `${percentage}%`;
     summaryBar.animate([
       { width: 0 },
-      { width: `${percentage}%`, easing: 'ease-out'}
+      { width: `${percentage}%`, easing: 'ease-out' }
     ], 1000);
     // show text after animation
     window.setTimeout(() => {
       summaryBar.innerHTML = `${percentage}%`;
       // adjust text
       const feedbacks = ['Keep trying!', 'Okay', 'Better Luck next time!',
-                         'Not bad!', 'Great!', 'Perfect!'];
+        'Not bad!', 'Great!', 'Perfect!'];
       const summaryText = questionnaire.getElementsByClassName('summary-text')[0] as HTMLElement;
       summaryText.innerHTML = feedbacks[Math.floor(ratio * 0.99 * feedbacks.length)];
     }, 1000);
@@ -265,7 +290,7 @@ function showNextQuestion(event: Event) {
   // update header
   const bubbles = questionnaire.getElementsByClassName('bubble');
   Array.from(bubbles).map(b => {
-    if(b.getAttribute('question') == '' + (current_question + 1)) {
+    if (b.getAttribute('question') == '' + (current_question + 1)) {
       b.classList.add('bubble-current');
     } else {
       b.classList.remove('bubble-current');
@@ -273,7 +298,7 @@ function showNextQuestion(event: Event) {
   });
 
   // update visibility
-  currentQuestion.nextElementSibling?.setAttribute('visible', 'true');
+  currentQuestion.nextElementSibling ?.setAttribute('visible', 'true');
   currentQuestion.removeAttribute('visible');
 
 }
@@ -298,7 +323,7 @@ function submitAnswer(event: Event) {
     b.getAttribute('question') == question.getAttribute('number')
   ).map(b => {
     b.classList.remove('bubble-pending');
-    if(correct) {
+    if (correct) {
       b.classList.add('bubble-correct');
     } else {
       b.classList.add('bubble-wrong');
@@ -307,7 +332,7 @@ function submitAnswer(event: Event) {
 
   // expand necessary explanations, if present
   Array.from(answers).map(a => {
-    if(a.getAttribute('selected') != a.getAttribute('correct')) {
+    if (a.getAttribute('selected') != a.getAttribute('correct')) {
       a.setAttribute('expanded', 'true');
     }
   });
@@ -336,7 +361,7 @@ function renderAnswer(type: Questiontype, answer: Answer) {
              src="${Ressources.angle_up_solid}">
       `}
     </div>
-    ${(answer.explanation == undefined)? '' : answer.explanation.outerHTML}
+    ${(answer.explanation == undefined) ? '' : answer.explanation.outerHTML}
   </answer>
   `;
 }
@@ -358,13 +383,13 @@ function selectAnswer(event: Event) {
   const el: HTMLElement = event.target as HTMLElement;
   const answer: HTMLElement = getTagRecursive(el, 'answer');
   const question: HTMLElement = getTagRecursive(answer, 'question');
-  if(question.getAttribute('answer') == 'pending') {
+  if (question.getAttribute('answer') == 'pending') {
     // toggle answer selection
     const answermark: HTMLElement = answer.getElementsByClassName('answer-mark')[0] as HTMLElement;
-    if(answer.getAttribute('selected') == 'false') {
+    if (answer.getAttribute('selected') == 'false') {
       answer.setAttribute('selected', 'true');
       answermark.setAttribute('src', Ressources.xmark_solid);
-      if(question.getAttribute('type') == 'singlechoice') {
+      if (question.getAttribute('type') == 'singlechoice') {
         submitAnswer(event);
       }
     } else {
@@ -374,7 +399,7 @@ function selectAnswer(event: Event) {
     }
   } else {
     // toggle showing of explanation
-    if(answer.getAttribute('expanded') == 'true') {
+    if (answer.getAttribute('expanded') == 'true') {
       answer.setAttribute('expanded', 'false');
     } else {
       answer.setAttribute('expanded', 'true');
@@ -470,75 +495,62 @@ function validateStructure(el: HTMLElement) {
     return parentHasToBe(parent, "SOLUTION", "DISTRACTOR");
   }
   function parentHasToBe(parent: HTMLElement | null, tag: string, tag_two?: string) {
-    if (parent ?.tagName == tag || parent?.tagName == tag_two) {
+    if (parent ?.tagName == tag || parent ?.tagName == tag_two) {
       return true;
     } else {
-      let msg = `HTML structure is invalid: Please check your input at:  ${parent?.outerHTML}`;
+      let msg = `HTML structure is invalid: Please check your input at:  ${parent ?.outerHTML}`;
       renderError(el, msg);
       return false;
     }
   }
 }
 
-// validateAttributes
-// check <question> attribute singlechoice | multiplechoice
-// check multiple <answer> attributes for at least (for multiplechoice) 1 correct answer
-// returns true (for successful validation) or false (fail)
-function validateAttribute(question: Question) {
-  let val = question.type;
-  let answers = question.answers;
-  let i = answers.length - 1;
-  let x = 0 as number;
-  let correct_answers = getCorrectAnswer(x, i) as number;
-  // get all correct answers to this question
-  function getCorrectAnswer(x: number, i: number) {
-    if (i >= 0) {
-      let correct = answers[i].correct;
-      if (correct == true) {
-        x = getCorrectAnswer(x + 1, i - 1) as number;
-        return x;
-      }
-      else {
-        x = getCorrectAnswer(x, i - 1) as number;
-        return x;
-      }
-    } else {
-      return x;
+function validateQuesionnaireAttributes(questionnaire:Questionnaire){
+  const questions = questionnaire.questions;
+  for (let i = 0; i < questions.length; i++){
+    if (validateQuestionAttributes(questions[i]) == false){
+      return false;
     }
   }
-  // if attr value does not exist
-  if (val == null) {
-    let msg = `Necessary attribute &lt;question type='' &gt; is missing at: ${question.rootElement.outerHTML}`;
-    renderError(question.rootElement, msg);
-    return false;
-  }
-  // if value exists, but is not correctly assigned
-  else if (val != "singlechoice" && val != "multiplechoice") {
-    let msg = `Necessary attribute &lt;question type='' &gt; with value: ${val}is neither 'singlechoice' nor 'multiplechoice': ${question.rootElement.outerHTML}`;
-    renderError(question.rootElement, msg);
-    return false;
-  }
-  // if only 1 or less answer exists
-  else if (answers.length < 2) {
+  return true;
+}
+
+function validateQuestionAttributes(question:Question){
+  const type = question.type;
+  const answers:number = question.answers.length;
+  const solutions:number = question.solutionNumber;
+  // if only 1 or less answers exists
+  if (answers < 2) {
     let msg = `You need to provide at least two answers for one question:  ${question.rootElement.outerHTML}`;
     renderError(question.rootElement, msg);
     return false;
   }
-  else if (correct_answers == 0) {
+  // if there is no solution
+  else if (solutions == 0) {
     let msg = `There is no correct answer in this question: ${question.rootElement.outerHTML}`;
     renderError(question.rootElement, msg);
     return false;
   }
-  // if question attr is singlechoice, but more than one correct answer exists
-  else if (val == "singlechoice" && correct_answers > 1) {
-    let msg = `There is more than one correct answer, but your question type is 'singlechoice': " ${question.rootElement.outerHTML}`;
+  // if optional attribute is not assigned correctly
+  else if (type == null) {
+    let msg = `Optional attribute &lt;question type='' &gt; is not set correctly assigned: ${question.rootElement.outerHTML}`;
     renderError(question.rootElement, msg);
     return false;
   }
-  else {
-    return true;
+  // if type is multiplechoice but doesnt match with solutions
+  else if(type == "multiplechoice" && solutions < 2){
+    let msg = `Optional attribute &lt;question type='multiplechoice' &gt; doesnt match with number of solutions: ${question.rootElement.outerHTML}`;
+    renderError(question.rootElement, msg);
+    return false;
   }
+  // if type is singlechoice but doesnt match with solutions
+  else if (type == "singlechoice" && solutions > 1){
+    let msg = `Optional attribute &lt;question type='singlechoice' &gt; doesnt match with number of solutions: ${question.rootElement.outerHTML}`;
+    renderError(question.rootElement, msg);
+  }
+return true;
 }
+
 
 
 // ######## HELPER FUNCTIONS #######

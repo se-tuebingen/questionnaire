@@ -17,7 +17,7 @@ There is also a module for Scribble (the Racket documentation tool), which not o
 In order to use the JavaScript module, one only needs to create HTML in the correct format and include the script somewhere on the page:
 ```html
 <questionnaire>
-  <question type="singlechoice"><!-- or multiplechoice-->
+  <question type="singlechoice"><!-- type is optional: singlechoice | multiplechoice-->
     Question Text
     <distractor>
       Wrong Answer Text

@@ -9,9 +9,9 @@ jobs:
     permissions:
       contents: write
     steps:
+    - uses: actions/checkout@v2
     - name: Zipping /dist Directory
       run: zip -r release.zip dist
-    - uses: actions/checkout@v2
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "release.zip"

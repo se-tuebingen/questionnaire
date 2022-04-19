@@ -1,12 +1,9 @@
 name: Releases
-
 on:
   push:
     tags:
     - '*'
-
 jobs:
-
   build:
     runs-on: ubuntu-latest
     permissions:
@@ -15,5 +12,6 @@ jobs:
     - uses: actions/checkout@v2
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "/dist/**"
+        artifacts: "dist/**"
+        bodyFile: "README.md"
         token: ${{ secrets.GITHUB_TOKEN }}

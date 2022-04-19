@@ -130,10 +130,5 @@ run
 For moving document parts around in Scribble, see e.g. the
 [delayed block](https://docs.racket-lang.org/scribble/core.html#%28def._%28%28lib._scribble%2Fcore..rkt%29._delayed-block%29%29) documentation. Saving stuff in a LaTex variable and accessing it later is impossible because the Top Scribble Document Element needs to be a block, which translates Custom Latex Properties to an environment, which cannot generate a `\def\variable{}` command.
 
-
-
-## Next Meeting
-
-
 ## MacOS Support
 - Running `raco scribble` instead of `scribble`

@@ -17,7 +17,7 @@ There is also a module for Scribble (the Racket documentation tool), which not o
 In order to use the JavaScript module, one only needs to create HTML in the correct format and include the script somewhere on the page:
 ```html
 <questionnaire>
-  <question type="singlechoice | multiplechoice"><!-- type is optional-->
+  <question type="singlechoice | multiplechoice"><!-- type is optional, will be inferred from number of solutions otherwise -->
     Question Text
     <distractor>
       Wrong Answer Text
@@ -47,13 +47,12 @@ You can generate your questions much in the same style as in the HTML document. 
 ```scribble
 @questionnaire[
   @question[
-    "singlechoice"
     "Question Text"
     @solution{correct answer}
     @distractor{wrong answer}
   ]
   @question[
-    "multiplechoice"
+    #:type "multiplechoice"
     @q{Question Text with some @italic{formatting}}
 
     @solution{correct answer}
@@ -67,6 +66,8 @@ You can generate your questions much in the same style as in the HTML document. 
 ]
 @texquestions[]
 ```
+
+Whether a question is multiple- or singlechoice is automatically inferred by the JavaScript PlugIn depending on the number of solutions. If you want to manually set the mode instead, you can give `@question` a `#:type` keyword argument of either `"singlechoice"` or `"multiplechoice"`.
 
 For your questions to show up in a PDF, you need to specify where they should be rendered.
 - A simple `@texquestions[]` renders the last `@questionnaire` that was defined above it. _If `@texquestions[]` is not called, the code for generating the latex for a question will not be run._

@@ -12,11 +12,10 @@ This manual aims to cover most possible valid configurations.
 
 @section{Single-Choice and Multiple Choice}
 
-Single-Choice Question:
+Single-Choice Question (single choice automatically inferred):
 
 @questionnaire[#:key "singlechoicetest"
 @question[
-  "singlechoice"
   @q{What is this @bold{course} @italic{about?}}
 
   @distractor{Learning to swim}
@@ -30,10 +29,10 @@ Single-Choice Question:
 ]
 ]
 
-Multiple-Choice-Question (in the pdf, the solution should be below and not in the margin, here):
+Multiple-Choice-Question (multiple choice automatically inferred, in the pdf, the solution should be below and not in the margin, here):
 
 @questionnaire[
-@question["multiplechoice"
+@question[
   @q{What does TS stand for?}
 
   @solution{TeamSpeak}
@@ -51,7 +50,7 @@ In latex, the questions should be rendered below:
 Questionnaire with several questions:
 
 @questionnaire[
-@question["multiplechoice"
+@question[ #:type "multiplechoice"
   @q{What does TS stand for?}
 
   @solution{TeamSpeak}
@@ -62,7 +61,7 @@ Questionnaire with several questions:
   @solution{TypeScript}
 ]
 @question[
-  "singlechoice"
+  #:type "singlechoice"
   @q{What is this course about?}
 
   @distractor{Learning to swim}
@@ -74,7 +73,7 @@ Questionnaire with several questions:
   @solution{Learning to program}
   @explanation{You are sitting at a computer, aren't you?}
 ]
-  @question["singlechoice"
+  @question[#:type "singlechoice"
     @q{Why is this happening?}
 
     @distractor{Yes}
@@ -96,7 +95,7 @@ In the pdf version, we should see the "What is this course about?" question here
 
 @texquestions[#:key "singlechoicetest" #:explain #f]
 @questionnaire[
-  @question["multiplechoice"
+  @question[#:type "multiplechoice"
     @q{What does TS stand for?}
 
     @solution{TeamSpeak}
@@ -129,7 +128,7 @@ Scribble allows to create:
 This questionnaire tests proper handling of those cases:
 
 @questionnaire[
-  @question["singlechoice"
+  @question[
     @q{
       Which of the following answers are correct?
       @itemlist[
@@ -162,7 +161,7 @@ This questionnaire tests proper handling of those cases:
     }
   ]
 
-  @question["singlechoice"
+  @question[
     @q{
       Fill in the gap in the table!
       @tabular[#:sep @hspace[3]
@@ -195,7 +194,7 @@ This questionnaire tests proper handling of those cases:
     }
   ]
 
-  @question["multiplechoice"
+  @question[#:type "multiplechoice"
     @q{
       More reduction!
       @racketblock[
@@ -229,7 +228,7 @@ This questionnaire tests proper handling of those cases:
     }
   ]
 
-  @question["singlechoice"
+  @question[#:type "singlechoice"
     @q{
       We only have one test image, so bear with me:
       @image["rocket-s.jpg"] @tt{+} @image["rocket-s.jpg"] @tt{=?}
@@ -255,7 +254,7 @@ This questionnaire tests proper handling of those cases:
 This page shows a few error fail cases except html structure building (which is handled by scribble).
 
 @questionnaire[
-  @question[""
+  @question[
     @q{What is an error?}
     @distractor{fun}
     @distractor{something to eat}

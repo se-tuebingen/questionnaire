@@ -11,7 +11,7 @@
 (provide questionnaire question solution distractor explanation texquestions q)
 
 ;;;;;;;;;;; Type Definitions
-(define questiontypes (or/c "singlechoice" "multiplechoice" ""))
+(define questiontypes (or/c "singlechoice" "multiplechoice" "infer"))
 (define texsolutionstyles (or/c "inline" "margin"))
  ; one-of does not work with strings
 (define arbitrary-content?
@@ -111,7 +111,8 @@
   (-> questiontypes style?)
   (style "" (list
     (alt-tag "question")
-    (attributes (list (cons 'type type)))
+    (attributes (if (string=? type "infer") '()
+                    (list (cons 'type type))))
   ))
 )
 
@@ -393,7 +394,7 @@
 
 ; question
 (define
-  (question type text . answers)
+  (question text #:type [type "infer"] . answers)
   (cond
     [(not (questiontypes type))
      (raise-argument-error 'type "A valid question type string (singlechoice or multiplechoice)" type)]

@@ -10,7 +10,7 @@ jobs:
       contents: write
     steps:
     - name: Zipping /dist Directory
-      run: mv dist release && zip release
+      run: zip release.zip dist
     - uses: actions/checkout@v2
     - uses: ncipollo/release-action@v1
       with:

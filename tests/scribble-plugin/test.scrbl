@@ -248,17 +248,3 @@ This questionnaire tests proper handling of those cases:
   ]
 ]
 @texquestions[]
-
-@section{Error Test Cases}
-
-This page shows a few error fail cases except html structure building (which is handled by scribble).
-
-@questionnaire[
-  @question[
-    @q{What is an error?}
-    @distractor{fun}
-    @distractor{something to eat}
-    @distractor{a flipped goat}
-    @distractor{ghost sandwich}
-]
-]

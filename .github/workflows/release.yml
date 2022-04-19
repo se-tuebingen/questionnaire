@@ -9,9 +9,11 @@ jobs:
     permissions:
       contents: write
     steps:
+    - name: Zipping /dist Directory
+      run: mv dist release && zip release
     - uses: actions/checkout@v2
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "dist"
+        artifacts: "release.zip"
         bodyFile: "CHANGELOG.md"
         token: ${{ secrets.GITHUB_TOKEN }}

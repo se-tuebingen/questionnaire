@@ -15,6 +15,44 @@
 </head>
 
 <body>
+  <!-- nice demo questionnaire -->
+  <questionnaire>
+    <question>
+      Do you like Quizzes in your Scripts?
+      <solution>Yes</solution>
+      <distractor>No</distractor>
+    </question>
+    <question>
+      What do you need to do to include them?
+      <distractor>Install a NPM package</distractor>
+      <distractor>Write some JavaScript code</distractor>
+      <solution>
+        None of the above
+        <explanation>
+          All you need to do is provide some HTML elements and include the script via a script tag.
+          <!-- todo: make release that can be simply included from web -->
+        </explanation>
+      </solution>
+    </question>
+    <question>
+      But I'm using Scribble to generate HTML, no way you support that, right?
+      <distractor>Sadly, no</distractor>
+      <solution>Of course!
+        <explanation>
+          Today's your lucky day, we even have a Scribble Plugin with Compile-Time errors and PDF generation!
+        </explanation>
+      </solution>
+    </question>
+    <question>
+      Any Question left?
+      <solution>No</solution>
+      <distractor>Yes
+        <explanation>Then please open an issue so we can help you :)</explanation>
+      </distractor>
+    </question>
+  </questionnaire>
+
+
   <!-- QUESTIONNAIRE WITH DISTRACTOR AND SOLUTION TAGS -->
   <questionnaire>
     <question type="multiplechoice">

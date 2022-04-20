@@ -10,6 +10,7 @@
 interface Questionnaire {
   rootElement: HTMLElement;
   questions: Question[];
+  language: ImplementedLanguage;
 };
 
 type Questiontype = "singlechoice" | "multiplechoice";
@@ -18,7 +19,7 @@ interface Question {
   type: Questiontype;
   text: Node[];
   answers: Answer[];
-  solutionNumber: number;
+  solutionCount: number;
   rootElement: HTMLElement;
 };
 
@@ -33,15 +34,17 @@ interface Answer {
 
 function parseQuestionnaire(questionnaire: HTMLElement): Questionnaire {
   const questions = Array.from(questionnaire.children as HTMLCollection);
+  const lang = questionnaire.getAttribute('lang');
   return {
     rootElement: questionnaire,
-    questions: questions.map(x => parseQuestion(x as HTMLElement))
+    questions: questions.map(x => parseQuestion(x as HTMLElement)),
+    language: lang == 'de' || lang == 'en' ? lang : 'en'
   };
 }
 
 function parseQuestion(question: HTMLElement): Question {
   const type = question.getAttribute('type') as Questiontype | null;
-  const solution_number = question.getElementsByTagName("solution").length;
+  const solution_count = question.getElementsByTagName("solution").length;
   const text = Array.from(question.childNodes as NodeList)
     .filter(x => (x as HTMLElement).tagName != 'DISTRACTOR'
       && (x as HTMLElement).tagName != 'SOLUTION');
@@ -49,10 +52,10 @@ function parseQuestion(question: HTMLElement): Question {
     .filter(x => (x as HTMLElement).tagName == 'DISTRACTOR'
       || (x as HTMLElement).tagName == 'SOLUTION');
   return {
-    type: getQuestionType(type, solution_number, question) as Questiontype,
+    type: getQuestionType(type, solution_count) as Questiontype,
     text: text,
     answers: answers.map(x => parseAnswer(x as HTMLElement)),
-    solutionNumber: solution_number,
+    solutionCount: solution_count,
     rootElement: question
   };
 }
@@ -60,17 +63,17 @@ function parseQuestion(question: HTMLElement): Question {
 // optional singlechoice / multiplechoice attribute
 // automatically assigns the correct type, if not given single- or multiplechoice
 // if optional attribute is assigned throw an error for invalid arguments
-function getQuestionType(type: Questiontype |  null, solution_number: number, question: HTMLElement) {
+function getQuestionType(type: Questiontype |  null, solution_count: number) {
   if (type == "singlechoice" || type == "multiplechoice") {
     return type;
   }
   else {
-    if (solution_number == 1) {
-      console.log("type: singlechoice");
+    if (solution_count == 1) {
+      console.log("inferred type: singlechoice");
       return "singlechoice";
     }
-    else if (solution_number > 1) {
-      console.log("type: multiplechoice");
+    else if (solution_count > 1) {
+      console.log("inferred type: multiplechoice");
       return "multiplechoice";
     }
   }
@@ -106,7 +109,12 @@ function setup() {
       if (validateQuesionnaireAttributes(r) == true) {
         // Possible ValidationPoint (Attributes)
         renderQuestionnaire(r);
+      } else {
+        console.log('invalid questionnaire attributes')
       }
+    } else {
+      console.log('invalid questionnaire structure');
+      console.log(validateQuestionnaireStructure(questionnaire));
     }
   }
 }
@@ -127,16 +135,64 @@ window.onload = setup;
 // store initial State after rendering for re-access
 const renderedQuestionnaires: string[] = [];
 
+// ### Language internationalization
+//               ^------18--------^
+interface TextDict {
+  goto: string;
+  select: string;
+  toggle: string;
+  wrong: string;
+  correct: string;
+  next: string;
+  submit: string;
+  reset: string;
+  feedbacks: string[];
+}
+type ImplementedLanguage = 'en' | 'de';
+
+const i18n: {[id: string]: TextDict; } = {
+  'en': {
+    goto: 'Go to question',
+    select: 'Select answer',
+    toggle: 'Show/hide explanation',
+    wrong: 'Wrong!',
+    correct: 'Correct!',
+    next: 'Next',
+    submit: 'Submit',
+    reset: 'Reset',
+    feedbacks: ['Keep trying!', 'Okay', 'Better Luck next time!',
+      'Not bad!', 'Great!', 'Perfect!']
+  },
+  'de': {
+    goto: 'Gehe zu Frage',
+    select: 'Wähle die Antwort aus',
+    toggle: 'Verstecke/Zeige Erklärung',
+    wrong: 'Falsch!',
+    correct: 'Richtig!',
+    next: 'Nächste Frage',
+    submit: 'Antwort prüfen',
+    reset: 'Zurücksetzen',
+    feedbacks: ['Nicht aufgeben!', 'Okay', 'Mehr Glück beim nächsten Mal!',
+      'Nicht schlecht!', 'Super!', 'Perfekt!']
+  }
+};
+let lang = 'en';
+
 // ### Questionnaire
 // <questionnaire>
 //  - total_questions
 //  - current_question
 //  - render_id
 function renderQuestionnaire(questionnaire: Questionnaire) {
+  // setup internationalization
+  lang = questionnaire.language;
+
+  // setup questionnaire properties
   const root = questionnaire.rootElement;
   root.setAttribute("total_questions", "" + questionnaire.questions.length);
   root.setAttribute("current_question", "1");
 
+  // render HTML
   root.innerHTML = `
     <div class="content-wrapper">
       <div class="question-overview">
@@ -144,7 +200,7 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
         <p   class="bubble bubble-pending ${i == 0 ? 'bubble-current' : ''}"
              question="${i + 1}"
              onclick="gotoQuestion(event)"
-             title="Go to Question ${i + 1}"></p>`).join('')}
+             title="${i18n[lang].goto} ${i + 1}"></p>`).join('')}
       </div>
       ${questionnaire.questions.map(renderQuestion).join('')}
       ${questionnaire.questions.length <= 1 ? '' : `
@@ -160,6 +216,8 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
       `}
     </div>
   `;
+
+  // store rendered innerHTML for resets
   root.setAttribute('render_id', (renderedQuestionnaires.push(root.innerHTML) - 1).toString());
 }
 
@@ -217,23 +275,21 @@ function renderQuestion(question: Question, index: number) {
               number="${index + 1}"
               answer="pending">
       <div class="correct-text">
-        <p>Correct!</p>
+        <p>${i18n[lang].correct}</p>
       </div>
       <div class="wrong-text">
-        <p>Wrong!</p>
+        <p>${i18n[lang].wrong}</p>
       </div>
       <div class="question-header">
         <div>${question.text.map(nodeOuterHTML).join('')}</div>
       </div>
       ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
       <div class="question-footer">
-        <div class="next-button" onClick="showNextQuestion(event)"
-             title="show next question">
-          Next
+        <div class="next-button" onClick="showNextQuestion(event)">
+          ${i18n[lang].next}
         </div>
-        <div class="submit-button" onClick="submitAnswer(event)"
-             title="submit answers and check if they are correct">
-          Submit
+        <div class="submit-button" onClick="submitAnswer(event)">
+          ${i18n[lang].submit}
         </div>
       </div>
     </question>
@@ -273,8 +329,7 @@ function showNextQuestion(event: Event) {
     window.setTimeout(() => {
       summaryBar.innerHTML = `${percentage}%`;
       // adjust text
-      const feedbacks = ['Keep trying!', 'Okay', 'Better Luck next time!',
-        'Not bad!', 'Great!', 'Perfect!'];
+      const feedbacks = i18n[lang].feedbacks;
       const summaryText = questionnaire.getElementsByClassName('summary-text')[0] as HTMLElement;
       summaryText.innerHTML = feedbacks[Math.floor(ratio * 0.99 * feedbacks.length)];
     }, 1000);
@@ -344,7 +399,9 @@ function renderAnswer(type: Questiontype, answer: Answer) {
   <answer correct="${answer.correct ? 'true' : 'false'}"
           selected="false"
           expanded="false">
-    <div class="wrapper-answer" onclick="selectAnswer(event)">
+    <div class="wrapper-answer"
+         onclick="selectAnswer(event)"
+         title="${i18n[lang].select}">
       <img class="answer-mark" src="${type == 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular}">
       <img class="answer-mark answer-mark-selected"
            src="${Ressources.xmark_solid}">
@@ -353,10 +410,10 @@ function renderAnswer(type: Questiontype, answer: Answer) {
       </div>
       ${answer.explanation == undefined ? '' : `
         <img class="expander"
-             title="show explanation"
+             title="${i18n[lang].toggle}"
              src="${Ressources.angle_down_solid}">
         <img class="collapser"
-             title="hide explanation"
+             title="${i18n[lang].toggle}"
              src="${Ressources.angle_up_solid}">
       `}
     </div>
@@ -448,28 +505,10 @@ function validateQuestionnaireStructure(questionnaire: HTMLElement) {
   let explanation: HTMLCollection = questionnaire.getElementsByTagName("explanation");
   // validate given html tag elements
 
-  if (validateHtmlTagElements(questions.length - 1, questions) == true
-    && validateHtmlTagElements(answers.length - 1, answers) == true
-    && validateHtmlTagElements(explanation.length - 1, explanation) == true) {
-    return true;
-  }
-  else {
-    return false;
-  }
-  function validateHtmlTagElements(i: number, col: HTMLCollection) {
-    if (i >= 0) {
-      let validated = validateStructure(col[i] as HTMLElement);
-      if (validated == true) {
-        let bool = validateHtmlTagElements(i - 1, col) as boolean;
-        return bool;
-      }
-      else {
-        return false;
-      }
-    } else {
-      return true;
-    }
-  }
+  return Array.from(questions).every(q => validateStructure(q as HTMLElement)) &&
+      Array.from(answers).every(a => validateStructure(a as HTMLElement)) &&
+      Array.from(explanation).every(e => validateStructure(e as HTMLElement));
+
 }
 // ValidateStructure
 // <questionnaire> -> <question> -> at least 2 <answer> -> <explanation>
@@ -477,27 +516,32 @@ function validateQuestionnaireStructure(questionnaire: HTMLElement) {
 function validateStructure(el: HTMLElement) {
   const html_tag = el.tagName;
   const parent = el.parentElement as HTMLElement | null;
-  if (html_tag == "QUESTION") {
-    // parent has to be a QUESTIONNAIRE
-    return parentHasToBe(parent, "QUESTIONNAIRE");
+  switch(html_tag){
+    case 'QUESTION':
+    return parentHasToBe(el, parent, "QUESTIONNAIRE");
+
+    case 'SOLUTION':
+    case 'DISTRACTOR':
+    return parentHasToBe(el, parent, "QUESTION");
+
+    case 'EXPLANATION':
+    return parentHasToBe(el, parent, "SOLUTION", "DISTRACTOR");
+
+    default:
+    console.log('html_tag to check was no question, solution, distractor or explanation');
+    return true;
   }
-  else if (html_tag == "SOLUTION" || html_tag == "DISTRACTOR") {
-    // parent has to be a QUESTION
-    return parentHasToBe(parent, "QUESTION");
-  }
-  else if (html_tag == "EXPLANATION") {
-    // parent has to be an SOLUTION OR DISTRACTOR
-    return parentHasToBe(parent, "SOLUTION", "DISTRACTOR");
-  }
-  function parentHasToBe(parent: HTMLElement | null, tag: string, tag_two?: string) {
-    if (parent ?.tagName == tag || parent ?.tagName == tag_two) {
-      return true;
-    } else {
-      let err = `HTML structure is invalid: Please check your input at: `;
-      let msg = parent ?.outerHTML as string;
-      renderError(el, err, msg);
-      return false;
-    }
+
+}
+
+function parentHasToBe(el: HTMLElement, parent: HTMLElement | null, tag: string, tag_two?: string) {
+  if (parent ?.tagName == tag || parent ?.tagName == tag_two) {
+    return true;
+  } else {
+    let err = `HTML structure is invalid: Please check your input at: `;
+    let msg = parent ?.outerHTML as string;
+    renderError(el, err, msg);
+    return false;
   }
 }
 
@@ -514,7 +558,7 @@ function validateQuesionnaireAttributes(questionnaire:Questionnaire){
 function validateQuestionAttributes(question:Question){
   const type = question.type;
   const answers:number = question.answers.length;
-  const solutions:number = question.solutionNumber;
+  const solutions:number = question.solutionCount;
   // if only 1 or less answers exists
   if (answers < 2) {
     let err = `You need to provide at least two answers for one &lt;question&gt;:`;

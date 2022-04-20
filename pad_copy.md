@@ -1,5 +1,42 @@
 # Interactive Textbooks
 
+## 20.04.22
+
+1. F
+- square[x] statt x
+- kringel[x] statt x
+
+2. L
+- Remove multiple-/Singlechoice Error
+
+3.F
+- Sprachinternationalisierung
+- Sprachparameter in questionnaire default übergeben
+
+4. L
+- Bug Summary
+
+5.1 L
+- Pull request Pl1 + doku link
+
+5.2 F
+- Pull request Info 1 + doku link + beispiele
+
+6. L
+- gh pages workflow erstellen
+
+7. F
+- Dokumentieren wie man den style verändert
+
+8. L
+- github workflows latest version anstelle von version change number
+
+9. L
+ swipeEvents
+
+10. F
+ Animations
+
 ## Todos
 
 ### Typescript

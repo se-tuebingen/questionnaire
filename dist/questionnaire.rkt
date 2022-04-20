@@ -13,6 +13,7 @@
 ;;;;;;;;;;; Type Definitions
 (define questiontypes (or/c "singlechoice" "multiplechoice" "infer"))
 (define texsolutionstyles (or/c "inline" "margin"))
+(define language (or/c "en" "de"))
  ; one-of does not work with strings
 (define arbitrary-content?
   (or/c block?
@@ -72,6 +73,7 @@
 
 ; quiz
 (struct/contract questionnaire-container (
+  [language language]
   [questions (listof question-container?)])
   #:transparent
 )
@@ -94,15 +96,18 @@
 )
 
 ; questionnaire
-(define
-  questionnaire-tag-wrapper
-  (style "" (list (alt-tag "questionnaire")))
+(define/contract
+  (questionnaire-tag-wrapper lang)
+  (-> language style?)
+  (style "" (list
+    (alt-tag "questionnaire")
+    (attributes (list (cons 'language lang)))))
 )
 
 (define/contract
-  (questionnaire-tag content)
-  (-> arbitrary-content? block?)
-  (wrap-tag questionnaire-tag-wrapper content)
+  (questionnaire-tag lang content)
+  (-> language arbitrary-content? block?)
+  (wrap-tag (questionnaire-tag-wrapper lang) content)
 )
 
 ; question
@@ -192,7 +197,7 @@
   (nested-flow
     (style #f (list (js-addition "questionnaire.js")))
     (list
-      (questionnaire-tag
+      (questionnaire-tag (questionnaire-container-language questionnaire)
        (map render-question-html
          (questionnaire-container-questions questionnaire))))
   )
@@ -419,15 +424,17 @@
 
 ; questionnaire
 (define
-  (questionnaire #:key [key "DefaultQuestionnaire"] . questions)
+  (questionnaire #:key [key "DefaultQuestionnaire"] #:language [lang "en"] . questions)
    (cond [(not (andmap question-container? questions))
           (raise-argument-error 'questions "A list of @question s (question-container)" questions)]
          [(not (string? key))
           (raise-argument-error 'key "A string key for retrieving the questionnaire with @texquestions" key)]
+         [(not (language lang))
+          (raise-argument-error 'language "An implemented language code (currently de or en)" lang)]
          [else
          (cond-block
-           [html (render-html (questionnaire-container questions))]
-           [latex (save-questionnaire key (questionnaire-container questions))]
+           [html (render-html (questionnaire-container lang questions))]
+           [latex (save-questionnaire key (questionnaire-container lang questions))]
          )
          ]
    )

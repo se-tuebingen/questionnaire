@@ -20,7 +20,7 @@ There is also a module for Scribble (the Racket documentation tool), which not o
 
 In order to use the JavaScript module, one only needs to create HTML in the correct format and include the script somewhere on the page:
 ```html
-<questionnaire>
+<questionnaire language="en | de"><!-- language is optional, default is English -->
   <question type="singlechoice | multiplechoice"><!-- type is optional, will be inferred from number of solutions otherwise -->
     Question Text
     <distractor>
@@ -49,14 +49,14 @@ Copy the Scribble-Plugin and the JavaScript-Plugin (`questionnaire.rkt` *and* `q
 
 You can generate your questions much in the same style as in the HTML document. The `@q` helper does not change the input, but enables you to use content notation while producing a racket argument (more on that [here](https://docs.racket-lang.org/scribble/reader.html)).
 ```scribble
-@questionnaire[
+@questionnaire[#:language "en" @; or "de" (optional, default: "en")
   @question[
     "Question Text"
     @solution{correct answer}
     @distractor{wrong answer}
   ]
   @question[
-    #:type "multiplechoice"
+    #:type "multiplechoice" @; or "singlechoice" (optional, inferred otherwise)
     @q{Question Text with some @italic{formatting}}
 
     @solution{correct answer}

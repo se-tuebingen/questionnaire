@@ -6,7 +6,7 @@
 // ########### PARSE METHODS
 function parseQuestionnaire(questionnaire) {
     const questions = Array.from(questionnaire.children);
-    const lang = questionnaire.getAttribute('lang');
+    const lang = questionnaire.getAttribute('language');
     return {
         rootElement: questionnaire,
         questions: questions.map(x => parseQuestion(x)),
@@ -120,7 +120,7 @@ const i18n = {
         toggle: 'Verstecke/Zeige Erklärung',
         wrong: 'Falsch!',
         correct: 'Richtig!',
-        next: 'Nächste Frage',
+        next: 'Weiter',
         submit: 'Antwort prüfen',
         reset: 'Zurücksetzen',
         feedbacks: ['Nicht aufgeben!', 'Okay', 'Mehr Glück beim nächsten Mal!',
@@ -140,6 +140,7 @@ function renderQuestionnaire(questionnaire) {
     const root = questionnaire.rootElement;
     root.setAttribute("total_questions", "" + questionnaire.questions.length);
     root.setAttribute("current_question", "1");
+    root.setAttribute("language", lang);
     // render HTML
     root.innerHTML = `
     <div class="content-wrapper">
@@ -158,8 +159,9 @@ function renderQuestionnaire(questionnaire) {
         </div>
         <p class="summary-text"></p>
         <button onclick="resetQuestionnaire(event)"
-                class="reset-button"
-                title="delete answers and start fresh">Reset</button>
+                class="reset-button">
+          ${i18n[lang].reset}
+        </button>
       </div>
       `}
     </div>
@@ -265,6 +267,7 @@ function showNextQuestion(event) {
         window.setTimeout(() => {
             summaryBar.innerHTML = `${percentage}%`;
             // adjust text
+            const lang = questionnaire.getAttribute('language');
             const feedbacks = i18n[lang].feedbacks;
             const summaryText = questionnaire.getElementsByClassName('summary-text')[0];
             summaryText.innerHTML = feedbacks[Math.floor(ratio * 0.99 * feedbacks.length)];
@@ -991,6 +994,8 @@ questionnaire .summary-bar-container {
   width: 100%;
   background-color: azure;
   margin: 1em;
+  margin-left: 0;
+  margin-right: 0;
 }
 questionnaire .summary-bar {
   background-color: lightgreen;

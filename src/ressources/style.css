@@ -317,6 +317,8 @@ questionnaire .summary-bar-container {
   width: 100%;
   background-color: azure;
   margin: 1em;
+  margin-left: 0;
+  margin-right: 0;
 }
 questionnaire .summary-bar {
   background-color: lightgreen;

@@ -34,7 +34,7 @@ interface Answer {
 
 function parseQuestionnaire(questionnaire: HTMLElement): Questionnaire {
   const questions = Array.from(questionnaire.children as HTMLCollection);
-  const lang = questionnaire.getAttribute('lang');
+  const lang = questionnaire.getAttribute('language');
   return {
     rootElement: questionnaire,
     questions: questions.map(x => parseQuestion(x as HTMLElement)),
@@ -169,7 +169,7 @@ const i18n: {[id: string]: TextDict; } = {
     toggle: 'Verstecke/Zeige Erklärung',
     wrong: 'Falsch!',
     correct: 'Richtig!',
-    next: 'Nächste Frage',
+    next: 'Weiter',
     submit: 'Antwort prüfen',
     reset: 'Zurücksetzen',
     feedbacks: ['Nicht aufgeben!', 'Okay', 'Mehr Glück beim nächsten Mal!',
@@ -191,6 +191,7 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
   const root = questionnaire.rootElement;
   root.setAttribute("total_questions", "" + questionnaire.questions.length);
   root.setAttribute("current_question", "1");
+  root.setAttribute("language", lang);
 
   // render HTML
   root.innerHTML = `
@@ -210,8 +211,9 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
         </div>
         <p class="summary-text"></p>
         <button onclick="resetQuestionnaire(event)"
-                class="reset-button"
-                title="delete answers and start fresh">Reset</button>
+                class="reset-button">
+          ${i18n[lang].reset}
+        </button>
       </div>
       `}
     </div>
@@ -329,6 +331,7 @@ function showNextQuestion(event: Event) {
     window.setTimeout(() => {
       summaryBar.innerHTML = `${percentage}%`;
       // adjust text
+      const lang = questionnaire.getAttribute('language') as string;
       const feedbacks = i18n[lang].feedbacks;
       const summaryText = questionnaire.getElementsByClassName('summary-text')[0] as HTMLElement;
       summaryText.innerHTML = feedbacks[Math.floor(ratio * 0.99 * feedbacks.length)];

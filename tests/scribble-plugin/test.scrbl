@@ -248,3 +248,30 @@ This questionnaire tests proper handling of those cases:
   ]
 ]
 @texquestions[]
+
+@section{internationalization}
+
+Hier sollten die HTML-Texte auf Deutsch erscheinen:
+
+@questionnaire[#:language "de"
+  @question[
+    @q{Wofür steht BSL?}
+
+    @distractor{Bovine Sign Language}
+
+    @solution{Beginning Student Language}
+
+    @distractor{Basic S-Expression Language}
+    @explanation{S-Expressions lernen wir später kennen}
+  ]
+  @question[
+    @q{Wozu reduziert der folgende Ausdruck?
+       @racketblock[(+ (* 20 2) 2)]}
+
+    @solution{@racketblock[(+ 40 2)]}
+    @solution{@racketblock[42]}
+    @distractor{@racketblock[80]}
+
+  ]
+]
+@texquestions[]

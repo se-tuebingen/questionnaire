@@ -124,8 +124,17 @@ questionnaire answer [visible=true] p {
 }
 
 questionnaire .answer-mark, questionnaire .expander, questionnaire .collapser {
-  height: 1em;
+  width: 1.5em;
   align-self: center;
+}
+
+questionnaire .answer-mark-selected {
+  display: none;
+}
+
+questionnaire answer[selected="true"] .answer-mark-selected {
+  display: inline-flex;
+  margin-left: -1.5em;
 }
 
 questionnaire p {

@@ -2,7 +2,7 @@
 
 ## 20.04.22
 
-1. F
+1. F (done)
 - square[x] statt x
 - kringel[x] statt x
 

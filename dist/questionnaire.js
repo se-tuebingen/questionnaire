@@ -289,6 +289,8 @@ function renderAnswer(type, answer) {
           expanded="false">
     <div class="wrapper-answer" onclick="selectAnswer(event)">
       <img class="answer-mark" src="${type == 'singlechoice' ? Ressources.circle_regular : Ressources.square_regular}">
+      <img class="answer-mark answer-mark-selected"
+           src="${Ressources.xmark_solid}">
       <div class="answer-text-container">
         ${answer.text.map(nodeOuterHTML).join('')}
       </div>
@@ -325,18 +327,14 @@ function selectAnswer(event) {
     const question = getTagRecursive(answer, 'question');
     if (question.getAttribute('answer') == 'pending') {
         // toggle answer selection
-        const answermark = answer.getElementsByClassName('answer-mark')[0];
         if (answer.getAttribute('selected') == 'false') {
             answer.setAttribute('selected', 'true');
-            answermark.setAttribute('src', Ressources.xmark_solid);
             if (question.getAttribute('type') == 'singlechoice') {
                 submitAnswer(event);
             }
         }
         else {
             answer.setAttribute('selected', 'false');
-            // we know it must be multiple choice - else we could not unselect stuff
-            answermark.setAttribute('src', Ressources.square_regular);
         }
     }
     else {
@@ -780,8 +778,17 @@ questionnaire answer [visible=true] p {
 }
 
 questionnaire .answer-mark, questionnaire .expander, questionnaire .collapser {
-  height: 1em;
+  width: 1.5em;
   align-self: center;
+}
+
+questionnaire .answer-mark-selected {
+  display: none;
+}
+
+questionnaire answer[selected="true"] .answer-mark-selected {
+  display: inline-flex;
+  margin-left: -1.5em;
 }
 
 questionnaire p {

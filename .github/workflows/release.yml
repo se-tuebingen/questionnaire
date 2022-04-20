@@ -10,10 +10,8 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v2
-    - name: Zipping /dist Directory
-      run: zip -r release.zip dist
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "release.zip"
+        artifacts: "dist"
         bodyFile: "CHANGELOG.md"
         token: ${{ secrets.GITHUB_TOKEN }}

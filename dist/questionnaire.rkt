@@ -404,6 +404,9 @@
      (raise-argument-error 'answers "A list of @solution|@distractor|@explanation" answers)]
     [(not (ormap solution-container? answers))
      (raise-argument-error 'answers "At least one @solution to the question." answers)]
+    [(and (string=? type "singlechoice")
+          (> (length (filter solution-container? answers)) 1))
+     (raise-argument-error 'answers "At most one @solution for a question of #:type \"singlechoice\"" answers)]
     [else
      (question-container type text (merge-explanations answers))]
   )

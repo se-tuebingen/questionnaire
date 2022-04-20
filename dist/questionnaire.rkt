@@ -402,6 +402,8 @@
      (raise-argument-error 'text "An Element of Type content?, block? or a list of (possibly a mix of) them" text)]
     [(not (andmap (or/c answer? explanation-container?) answers))
      (raise-argument-error 'answers "A list of @solution|@distractor|@explanation" answers)]
+    [(< (length (filter answer? answers)) 2)
+     (raise-argument-error 'answers "At least two answers (@solution|@distractor) to the question" answers)]
     [(not (ormap solution-container? answers))
      (raise-argument-error 'answers "At least one @solution to the question." answers)]
     [(and (string=? type "singlechoice")

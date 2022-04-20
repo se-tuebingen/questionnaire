@@ -138,8 +138,9 @@ questionnaire .wrapper-answer > div, questionnaire .question-header > div {
   align-self: center;
 }
 
+/* RESPONSIVE MAX WIDTH */
 @media (min-width: 768px) {
-  questionnaire question {
+  questionnaire question, questionnaire .summary {
     max-width: 600px;
   }
 }

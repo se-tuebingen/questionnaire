@@ -2,6 +2,10 @@
 [Etherpad](http://160.uk.to/pad/p/interactive-textbooks)
 [![Generate HTML & PDF](https://github.com/se-tuebingen/interactive-textbooks/actions/workflows/publish.yml/badge.svg)](https://github.com/se-tuebingen/interactive-textbooks/actions/workflows/publish.yml)
 
+## Demo
+
+![Demo Gif](questionnaire-demo.gif)
+
 ## What can this module do?
 
 With this module, you can create simple HTML quizzes (questionnaires) with single- or multiplechoice questions by

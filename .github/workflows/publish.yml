@@ -25,5 +25,10 @@ jobs:
         run: make all
       - name: Execute Tests
         run: make test
+
+      - uses: JamesIves/github-pages-deploy-action@4.1.7
+        with:
+          branch: master
+          folder: tests/javascript-plugin
       # - name: Check that tests have been run locally before uploading
       #   run: git diff --exit-code

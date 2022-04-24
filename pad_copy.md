@@ -7,7 +7,7 @@
 - kringel[x] statt x
 
 2. L
-- Remove multiple-/Singlechoice Error
+- Remove multiple-/Singlechoice Error (done)
 
 3. F (done)
 - Sprachinternationalisierung
@@ -17,19 +17,19 @@
 - Bug Summary
 
 5.1 L
-- Pull request Pl1 + doku link
+- Pull request Pl1 + doku link (done) (still need to convert scala-code to md-text)
 
 5.2 F
 - Pull request Info 1 + doku link + beispiele
 
 6. L
-- gh pages workflow erstellen
+- gh pages workflow erstellen(done)
 
 7. F
 - Dokumentieren wie man den style verändert
 
 8. L
-- github workflows latest version anstelle von version change number
+- github workflows latest version anstelle von version change number (done)
 
 9. L
  swipeEvents

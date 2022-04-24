@@ -63,19 +63,14 @@ function parseQuestion(question: HTMLElement): Question {
 // optional singlechoice / multiplechoice attribute
 // automatically assigns the correct type, if not given single- or multiplechoice
 // if optional attribute is assigned throw an error for invalid arguments
-function getQuestionType(type: Questiontype |  null, solution_count: number) {
-  if (type == "singlechoice" || type == "multiplechoice") {
-    return type;
+function getQuestionType(type: Questiontype | null, solution_count: number) {
+  if (solution_count == 1) {
+    console.log("inferred type: singlechoice");
+    return "singlechoice";
   }
-  else {
-    if (solution_count == 1) {
-      console.log("inferred type: singlechoice");
-      return "singlechoice";
-    }
-    else if (solution_count > 1) {
-      console.log("inferred type: multiplechoice");
-      return "multiplechoice";
-    }
+  else if (solution_count > 1) {
+    console.log("inferred type: multiplechoice");
+    return "multiplechoice";
   }
 }
 
@@ -150,7 +145,7 @@ interface TextDict {
 }
 type ImplementedLanguage = 'en' | 'de';
 
-const i18n: {[id: string]: TextDict; } = {
+const i18n: { [id: string]: TextDict; } = {
   'en': {
     goto: 'Go to question',
     select: 'Select answer',
@@ -465,7 +460,7 @@ function selectAnswer(event: Event) {
 
 // ### Error
 // render Function
-function renderError(current_el: HTMLElement, error:string, message: string) {
+function renderError(current_el: HTMLElement, error: string, message: string) {
   const questionnaire = getTagRecursive(current_el, "questionnaire");
   const error_html = `
   <div class="error-wrapper">
@@ -509,8 +504,8 @@ function validateQuestionnaireStructure(questionnaire: HTMLElement) {
   // validate given html tag elements
 
   return Array.from(questions).every(q => validateStructure(q as HTMLElement)) &&
-      Array.from(answers).every(a => validateStructure(a as HTMLElement)) &&
-      Array.from(explanation).every(e => validateStructure(e as HTMLElement));
+    Array.from(answers).every(a => validateStructure(a as HTMLElement)) &&
+    Array.from(explanation).every(e => validateStructure(e as HTMLElement));
 
 }
 // ValidateStructure
@@ -519,20 +514,20 @@ function validateQuestionnaireStructure(questionnaire: HTMLElement) {
 function validateStructure(el: HTMLElement) {
   const html_tag = el.tagName;
   const parent = el.parentElement as HTMLElement | null;
-  switch(html_tag){
+  switch (html_tag) {
     case 'QUESTION':
-    return parentHasToBe(el, parent, "QUESTIONNAIRE");
+      return parentHasToBe(el, parent, "QUESTIONNAIRE");
 
     case 'SOLUTION':
     case 'DISTRACTOR':
-    return parentHasToBe(el, parent, "QUESTION");
+      return parentHasToBe(el, parent, "QUESTION");
 
     case 'EXPLANATION':
-    return parentHasToBe(el, parent, "SOLUTION", "DISTRACTOR");
+      return parentHasToBe(el, parent, "SOLUTION", "DISTRACTOR");
 
     default:
-    console.log('html_tag to check was no question, solution, distractor or explanation');
-    return true;
+      console.log('html_tag to check was no question, solution, distractor or explanation');
+      return true;
   }
 
 }
@@ -548,24 +543,24 @@ function parentHasToBe(el: HTMLElement, parent: HTMLElement | null, tag: string,
   }
 }
 
-function validateQuesionnaireAttributes(questionnaire:Questionnaire){
+function validateQuesionnaireAttributes(questionnaire: Questionnaire) {
   const questions = questionnaire.questions;
-  for (let i = 0; i < questions.length; i++){
-    if (validateQuestionAttributes(questions[i]) == false){
+  for (let i = 0; i < questions.length; i++) {
+    if (validateQuestionAttributes(questions[i]) == false) {
       return false;
     }
   }
   return true;
 }
 
-function validateQuestionAttributes(question:Question){
+function validateQuestionAttributes(question: Question) {
   const type = question.type;
-  const answers:number = question.answers.length;
-  const solutions:number = question.solutionCount;
+  const answers: number = question.answers.length;
+  const solutions: number = question.solutionCount;
   // if only 1 or less answers exists
   if (answers < 2) {
     let err = `You need to provide at least two answers for one &lt;question&gt;:`;
-    let msg =  question.rootElement.outerHTML;
+    let msg = question.rootElement.outerHTML;
     renderError(question.rootElement, err, msg);
     return false;
   }
@@ -576,21 +571,7 @@ function validateQuestionAttributes(question:Question){
     renderError(question.rootElement, err, msg);
     return false;
   }
-  // if type is multiplechoice but doesnt match with solutions
-  else if(type == "multiplechoice" && solutions < 2){
-    let err = `Optional attribute &lt;question type='multiplechoice'&gt; doesnt match with number of solutions:`;
-    let msg = question.rootElement.outerHTML;
-    renderError(question.rootElement, err, msg);
-    return false;
-  }
-  // if type is singlechoice but doesnt match with solutions
-  else if (type == "singlechoice" && solutions > 1){
-    let err = `Optional attribute &lt;question type='singlechoice'&gt; doesnt match with number of solutions:`;
-    let msg = question.rootElement.outerHTML;
-    renderError(question.rootElement, err, msg);
-    return false;
-  }
-return true;
+  return true;
 }
 
 

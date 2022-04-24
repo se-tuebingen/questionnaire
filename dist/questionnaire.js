@@ -35,18 +35,13 @@ function parseQuestion(question) {
 // automatically assigns the correct type, if not given single- or multiplechoice
 // if optional attribute is assigned throw an error for invalid arguments
 function getQuestionType(type, solution_count) {
-    if (type == "singlechoice" || type == "multiplechoice") {
-        return type;
+    if (solution_count == 1) {
+        console.log("inferred type: singlechoice");
+        return "singlechoice";
     }
-    else {
-        if (solution_count == 1) {
-            console.log("inferred type: singlechoice");
-            return "singlechoice";
-        }
-        else if (solution_count > 1) {
-            console.log("inferred type: multiplechoice");
-            return "multiplechoice";
-        }
+    else if (solution_count > 1) {
+        console.log("inferred type: multiplechoice");
+        return "multiplechoice";
     }
 }
 function parseAnswer(answer) {
@@ -486,20 +481,6 @@ function validateQuestionAttributes(question) {
     // if there is no solution
     else if (solutions == 0) {
         let err = `This question has no &lt;solution&gt;:`;
-        let msg = question.rootElement.outerHTML;
-        renderError(question.rootElement, err, msg);
-        return false;
-    }
-    // if type is multiplechoice but doesnt match with solutions
-    else if (type == "multiplechoice" && solutions < 2) {
-        let err = `Optional attribute &lt;question type='multiplechoice'&gt; doesnt match with number of solutions:`;
-        let msg = question.rootElement.outerHTML;
-        renderError(question.rootElement, err, msg);
-        return false;
-    }
-    // if type is singlechoice but doesnt match with solutions
-    else if (type == "singlechoice" && solutions > 1) {
-        let err = `Optional attribute &lt;question type='singlechoice'&gt; doesnt match with number of solutions:`;
         let msg = question.rootElement.outerHTML;
         renderError(question.rootElement, err, msg);
         return false;

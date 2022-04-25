@@ -7,4 +7,5 @@ typescript:
 	tsc
 
 test:
+	cp dist/questionnaire.js tests/javascript-plugin
 	cd tests/scribble-plugin && ./test.sh

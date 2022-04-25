@@ -84,6 +84,18 @@ There are also some styling options for the LaTex output that can be passed as k
   - `"inline"` below the questions
 - `#:explain` Whether to include explanations in the solution (default: `#t`)
 
+### Customizing Styles
+
+The CSS style sheet (`src/ressources/style.css`) is mainly concerned with layout and color. _The **content** and typography of questions, answers and explanations are **left as-is** as far as possible_, only the font size of the question is changed.
+
+The style sheet is added to the head of the HTML document. The containing styles are all scoped to the `questionnaire` element.
+
+- In order to overwrite styles or CSS variables, you need to either define them after the stylesheet (i.e. in a `<style>` tag somewhere in your document, but outside of the questionnaire) and be at least as specific, or be more specific (e.g. by giving the questionnaire a class)._Adding a class to a question, answer or explanation will **not work**, since these elements are destroyed and recreated during the processing of the questionnaire!_
+
+- **Colors are defined via [CSS Variables](https://www.w3schools.com/css/css3_variables.asp)** so that they can be changed more easily. _For a full list of variables, refer to the source at `src/ressources/style.css`, as it may change between versions._
+
+**For an instructive example, see `tests/javascript-plugin/questionnaire-test.html`.**
+
 ## Development
 
 ### Requirements

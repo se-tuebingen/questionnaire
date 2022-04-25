@@ -11,12 +11,49 @@
     padding: 0;
     font-family: monospace;
   }
+
+  /* custom style demo */
+
+  /* v-- higher specificity by adding a class to questionnaire */
+  .custom question:nth-child(4) {
+    --correct-light: greenyellow;
+    --correct-medium: lime;
+    --correct-dark: darkgreen;
+
+    --wrong-light: blanchedalmond;
+    --wrong-medium: crimson;
+    --wrong-dark: purple;
+
+    --answer-border-and-hover: paleturquoise;
+    --answer-bg: #fdfdfd;
+    --selected: darkcyan;
+  }
+  .custom question:nth-child(4) answer[selected="true"] {
+    font-style: italic;
+  }
   </style>
 </head>
 
 <body>
+  <!-- comment in in order to re-style entire questionnaire -->
+  <!-- <style>
+  /* v-- same specificity, but defined after, so overrides values set by stylesheet in <head> */
+  questionnaire {
+    --correct-light: greenyellow;
+    --correct-medium: lime;
+    --correct-dark: darkgreen;
+
+    --wrong-light: blanchedalmond;
+    --wrong-medium: crimson;
+    --wrong-dark: purple;
+
+    --answer-border-and-hover: paleturquoise;
+    --answer-bg: #fdfdfd;
+    --selected: darkcyan;
+  }
+  </style> -->
   <!-- nice demo questionnaire -->
-  <questionnaire>
+  <questionnaire class="custom">
     <question>
       Do you like Quizzes in your Scripts?
       <solution>Yes</solution>
@@ -31,6 +68,25 @@
         <explanation>
           All you need to do is provide some HTML elements and include the script via a script tag.
           <!-- todo: make release that can be simply included from web -->
+        </explanation>
+      </solution>
+    </question>
+    <question>
+      What can I customize about the style?
+      <distractor>
+        Nothing
+      </distractor>
+      <solution>
+        CSS Classes with a custom style node
+        <explanation>
+          Simply add a style node in your quiz to overwrite CSS classes.
+          For text content, the only thing that is styled is the size, anyway.
+        </explanation>
+      </solution>
+      <solution>
+        Color scheme via CSS variables
+        <explanation>
+          To make it easier for you to change the color scheme, it relies on CSS variables :)
         </explanation>
       </solution>
     </question>

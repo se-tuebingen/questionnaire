@@ -43,6 +43,32 @@ questionnaire pre code {
 }
 
 /* QUESTIONNAIRE */
+
+/* Color variables */
+questionnaire {
+  --current: azure;
+
+  --pending-light: white;
+  --pending-medium: silver;
+
+  --correct-light: lightgreen;
+  --correct-medium: green;
+  --correct-dark: darkgreen;
+
+  --wrong-light: lightpink;
+  --wrong-medium: darkred;
+  --wrong-dark: darkred;
+
+  --question-bg: #fcfcfc;
+
+  --answer-border-and-hover: #eee;
+  --answer-bg: #fdfdfd;
+  --selected: grey;
+
+  --button-border-and-hover: #bbb;
+
+}
+
 /* Basic layout */
 questionnaire {
   display: block;
@@ -66,7 +92,7 @@ questionnaire question, questionnaire .summary {
   margin: 0 auto;
   font-size: 18pt;
   padding:4vw;
-  background-color: #fcfcfc;
+  background-color: var(--question-bg);
 }
 
 questionnaire .question-header, questionnaire .question-footer, questionnaire .wrapper-answer {
@@ -84,7 +110,7 @@ questionnaire .question-footer{
 }
 
 questionnaire .wrapper-answer, questionnaire explanation {
-  border: 1px solid #eee;
+  border: 1px solid var(--answer-border-and-hover);
   padding: 5px 12px;
   font-size: 14pt;
   margin: 15px 0 0;
@@ -95,31 +121,27 @@ questionnaire explanation {
   border-top: 0;
 }
 questionnaire answer[correct="true"] explanation {
-  border: 2px solid lightgreen;
+  border: 2px solid var(--correct-light);
   border-top: 0;
 }
 questionnaire answer[correct="false"] explanation {
-  border: 2px solid lightpink;
+  border: 2px solid var(--wrong-light);
   border-top: 0;
 }
 
 questionnaire .wrapper-answer:hover {
   cursor: pointer;
-  background-color: #eee;
+  background-color: var(--answer-border-and-hover);
 }
 
 questionnaire answer p {
   margin: 0 0 0 16px;
   padding: 6px;
-  /*font-size: 12pt;
-  border: 1px solid #000;
-  width:100%;*/
 }
 
 
 questionnaire explanation {
   display: none;
-  /*max-width: 30vw;*/
 }
 
 questionnaire answer [visible=true] {
@@ -128,7 +150,7 @@ questionnaire answer [visible=true] {
   font-size: 12pt;
   word-break: break-word;
   border:0;
-  background-color: #fdfdfd;
+  background-color: var(--answer-bg);
 }
 
 questionnaire answer [visible=true] p {
@@ -176,40 +198,40 @@ questionnaire .correct-text, questionnaire .wrong-text {
 }
 questionnaire question[answer="correct"] .correct-text {
   display: inline-flex;
-  color: darkgreen;
+  color: var(--correct-dark);
 }
 questionnaire question[answer="wrong"] .wrong-text {
   display: inline-flex;
-  color: darkred;
+  color: var(--wrong-dark);
 }
 
 /* question border */
 questionnaire question[answer="pending"] {
-  border: 1px solid silver;
+  border: 1px solid var(--pending-medium);
 }
 
 questionnaire question[answer="correct"] {
-  border: 1px solid green;
+  border: 1px solid var(--correct-medium);
 }
 
 questionnaire question[answer="wrong"] {
-  border: 1px solid darkred;
+  border: 1px solid var(--wrong-medium);
 }
 
 /* answers */
 questionnaire question[answer="pending"] answer[selected="true"] .wrapper-answer {
-  border: 2px solid grey;
+  border: 2px solid var(--selected);
 }
 /* *="o" means correct or wrong, not pending */
 questionnaire question[answer*="o"] answer[correct="true"][selected="true"] .wrapper-answer {
-  border: 2px solid green;
+  border: 2px solid var(--correct-medium);
 }
 questionnaire question[answer*="o"] answer[correct="true"] .wrapper-answer {
-  background-color: lightgreen;
+  background-color: var(--correct-light);
 }
 questionnaire question[answer*="o"] answer[correct="false"][selected="true"] .wrapper-answer {
-  border: 2px solid darkred;
-  background-color: lightpink;
+  border: 2px solid var(--wrong-medium);
+  background-color: var(--wrong-light);
 }
 
 /* explanation */
@@ -252,12 +274,12 @@ questionnaire .submit-button, questionnaire .next-button, questionnaire .reset-b
   padding:15px;
   margin:5px 15px;
   margin-top: 15px;
-  border: 4px solid #bbb;
+  border: 4px solid var(--button-border-and-hover);
   border-radius: 7px;
   font-size:1.3em;
 }
 questionnaire .submit-button:hover, questionnaire .next-button:hover, questionnaire .reset-button:hover {
-  background-color: #bbb;
+  background-color: var(--button-border-and-hover);
   cursor:pointer;
 }
 
@@ -301,43 +323,42 @@ questionnaire .bubble:hover {
   transform: scale(0.9);
 }
 questionnaire .bubble-pending {
-  background-color: white;
-  border-color: silver;
+  background-color: var(--pending-light);
+  border-color: var(--pending-medium);
 }
 questionnaire .bubble-current {
   height: 2em;
   width: 2em;
   border-radius: 1em;
-  background-color: azure;
+  background-color: var(--current);
 }
 questionnaire .bubble-correct {
-  background-color: lightgreen;
-  border-color: darkgreen;
+  background-color: var(--correct-light);
+  border-color: var(--correct-dark);
 }
 questionnaire .bubble-wrong {
-  background-color: lightpink;
-  border-color: darkred;
+  background-color: var(--wrong-light);
+  border-color: var(--wrong-dark);
 }
 
 /* SUMMARY */
 questionnaire .summary[visible="true"] {
   display: block;
   text-align: center;
-  border: 1px solid silver;
+  border: 1px solid var(--pending-medium);
 }
 questionnaire .summary-bar-container {
   width: 100%;
-  background-color: azure;
+  background-color: var(--current);
   margin: 1em;
   margin-left: 0;
   margin-right: 0;
 }
 questionnaire .summary-bar {
-  background-color: lightgreen;
-  border: 1px solid darkgreen;
+  background-color: var(--correct-light);
+  border: 1px solid var(--correct-dark);
   padding: 0.25em;
   width: 1%;
-  transition: all 10s ease-out;
 }
 questionnaire[current_question="0"] .question-overview{
   margin-bottom: -0.5em;

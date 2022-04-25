@@ -25,7 +25,7 @@
 6. L
 - gh pages workflow erstellen(done)
 
-7. F
+7. F (done)
 - Dokumentieren wie man den style verändert
 
 8. L

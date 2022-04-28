@@ -29,7 +29,9 @@ Single-Choice Question (single choice automatically inferred):
 ]
 ]
 
-Multiple-Choice-Question (multiple choice automatically inferred, in the pdf, the solution should be below and not in the margin, here):
+Multiple-Choice-Question (multiple choice automatically inferred).
+
+@pdf-note{This note should only show up in the pdf: The solution for the MC-Question should show up below and not in the margin.}
 
 @questionnaire[
 @question[

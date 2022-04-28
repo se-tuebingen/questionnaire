@@ -8,7 +8,7 @@
 (require scribble/latex-properties)
 (require scribble/base)
 
-(provide questionnaire question solution distractor explanation texquestions q)
+(provide questionnaire question solution distractor explanation texquestions q pdf-note)
 
 ;;;;;;;;;;; Type Definitions
 (define questiontypes (or/c "singlechoice" "multiplechoice" "infer"))
@@ -452,7 +452,16 @@
         [else (cond-block
                 [latex
                  (retrieve-questionnaire key (lambda (x) (render-latex style explain x)))]
-                [html nothing]
+                [else nothing]
               )]
+  )
+)
+
+; helper for creating a margin note that only shows up in pdf
+(define
+  (pdf-note content)
+  (cond-block
+    [latex (margin-note content)]
+    [else nothing]
   )
 )

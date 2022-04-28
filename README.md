@@ -89,6 +89,8 @@ There are also some styling options for the LaTex output that can be passed as k
   - `"inline"` below the questions
 - `#:explain` Whether to include explanations in the solution (default: `#t`)
 
+The `@pdf-note{}`-helper is a `@margin-note{}` that only shows up when the render target is latex/pdf.
+
 ### Customizing Styles
 
 The CSS style sheet (`src/ressources/style.css`) is mainly concerned with layout and color. _The **content** and typography of questions, answers and explanations are **left as-is** as far as possible_, only the font size of the question is changed.

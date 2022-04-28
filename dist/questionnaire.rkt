@@ -459,7 +459,7 @@
 
 ; helper for creating a margin note that only shows up in pdf
 (define
-  (pdf-note content)
+  (pdf-note . content)
   (cond-block
     [latex (margin-note content)]
     [else nothing]

@@ -251,6 +251,40 @@ This questionnaire tests proper handling of those cases:
 ]
 @texquestions[]
 
+In order to test scroll behaviour, here is add some additional content:
+@itemlist[
+  @item{Itemizations}
+  @item{Tables
+    @tabular[#:sep @hspace[3]
+ (list (list @bold{Numbers}       @bold{Strings})
+       (list @racket[42]         @racket["42"])
+       (list @racket[(+ 21 21)]  @racket["(+ 21 21)"]))]
+  }
+  @item{
+    @racketblock[(string-append "Racket" "Code")]
+  }
+  @item{
+    Images: @image["rocket-s.jpg"]
+  }
+  @item{ And much more, which cannot be covered in its entirety}
+]
+@itemlist[
+  @item{Itemizations}
+  @item{Tables
+    @tabular[#:sep @hspace[3]
+ (list (list @bold{Numbers}       @bold{Strings})
+       (list @racket[42]         @racket["42"])
+       (list @racket[(+ 21 21)]  @racket["(+ 21 21)"]))]
+  }
+  @item{
+    @racketblock[(string-append "Racket" "Code")]
+  }
+  @item{
+    Images: @image["rocket-s.jpg"]
+  }
+  @item{ And much more, which cannot be covered in its entirety}
+]
+
 @section{internationalization}
 
 Hier sollten die HTML-Texte auf Deutsch erscheinen:

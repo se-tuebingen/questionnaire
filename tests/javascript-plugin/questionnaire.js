@@ -285,6 +285,8 @@ function showNextQuestion(event) {
     // update visibility
     (_a = currentQuestion.nextElementSibling) === null || _a === void 0 ? void 0 : _a.setAttribute('visible', 'true');
     currentQuestion.removeAttribute('visible');
+    // scroll to top of questionnaire box  
+    questionnaire.scrollIntoView();
 }
 // submit
 function submitAnswer(event) {
@@ -313,6 +315,8 @@ function submitAnswer(event) {
             a.setAttribute('expanded', 'true');
         }
     });
+    // scroll to top of questionnaire box
+    questionnaire.scrollIntoView();
 }
 // ### Answer
 // <answer>

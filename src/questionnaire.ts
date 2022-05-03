@@ -348,8 +348,11 @@ function showNextQuestion(event: Event) {
   });
 
   // update visibility
-  currentQuestion.nextElementSibling ?.setAttribute('visible', 'true');
+  currentQuestion.nextElementSibling?.setAttribute('visible', 'true');
   currentQuestion.removeAttribute('visible');
+
+  // scroll to top of questionnaire box  
+  questionnaire.scrollIntoView();
 
 }
 // submit
@@ -386,6 +389,9 @@ function submitAnswer(event: Event) {
       a.setAttribute('expanded', 'true');
     }
   });
+
+  // scroll to top of questionnaire box
+  questionnaire.scrollIntoView();
 }
 
 // ### Answer

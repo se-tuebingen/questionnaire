@@ -267,6 +267,7 @@ function resetQuestionnaire(e: Event) {
 //  - answer: "pending"|"correct"|"wrong"
 function renderQuestion(question: Question, index: number) {
   return `
+  <div class="question-wrapper">
     <question type="${question.type}"
               ${index == 0 ? 'visible="true"' : ''}
               number="${index + 1}"
@@ -290,6 +291,9 @@ function renderQuestion(question: Question, index: number) {
         </div>
       </div>
     </question>
+    <div class="question-border-grey"></div>
+    <div class="question-border"></div>
+  </div>
   `;
 }
 
@@ -351,7 +355,7 @@ function showNextQuestion(event: Event) {
   currentQuestion.nextElementSibling?.setAttribute('visible', 'true');
   currentQuestion.removeAttribute('visible');
 
-  // scroll to top of questionnaire box  
+  // scroll to top of questionnaire box
   questionnaire.scrollIntoView();
 
 }

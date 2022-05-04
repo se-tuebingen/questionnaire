@@ -207,6 +207,7 @@ function resetQuestionnaire(e) {
 //  - answer: "pending"|"correct"|"wrong"
 function renderQuestion(question, index) {
     return `
+  <div class="question-wrapper">
     <question type="${question.type}"
               ${index == 0 ? 'visible="true"' : ''}
               number="${index + 1}"
@@ -230,6 +231,9 @@ function renderQuestion(question, index) {
         </div>
       </div>
     </question>
+    <div class="question-border-grey"></div>
+    <div class="question-border"></div>
+  </div>
   `;
 }
 // event handlers:
@@ -285,7 +289,7 @@ function showNextQuestion(event) {
     // update visibility
     (_a = currentQuestion.nextElementSibling) === null || _a === void 0 ? void 0 : _a.setAttribute('visible', 'true');
     currentQuestion.removeAttribute('visible');
-    // scroll to top of questionnaire box  
+    // scroll to top of questionnaire box
     questionnaire.scrollIntoView();
 }
 // submit
@@ -737,8 +741,10 @@ questionnaire .question-overview{
 margin: 0 auto 10px;
 font-size:1.1em;
 }
-questionnaire question, questionnaire .summary {
+questionnaire .question-wrapper, questionnaire .summary {
   width: 90%;
+}
+questionnaire question, questionnaire .summary {
   margin: 0 auto;
   font-size: 18pt;
   padding:4vw;
@@ -833,7 +839,7 @@ questionnaire .wrapper-answer > div, questionnaire .question-header > div {
 
 /* RESPONSIVE MAX WIDTH */
 @media (min-width: 768px) {
-  questionnaire question, questionnaire .summary {
+  questionnaire .question-wrapper, questionnaire .summary {
     max-width: 600px;
   }
 }
@@ -855,17 +861,47 @@ questionnaire question[answer="wrong"] .wrong-text {
   color: var(--wrong-dark);
 }
 
-/* question border */
-questionnaire question[answer="pending"] {
-  border: 1px solid var(--pending-medium);
+/* question border (animated) */
+questionnaire .question-wrapper {
+  position: relative;
+}
+questionnaire .question-border-grey {
+  background-color: var(--pending-medium);
+  position: absolute;
+  z-index: -2;
+  margin: -1px;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}
+questionnaire .question-border {
+  background-color: var(--pending-medium);
+  position: absolute;
+  z-index: -1;
+  margin: -1px;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  border: 1px solid transparent;
+  border-radius: 50vw;
 }
 
-questionnaire question[answer="correct"] {
-  border: 1px solid var(--correct-medium);
+questionnaire question[answer="correct"] ~ .question-border {
+  background-color: 1px solid var(--correct-medium);
+
+  margin: -4px;
+  border-radius: 0;
+  transition: border-radius 2s ease-out, margin 1s ease-out;
 }
 
-questionnaire question[answer="wrong"] {
-  border: 1px solid var(--wrong-medium);
+questionnaire question[answer="wrong"] ~ .question-border {
+  background-color: 1px solid var(--wrong-medium);
+
+  margin: -4px;
+  border-radius: 0;
+  transition: border-radius 2s ease-out, margin 1s ease-out;
 }
 
 /* answers */

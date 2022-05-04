@@ -740,7 +740,7 @@ font-size:1.2em;
 questionnaire question, questionnaire .summary {
   width: 90%;
   margin: 0 auto;
-  font-size: 0.9em;
+  font-size: 1.3em;
   padding:4vw;
   background-color: var(--question-bg);
 }

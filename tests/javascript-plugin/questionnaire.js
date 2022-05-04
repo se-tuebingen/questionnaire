@@ -261,8 +261,9 @@ function showNextQuestion(event) {
         summaryBar.style.width = `${percentage}%`;
         summaryBar.animate([
             { width: 0 },
+            { width: 0 },
             { width: `${percentage}%`, easing: 'ease-out' }
-        ], 1000);
+        ], 2000);
         // show text after animation
         window.setTimeout(() => {
             summaryBar.innerHTML = `${percentage}%`;
@@ -271,7 +272,7 @@ function showNextQuestion(event) {
             const feedbacks = i18n[lang].feedbacks;
             const summaryText = questionnaire.getElementsByClassName('summary-text')[0];
             summaryText.innerHTML = feedbacks[Math.floor(ratio * 0.99 * feedbacks.length)];
-        }, 1000);
+        }, 2000);
     }
     else {
         // update questionnaire
@@ -846,6 +847,7 @@ questionnaire .wrapper-answer > div, questionnaire .question-header > div {
 @media (min-width: 768px) {
   questionnaire question, questionnaire .summary {
     max-width: 600px;
+    box-sizing: border-box; /* includes padding in width */
   }
 }
 
@@ -898,7 +900,7 @@ questionnaire question .default-border {
   right: 0;
   bottom: 0;
 }
-questionnaire question[answer*="o"] {
+questionnaire question[answer*="o"] .default-border {
   background-color: transparent;
 
   /* transition: background-color 0.5s steps(1, start); */
@@ -1000,14 +1002,36 @@ questionnaire question[answer*="o"] answer[expanded="true"] .collapser {
 
 /* NAVIGATION */
 /* only show question that has been set visible */
+/* switch items with "pagination" effect */
 questionnaire question{
-  display:none;
+  /* display:none; */
+  transform: translateX(-100%);
+  visibility: hidden;
+  height: 0;
+  transition: transform 0.5s ease-out 0s, visibility 0.5s ease-out 0s, height 0.5s steps(1,end) 0s;
+}
+questionnaire question[visible="true"] ~ question {
+  transform: translateX(100%);
+  visibility: hidden;
+  height: 0;
+  transition: transform 0.5s ease-out 0s, visibility 0.5s ease-out 0s, height 0.5s steps(1,end) 0s;
 }
 questionnaire .summary {
-  display: none;
+  /* display: none; */
+  transform: translateX(100%);
+  visibility: hidden;
+  height: 0;
+  transition: transform 0.5s ease-out 0s, visibility 0.5s ease-out 0s, height 0.5s steps(1,end) 0s;
 }
-questionnaire [visible=true]{
+questionnaire [visible="true"]{
   display:block;
+}
+questionnaire question[visible="true"], questionnaire .summary[visible="true"] {
+  visibility: visible;
+  transform: translateX(0);
+  height: auto;
+  transition: transform 0.5s ease-out 0.5s, visibility 0.5s ease-out 0.5s, height 0.5s steps(1,start) 0.5s;
+  /* transition: transform 2s ease-out, visibility 2s ease-out; */
 }
 
 /* button styles */
@@ -1049,6 +1073,7 @@ questionnaire .question-overview {
   justify-content: center;
   align-items: center;
   margin-bottom: -1em;
+  height: 2em;
   z-index: 1000;
 }
 questionnaire .bubble {
@@ -1058,6 +1083,7 @@ questionnaire .bubble {
   border-radius: 0.5em;
   display: inline-flex;
   margin: 0 0.25em;
+  transition: height 0.5s ease-out 0s, width 0.5s ease-out 0s, border-radius 0.5s ease-out 0s;
 }
 questionnaire .bubble:hover {
   cursor: pointer;
@@ -1072,6 +1098,7 @@ questionnaire .bubble-current {
   width: 2em;
   border-radius: 1em;
   background-color: var(--current);
+  transition: height 0.5s ease-out 0.5s, width 0.5s ease-out 0.5s, border-radius 0.5s ease-out 0.5s;
 }
 questionnaire .bubble-correct {
   background-color: var(--correct-light);
@@ -1100,8 +1127,5 @@ questionnaire .summary-bar {
   border: 1px solid var(--correct-dark);
   padding: 0.25em;
   width: 1%;
-}
-questionnaire[current_question="0"] .question-overview{
-  margin-bottom: -0.5em;
 }`;
 })(Ressources || (Ressources = {}));

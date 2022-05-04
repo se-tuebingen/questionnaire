@@ -324,9 +324,10 @@ function showNextQuestion(event: Event) {
     summaryBar.innerHTML = '?';
     summaryBar.style.width = `${percentage}%`;
     summaryBar.animate([
+      { width: 0 }, // wait 1s for paging animation
       { width: 0 },
       { width: `${percentage}%`, easing: 'ease-out' }
-    ], 1000);
+    ], 2000);
     // show text after animation
     window.setTimeout(() => {
       summaryBar.innerHTML = `${percentage}%`;
@@ -335,7 +336,7 @@ function showNextQuestion(event: Event) {
       const feedbacks = i18n[lang].feedbacks;
       const summaryText = questionnaire.getElementsByClassName('summary-text')[0] as HTMLElement;
       summaryText.innerHTML = feedbacks[Math.floor(ratio * 0.99 * feedbacks.length)];
-    }, 1000);
+    }, 2000);
 
   } else {
     // update questionnaire

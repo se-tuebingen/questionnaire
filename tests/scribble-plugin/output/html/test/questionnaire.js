@@ -315,11 +315,14 @@ function submitAnswer(event) {
         }
     });
     // expand necessary explanations, if present
-    Array.from(answers).map(a => {
-        if (a.getAttribute('selected') != a.getAttribute('correct')) {
-            a.setAttribute('expanded', 'true');
-        }
-    });
+    // with delay, because of animation
+    window.setTimeout(() => {
+        Array.from(answers).map(a => {
+            if (a.getAttribute('selected') != a.getAttribute('correct')) {
+                a.setAttribute('expanded', 'true');
+            }
+        });
+    }, 500);
     // scroll to top of questionnaire box
     questionnaire.scrollIntoView();
 }
@@ -847,6 +850,21 @@ questionnaire .wrapper-answer > div, questionnaire .question-header > div {
 }
 
 /* FEEDBACK */
+/* feedback happens animated with 0.5s delay */
+@keyframes show-delayed {
+  0% {
+    height: 0;
+    visibility: hidden;
+  }
+  99% {
+    height: 0;
+    visibility: hidden;
+  }
+  100% {
+    height: auto;
+    visibility: visible;
+  }
+}
 /* text */
 questionnaire .correct-text, questionnaire .wrong-text {
   display: inline-flex;
@@ -857,24 +875,15 @@ questionnaire .correct-text, questionnaire .wrong-text {
 questionnaire question[answer="correct"] .correct-text {
   display: inline-flex;
   color: var(--correct-dark);
+  animation: show-delayed 0.5s;
 }
 questionnaire question[answer="wrong"] .wrong-text {
   display: inline-flex;
   color: var(--wrong-dark);
+  animation: show-delayed 0.5s;
 }
 
 /* question border (fancy animated version) */
-/* questionnaire question[answer="pending"] {
-  border: 1px solid var(--pending-medium);
-}
-
-questionnaire question[answer="correct"] {
-  border: 1px solid var(--correct-medium);
-}
-
-questionnaire question[answer="wrong"] {
-  border: 1px solid var(--wrong-medium);
-} */
 questionnaire question {
   position: relative;
 }
@@ -942,6 +951,9 @@ questionnaire question[answer="pending"] answer[selected="true"] .wrapper-answer
   border: 2px solid var(--selected);
 }
 /* *="o" means correct or wrong, not pending */
+questionnaire question[answer*="o"] .wrapper-answer {
+  transition: border 0.5s steps(1,end), background-color 0.5s steps(1,end);
+}
 questionnaire question[answer*="o"] answer[correct="true"][selected="true"] .wrapper-answer {
   border: 2px solid var(--correct-medium);
 }
@@ -968,12 +980,22 @@ questionnaire question[answer*="o"] .expander {
 
 questionnaire question[answer*="o"] answer[expanded="true"] explanation {
   display: block;
+  /* animation: show-delayed 0.5s; */
 }
 questionnaire question[answer*="o"] answer[expanded="true"] .expander {
   display: none;
 }
+/* @keyframes rotate-down {
+  0% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+} */
 questionnaire question[answer*="o"] answer[expanded="true"] .collapser {
   display: block;
+  /* animation: rotate-down 0.5s; */
 }
 
 /* NAVIGATION */

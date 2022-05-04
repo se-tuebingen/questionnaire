@@ -389,11 +389,14 @@ function submitAnswer(event: Event) {
   });
 
   // expand necessary explanations, if present
-  Array.from(answers).map(a => {
-    if (a.getAttribute('selected') != a.getAttribute('correct')) {
-      a.setAttribute('expanded', 'true');
-    }
-  });
+  // with delay, because of animation
+  window.setTimeout(() => {
+    Array.from(answers).map(a => {
+      if (a.getAttribute('selected') != a.getAttribute('correct')) {
+        a.setAttribute('expanded', 'true');
+      }
+    });
+  }, 500);
 
   // scroll to top of questionnaire box
   questionnaire.scrollIntoView();

@@ -211,24 +211,29 @@ function renderQuestion(question, index) {
               ${index == 0 ? 'visible="true"' : ''}
               number="${index + 1}"
               answer="pending">
-      <div class="correct-text">
-        <p>${i18n[lang].correct}</p>
-      </div>
-      <div class="wrong-text">
-        <p>${i18n[lang].wrong}</p>
-      </div>
-      <div class="question-header">
-        <div>${question.text.map(nodeOuterHTML).join('')}</div>
-      </div>
-      ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
-      <div class="question-footer">
-        <div class="next-button" onClick="showNextQuestion(event)">
-          ${i18n[lang].next}
+      <div class="question-content">
+        <div class="correct-text">
+          <p>${i18n[lang].correct}</p>
         </div>
-        <div class="submit-button" onClick="submitAnswer(event)">
-          ${i18n[lang].submit}
+        <div class="wrong-text">
+          <p>${i18n[lang].wrong}</p>
+        </div>
+        <div class="question-header">
+          <div>${question.text.map(nodeOuterHTML).join('')}</div>
+        </div>
+        ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
+        <div class="question-footer">
+          <div class="next-button" onClick="showNextQuestion(event)">
+            ${i18n[lang].next}
+          </div>
+          <div class="submit-button" onClick="submitAnswer(event)">
+            ${i18n[lang].submit}
+          </div>
         </div>
       </div>
+      <div class="default-border"></div>
+      <div class="animated-border-lr"></div>
+      <div class="animated-border-tb"></div>
     </question>
   `;
 }
@@ -285,7 +290,7 @@ function showNextQuestion(event) {
     // update visibility
     (_a = currentQuestion.nextElementSibling) === null || _a === void 0 ? void 0 : _a.setAttribute('visible', 'true');
     currentQuestion.removeAttribute('visible');
-    // scroll to top of questionnaire box  
+    // scroll to top of questionnaire box
     questionnaire.scrollIntoView();
 }
 // submit
@@ -737,9 +742,12 @@ questionnaire .question-overview{
 margin: 0 auto 10px;
 font-size:1.1em;
 }
+
 questionnaire question, questionnaire .summary {
   width: 90%;
   margin: 0 auto;
+}
+questionnaire question .question-content, questionnaire .summary {
   font-size: 18pt;
   padding:4vw;
   background-color: var(--question-bg);
@@ -855,8 +863,8 @@ questionnaire question[answer="wrong"] .wrong-text {
   color: var(--wrong-dark);
 }
 
-/* question border */
-questionnaire question[answer="pending"] {
+/* question border (fancy animated version) */
+/* questionnaire question[answer="pending"] {
   border: 1px solid var(--pending-medium);
 }
 
@@ -866,7 +874,68 @@ questionnaire question[answer="correct"] {
 
 questionnaire question[answer="wrong"] {
   border: 1px solid var(--wrong-medium);
+} */
+questionnaire question {
+  position: relative;
 }
+
+questionnaire question .default-border {
+  background-color: var(--pending-medium);
+  position: absolute;
+  z-index: -2;
+  margin: -1px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+questionnaire question[answer*="o"] {
+  background-color: transparent;
+
+  /* transition: background-color 0.5s steps(1, start); */
+  transition: background-color 0.5s easeOutQuint;
+}
+
+questionnaire question .animated-border-lr {
+  background-color: transparent;
+  position: absolute;
+  z-index: -1;
+  margin: -1px;
+  left: 0;
+  right: 0;
+  height: 0;
+  top: 50%;
+}
+questionnaire question[answer*="o"] .animated-border-lr {
+  background-color: var(--correct-medium);
+  top: 0;
+  height: calc(100% + 2px);
+  transition: height 0.5s ease-out, top 0.5s ease-out;
+}
+questionnaire question[answer="wrong"] .animated-border-lr {
+  background-color: var(--wrong-medium);
+}
+
+questionnaire question .animated-border-tb {
+  background-color: transparent;
+  position: absolute;
+  z-index: -1;
+  margin: -1px;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  left: 50%;
+}
+questionnaire question[answer*="o"] .animated-border-tb {
+  background-color: var(--correct-medium);
+  left: 0;
+  width: calc(100% + 2px);
+  transition: width 0.5s ease-out, left 0.5s ease-out;
+}
+questionnaire question[answer="wrong"] .animated-border-tb {
+  background-color: var(--wrong-medium);
+}
+
 
 /* answers */
 questionnaire question[answer="pending"] answer[selected="true"] .wrapper-answer {

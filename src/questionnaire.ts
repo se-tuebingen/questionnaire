@@ -271,24 +271,29 @@ function renderQuestion(question: Question, index: number) {
               ${index == 0 ? 'visible="true"' : ''}
               number="${index + 1}"
               answer="pending">
-      <div class="correct-text">
-        <p>${i18n[lang].correct}</p>
-      </div>
-      <div class="wrong-text">
-        <p>${i18n[lang].wrong}</p>
-      </div>
-      <div class="question-header">
-        <div>${question.text.map(nodeOuterHTML).join('')}</div>
-      </div>
-      ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
-      <div class="question-footer">
-        <div class="next-button" onClick="showNextQuestion(event)">
-          ${i18n[lang].next}
+      <div class="question-content">
+        <div class="correct-text">
+          <p>${i18n[lang].correct}</p>
         </div>
-        <div class="submit-button" onClick="submitAnswer(event)">
-          ${i18n[lang].submit}
+        <div class="wrong-text">
+          <p>${i18n[lang].wrong}</p>
+        </div>
+        <div class="question-header">
+          <div>${question.text.map(nodeOuterHTML).join('')}</div>
+        </div>
+        ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
+        <div class="question-footer">
+          <div class="next-button" onClick="showNextQuestion(event)">
+            ${i18n[lang].next}
+          </div>
+          <div class="submit-button" onClick="submitAnswer(event)">
+            ${i18n[lang].submit}
+          </div>
         </div>
       </div>
+      <div class="default-border"></div>
+      <div class="animated-border-lr"></div>
+      <div class="animated-border-tb"></div>
     </question>
   `;
 }
@@ -351,7 +356,7 @@ function showNextQuestion(event: Event) {
   currentQuestion.nextElementSibling?.setAttribute('visible', 'true');
   currentQuestion.removeAttribute('visible');
 
-  // scroll to top of questionnaire box  
+  // scroll to top of questionnaire box
   questionnaire.scrollIntoView();
 
 }

@@ -672,13 +672,13 @@ questionnaire .error-wrapper{
 margin: 10px 0;
 }
 questionnaire .error-box{
-font-size:16pt;
+font-size:1.1em;
 line-height:1.5em;
 }
 
 .error-message{
   font-family:monospace;
-  font-size:12pt;
+  font-size:1em;
 }
 
 questionnaire pre code {
@@ -728,8 +728,8 @@ questionnaire .content-wrapper {
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
-  margin: 1vw;
-  padding: 1vw;
+  margin: 10px;
+  padding: 10px;
   justify-content: center;
 }
 
@@ -740,7 +740,7 @@ font-size:1.1em;
 questionnaire question, questionnaire .summary {
   width: 90%;
   margin: 0 auto;
-  font-size: 18pt;
+  font-size: 1.2em;
   padding:4vw;
   background-color: var(--question-bg);
 }
@@ -762,7 +762,7 @@ questionnaire .question-footer{
 questionnaire .wrapper-answer, questionnaire explanation {
   border: 1px solid var(--answer-border-and-hover);
   padding: 5px 12px;
-  font-size: 14pt;
+  font-size: 1.1em;
   margin: 15px 0 0;
   width:90%;
 }
@@ -797,7 +797,7 @@ questionnaire explanation {
 questionnaire answer [visible=true] {
   margin: 5px 0;
   padding: 15px 12px;
-  font-size: 12pt;
+  font-size: 1em;
   word-break: break-word;
   border:0;
   background-color: var(--answer-bg);
@@ -926,7 +926,7 @@ questionnaire .submit-button, questionnaire .next-button, questionnaire .reset-b
   margin-top: 15px;
   border: 4px solid var(--button-border-and-hover);
   border-radius: 7px;
-  font-size:1.3em;
+  font-size:1.1em;
 }
 questionnaire .submit-button:hover, questionnaire .next-button:hover, questionnaire .reset-button:hover {
   background-color: var(--button-border-and-hover);

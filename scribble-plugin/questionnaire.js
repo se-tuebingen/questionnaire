@@ -925,7 +925,6 @@ questionnaire .submit-button, questionnaire .next-button, questionnaire .reset-b
   margin-top: 15px;
   border: 4px solid var(--button-border-and-hover);
   border-radius: 7px;
-  font-size:0.9em;
 }
 questionnaire .submit-button:hover, questionnaire .next-button:hover, questionnaire .reset-button:hover {
   background-color: var(--button-border-and-hover);

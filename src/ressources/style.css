@@ -176,6 +176,7 @@ questionnaire .wrapper-answer > div, questionnaire .question-header > div {
 @media (min-width: 768px) {
   questionnaire question, questionnaire .summary {
     max-width: 600px;
+    box-sizing: border-box; /* includes padding in width */
   }
 }
 

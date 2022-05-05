@@ -271,24 +271,29 @@ function renderQuestion(question: Question, index: number) {
               ${index == 0 ? 'visible="true"' : ''}
               number="${index + 1}"
               answer="pending">
-      <div class="correct-text">
-        <p>${i18n[lang].correct}</p>
-      </div>
-      <div class="wrong-text">
-        <p>${i18n[lang].wrong}</p>
-      </div>
-      <div class="question-header">
-        <div>${question.text.map(nodeOuterHTML).join('')}</div>
-      </div>
-      ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
-      <div class="question-footer">
-        <div class="next-button" onClick="showNextQuestion(event)">
-          ${i18n[lang].next}
+      <div class="question-content">
+        <div class="correct-text">
+          <p>${i18n[lang].correct}</p>
         </div>
-        <div class="submit-button" onClick="submitAnswer(event)">
-          ${i18n[lang].submit}
+        <div class="wrong-text">
+          <p>${i18n[lang].wrong}</p>
+        </div>
+        <div class="question-header">
+          <div>${question.text.map(nodeOuterHTML).join('')}</div>
+        </div>
+        ${question.answers.map((x) => renderAnswer(question.type, x)).join('')}
+        <div class="question-footer">
+          <div class="next-button" onClick="showNextQuestion(event)">
+            ${i18n[lang].next}
+          </div>
+          <div class="submit-button" onClick="submitAnswer(event)">
+            ${i18n[lang].submit}
+          </div>
         </div>
       </div>
+      <div class="default-border"></div>
+      <div class="animated-border-lr"></div>
+      <div class="animated-border-tb"></div>
     </question>
   `;
 }
@@ -319,9 +324,10 @@ function showNextQuestion(event: Event) {
     summaryBar.innerHTML = '?';
     summaryBar.style.width = `${percentage}%`;
     summaryBar.animate([
+      { width: 0 }, // wait 1s for paging animation
       { width: 0 },
       { width: `${percentage}%`, easing: 'ease-out' }
-    ], 1000);
+    ], 2000);
     // show text after animation
     window.setTimeout(() => {
       summaryBar.innerHTML = `${percentage}%`;
@@ -330,7 +336,7 @@ function showNextQuestion(event: Event) {
       const feedbacks = i18n[lang].feedbacks;
       const summaryText = questionnaire.getElementsByClassName('summary-text')[0] as HTMLElement;
       summaryText.innerHTML = feedbacks[Math.floor(ratio * 0.99 * feedbacks.length)];
-    }, 1000);
+    }, 2000);
 
   } else {
     // update questionnaire
@@ -351,7 +357,7 @@ function showNextQuestion(event: Event) {
   currentQuestion.nextElementSibling?.setAttribute('visible', 'true');
   currentQuestion.removeAttribute('visible');
 
-  // scroll to top of questionnaire box  
+  // scroll to top of questionnaire box
   questionnaire.scrollIntoView();
 
 }
@@ -384,11 +390,14 @@ function submitAnswer(event: Event) {
   });
 
   // expand necessary explanations, if present
-  Array.from(answers).map(a => {
-    if (a.getAttribute('selected') != a.getAttribute('correct')) {
-      a.setAttribute('expanded', 'true');
-    }
-  });
+  // with delay, because of animation
+  window.setTimeout(() => {
+    Array.from(answers).map(a => {
+      if (a.getAttribute('selected') != a.getAttribute('correct')) {
+        a.setAttribute('expanded', 'true');
+      }
+    });
+  }, 500);
 
   // scroll to top of questionnaire box
   questionnaire.scrollIntoView();

@@ -22,13 +22,13 @@ questionnaire .error-wrapper{
 margin: 10px 0;
 }
 questionnaire .error-box{
-font-size:16pt;
+font-size:1.1em;
 line-height:1.5em;
 }
 
 .error-message{
   font-family:monospace;
-  font-size:12pt;
+  font-size:1em;
 }
 
 questionnaire pre code {
@@ -85,13 +85,16 @@ questionnaire .content-wrapper {
 
 questionnaire .question-overview{
 margin: 0 auto 10px;
-font-size:1.1em;
+font-size:1.2em;
 }
+
 questionnaire question, questionnaire .summary {
   width: 90%;
   margin: 0 auto;
-  font-size: 18pt;
-  padding:4vw;
+}
+questionnaire question .question-content, questionnaire .summary {
+  font-size: 1.3em;
+  padding: 2em;
   background-color: var(--question-bg);
 }
 
@@ -112,7 +115,7 @@ questionnaire .question-footer{
 questionnaire .wrapper-answer, questionnaire explanation {
   border: 1px solid var(--answer-border-and-hover);
   padding: 5px 12px;
-  font-size: 14pt;
+  font-size: 0.9em;
   margin: 15px 0 0;
   width:90%;
 }
@@ -147,7 +150,6 @@ questionnaire explanation {
 questionnaire answer [visible=true] {
   margin: 5px 0;
   padding: 15px 12px;
-  font-size: 12pt;
   word-break: break-word;
   border:0;
   background-color: var(--answer-bg);
@@ -185,10 +187,26 @@ questionnaire .wrapper-answer > div, questionnaire .question-header > div {
 @media (min-width: 768px) {
   questionnaire question, questionnaire .summary {
     max-width: 600px;
+    box-sizing: border-box; /* includes padding in width */
   }
 }
 
 /* FEEDBACK */
+/* feedback happens animated with 0.5s delay */
+@keyframes show-delayed {
+  0% {
+    height: 0;
+    visibility: hidden;
+  }
+  99% {
+    height: 0;
+    visibility: hidden;
+  }
+  100% {
+    height: auto;
+    visibility: visible;
+  }
+}
 /* text */
 questionnaire .correct-text, questionnaire .wrong-text {
   display: inline-flex;
@@ -199,30 +217,85 @@ questionnaire .correct-text, questionnaire .wrong-text {
 questionnaire question[answer="correct"] .correct-text {
   display: inline-flex;
   color: var(--correct-dark);
+  animation: show-delayed 0.5s;
 }
 questionnaire question[answer="wrong"] .wrong-text {
   display: inline-flex;
   color: var(--wrong-dark);
+  animation: show-delayed 0.5s;
 }
 
-/* question border */
-questionnaire question[answer="pending"] {
-  border: 1px solid var(--pending-medium);
+/* question border (fancy animated version) */
+questionnaire question {
+  position: relative;
 }
 
-questionnaire question[answer="correct"] {
-  border: 1px solid var(--correct-medium);
+questionnaire question .default-border {
+  background-color: var(--pending-medium);
+  position: absolute;
+  z-index: -2;
+  margin: -1px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+questionnaire question[answer*="o"] .default-border {
+  background-color: transparent;
+
+  /* transition: background-color 0.5s steps(1, start); */
+  transition: background-color 0.5s easeOutQuint;
 }
 
-questionnaire question[answer="wrong"] {
-  border: 1px solid var(--wrong-medium);
+questionnaire question .animated-border-lr {
+  background-color: transparent;
+  position: absolute;
+  z-index: -1;
+  margin: -1px;
+  left: 0;
+  right: 0;
+  height: 0;
+  top: 50%;
 }
+questionnaire question[answer*="o"] .animated-border-lr {
+  background-color: var(--correct-medium);
+  top: 0;
+  height: calc(100% + 2px);
+  transition: height 0.5s ease-out, top 0.5s ease-out;
+}
+questionnaire question[answer="wrong"] .animated-border-lr {
+  background-color: var(--wrong-medium);
+}
+
+questionnaire question .animated-border-tb {
+  background-color: transparent;
+  position: absolute;
+  z-index: -1;
+  margin: -1px;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  left: 50%;
+}
+questionnaire question[answer*="o"] .animated-border-tb {
+  background-color: var(--correct-medium);
+  left: 0;
+  width: calc(100% + 2px);
+  transition: width 0.5s ease-out, left 0.5s ease-out;
+}
+questionnaire question[answer="wrong"] .animated-border-tb {
+  background-color: var(--wrong-medium);
+}
+
 
 /* answers */
 questionnaire question[answer="pending"] answer[selected="true"] .wrapper-answer {
   border: 2px solid var(--selected);
 }
 /* *="o" means correct or wrong, not pending */
+questionnaire question[answer*="o"] .wrapper-answer {
+  transition: border 0.5s steps(1,end), background-color 0.5s steps(1,end);
+}
 questionnaire question[answer*="o"] answer[correct="true"][selected="true"] .wrapper-answer {
   border: 2px solid var(--correct-medium);
 }
@@ -249,24 +322,53 @@ questionnaire question[answer*="o"] .expander {
 
 questionnaire question[answer*="o"] answer[expanded="true"] explanation {
   display: block;
+  /* animation: show-delayed 0.5s; */
 }
 questionnaire question[answer*="o"] answer[expanded="true"] .expander {
   display: none;
 }
+/* @keyframes rotate-down {
+  0% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+} */
 questionnaire question[answer*="o"] answer[expanded="true"] .collapser {
   display: block;
+  /* animation: rotate-down 0.5s; */
 }
 
 /* NAVIGATION */
 /* only show question that has been set visible */
+/* switch items with "pagination" effect */
 questionnaire question{
-  display:none;
+  /* display:none; */
+  transform: translateX(-100%);
+  visibility: hidden;
+  max-height: 0;
+  transition: transform 0.5s ease-out 0s, visibility 0.5s ease-out 0s, max-height 0.5s steps(1,end) 0s;
+}
+questionnaire question[visible="true"] ~ question {
+  transform: translateX(100%);
+  visibility: hidden;
+  max-height: 0;
+  transition: transform 0.5s ease-out 0s, visibility 0.5s ease-out 0s, max-height 0.5s steps(1,end) 0s;
 }
 questionnaire .summary {
-  display: none;
+  /* display: none; */
+  transform: translateX(100%);
+  visibility: hidden;
+  max-height: 0;
+  transition: transform 0.5s ease-out 0s, visibility 0.5s ease-out 0s, max-height 0.5s steps(1,end) 0s;
 }
-questionnaire [visible=true]{
-  display:block;
+
+questionnaire question[visible="true"], questionnaire .summary[visible="true"] {
+  visibility: visible;
+  transform: translateX(0);
+  max-height: 20000vh; /* Using max-height, because height:auto is not animatable. very large value that should not realistically be reached.*/
+  transition: transform 0.5s ease-out 0.5s, visibility 0.5s ease-out 0.5s, max-height 0.5s steps(1,start) 0.5s;
 }
 
 /* button styles */
@@ -276,7 +378,6 @@ questionnaire .submit-button, questionnaire .next-button, questionnaire .reset-b
   margin-top: 15px;
   border: 4px solid var(--button-border-and-hover);
   border-radius: 7px;
-  font-size:1.3em;
 }
 questionnaire .submit-button:hover, questionnaire .next-button:hover, questionnaire .reset-button:hover {
   background-color: var(--button-border-and-hover);
@@ -308,6 +409,7 @@ questionnaire .question-overview {
   justify-content: center;
   align-items: center;
   margin-bottom: -1em;
+  height: 2em;
   z-index: 1000;
 }
 questionnaire .bubble {
@@ -317,6 +419,7 @@ questionnaire .bubble {
   border-radius: 0.5em;
   display: inline-flex;
   margin: 0 0.25em;
+  transition: height 0.5s ease-out 0s, width 0.5s ease-out 0s, border-radius 0.5s ease-out 0s;
 }
 questionnaire .bubble:hover {
   cursor: pointer;
@@ -331,6 +434,7 @@ questionnaire .bubble-current {
   width: 2em;
   border-radius: 1em;
   background-color: var(--current);
+  transition: height 0.5s ease-out 0.5s, width 0.5s ease-out 0.5s, border-radius 0.5s ease-out 0.5s;
 }
 questionnaire .bubble-correct {
   background-color: var(--correct-light);
@@ -359,8 +463,5 @@ questionnaire .summary-bar {
   border: 1px solid var(--correct-dark);
   padding: 0.25em;
   width: 1%;
-}
-questionnaire[current_question="0"] .question-overview{
-  margin-bottom: -0.5em;
 }`;
 }

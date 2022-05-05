@@ -78,8 +78,8 @@ questionnaire .content-wrapper {
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
-  margin: 10px;
-  padding: 10px;
+  margin: 1vw;
+  padding: 1vw;
   justify-content: center;
 }
 

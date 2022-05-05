@@ -6,35 +6,35 @@
 - square[x] statt x
 - kringel[x] statt x
 
-2. L
-- Remove multiple-/Singlechoice Error (done)
+2. L (done)
+- Remove multiple-/Singlechoice Error
 
 3. F (done)
 - Sprachinternationalisierung
 - Sprachparameter in questionnaire default übergeben
 
-4. L
+4. L (done)
 - Bug Summary
 
-5.1 L
-- Pull request Pl1 + doku link (done) (still need to convert scala-code to md-text)
+5.1 L (done) (still need to convert scala-code to md-text)
+- Pull request Pl1 + doku link
 
-5.2 F
+5.2 F (done)
 - Pull request Info 1 + doku link + beispiele
 
-6. L
-- gh pages workflow erstellen(done)
+6. L (done)
+- gh pages workflow erstellen
 
 7. F (done)
 - Dokumentieren wie man den style verändert
 
-8. L
+8. L (done)
 - github workflows latest version anstelle von version change number (done)
 
-9. L
+9. L (deprecated, weil nicht sinnvoll)
  swipeEvents
 
-10. F
+10. F (done)
  Animations
 
 ## Todos

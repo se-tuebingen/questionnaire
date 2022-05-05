@@ -335,31 +335,28 @@ questionnaire question{
   /* display:none; */
   transform: translateX(-100%);
   visibility: hidden;
-  height: 0;
-  transition: transform 0.5s ease-out 0s, visibility 0.5s ease-out 0s, height 0.5s steps(1,end) 0s;
+  max-height: 0;
+  transition: transform 0.5s ease-out 0s, visibility 0.5s ease-out 0s, max-height 0.5s steps(1,end) 0s;
 }
 questionnaire question[visible="true"] ~ question {
   transform: translateX(100%);
   visibility: hidden;
-  height: 0;
-  transition: transform 0.5s ease-out 0s, visibility 0.5s ease-out 0s, height 0.5s steps(1,end) 0s;
+  max-height: 0;
+  transition: transform 0.5s ease-out 0s, visibility 0.5s ease-out 0s, max-height 0.5s steps(1,end) 0s;
 }
 questionnaire .summary {
   /* display: none; */
   transform: translateX(100%);
   visibility: hidden;
-  height: 0;
-  transition: transform 0.5s ease-out 0s, visibility 0.5s ease-out 0s, height 0.5s steps(1,end) 0s;
+  max-height: 0;
+  transition: transform 0.5s ease-out 0s, visibility 0.5s ease-out 0s, max-height 0.5s steps(1,end) 0s;
 }
-questionnaire [visible="true"]{
-  display:block;
-}
+
 questionnaire question[visible="true"], questionnaire .summary[visible="true"] {
   visibility: visible;
   transform: translateX(0);
-  height: auto;
-  transition: transform 0.5s ease-out 0.5s, visibility 0.5s ease-out 0.5s, height 0.5s steps(1,start) 0.5s;
-  /* transition: transform 2s ease-out, visibility 2s ease-out; */
+  max-height: 20000vh; /* Using max-height, because height:auto is not animatable. very large value that should not realistically be reached.*/
+  transition: transform 0.5s ease-out 0.5s, visibility 0.5s ease-out 0.5s, max-height 0.5s steps(1,start) 0.5s;
 }
 
 /* button styles */

@@ -23,6 +23,11 @@ There is also a module for Scribble (the Racket documentation tool), which not o
 
 In order to use the JavaScript module, one only needs to create HTML in the correct format and include the script somewhere on the page:
 ```html
+<!-- prevent questionnaire from showing up if there is no javascript enabled-->
+<noscript><style>questionnaire { display: none; }</style></noscript>
+<!-- warning for user - feel free to leave out or customize -->
+<noscript><div>Enable JavaScript to see the quiz</div></noscript>
+
 <questionnaire language="en | de"><!-- language is optional, default is English -->
   <question type="singlechoice | multiplechoice"><!-- type is optional, will be inferred from number of solutions otherwise -->
     Question Text

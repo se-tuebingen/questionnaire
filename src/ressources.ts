@@ -94,7 +94,7 @@ questionnaire question, questionnaire .summary {
 }
 questionnaire question .question-content, questionnaire .summary {
   font-size: 1.3em;
-  padding:4vw;
+  padding: 2em;
   background-color: var(--question-bg);
 }
 

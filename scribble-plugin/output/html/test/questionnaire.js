@@ -705,26 +705,30 @@ questionnaire pre code {
 
 /* Color variables */
 questionnaire {
-  --current: azure;
+  --bubble-current: azure;
+  --bubble-pending: white;
 
-  --pending-light: white;
-  --pending-medium: silver;
+  --pending-border: silver;
 
-  --correct-light: lightgreen;
-  --correct-medium: green;
-  --correct-dark: darkgreen;
+  --correct-background: lightgreen;
+  --correct-border: green;
+  --correct-border-light: lightgreen;
+  --correct-text: darkgreen;
 
-  --wrong-light: lightpink;
-  --wrong-medium: darkred;
-  --wrong-dark: darkred;
+  --wrong-background: lightpink;
+  --wrong-border: darkred;
+  --wrong-border-light: lightpink;
+  --wrong-text: darkred;
 
-  --question-bg: #fcfcfc;
+  --question-background: #fcfcfc;
 
   --answer-border-and-hover: #eee;
-  --answer-bg: #fdfdfd;
-  --selected: grey;
+  --answer-background: #fdfdfd;
+  --answer-border-selected: grey;
 
   --button-border-and-hover: #bbb;
+
+  --summary-bar-background: azure;
 
 }
 
@@ -754,7 +758,7 @@ questionnaire question, questionnaire .summary {
 questionnaire question .question-content, questionnaire .summary {
   font-size: 1.3em;
   padding: 2em;
-  background-color: var(--question-bg);
+  background-color: var(--question-background);
 }
 
 questionnaire .question-header, questionnaire .question-footer, questionnaire .wrapper-answer {
@@ -783,11 +787,11 @@ questionnaire explanation {
   border-top: 0;
 }
 questionnaire answer[correct="true"] explanation {
-  border: 2px solid var(--correct-light);
+  border: 1px solid var(--correct-border-light);
   border-top: 0;
 }
 questionnaire answer[correct="false"] explanation {
-  border: 2px solid var(--wrong-light);
+  border: 1px solid var(--wrong-border-light);
   border-top: 0;
 }
 
@@ -811,7 +815,7 @@ questionnaire answer [visible=true] {
   padding: 15px 12px;
   word-break: break-word;
   border:0;
-  background-color: var(--answer-bg);
+  background-color: var(--answer-background);
 }
 
 questionnaire answer [visible=true] p {
@@ -875,12 +879,12 @@ questionnaire .correct-text, questionnaire .wrong-text {
 }
 questionnaire question[answer="correct"] .correct-text {
   display: inline-flex;
-  color: var(--correct-dark);
+  color: var(--correct-text);
   animation: show-delayed 0.5s;
 }
 questionnaire question[answer="wrong"] .wrong-text {
   display: inline-flex;
-  color: var(--wrong-dark);
+  color: var(--wrong-text);
   animation: show-delayed 0.5s;
 }
 
@@ -890,7 +894,7 @@ questionnaire question {
 }
 
 questionnaire question .default-border {
-  background-color: var(--pending-medium);
+  background-color: var(--pending-border);
   position: absolute;
   z-index: -2;
   margin: -1px;
@@ -917,13 +921,13 @@ questionnaire question .animated-border-lr {
   top: 50%;
 }
 questionnaire question[answer*="o"] .animated-border-lr {
-  background-color: var(--correct-medium);
+  background-color: var(--correct-border);
   top: 0;
   height: calc(100% + 2px);
   transition: height 0.5s ease-out, top 0.5s ease-out;
 }
 questionnaire question[answer="wrong"] .animated-border-lr {
-  background-color: var(--wrong-medium);
+  background-color: var(--wrong-border);
 }
 
 questionnaire question .animated-border-tb {
@@ -937,33 +941,33 @@ questionnaire question .animated-border-tb {
   left: 50%;
 }
 questionnaire question[answer*="o"] .animated-border-tb {
-  background-color: var(--correct-medium);
+  background-color: var(--correct-border);
   left: 0;
   width: calc(100% + 2px);
   transition: width 0.5s ease-out, left 0.5s ease-out;
 }
 questionnaire question[answer="wrong"] .animated-border-tb {
-  background-color: var(--wrong-medium);
+  background-color: var(--wrong-border);
 }
 
 
 /* answers */
 questionnaire question[answer="pending"] answer[selected="true"] .wrapper-answer {
-  border: 2px solid var(--selected);
+  border: 2px solid var(--answer-border-selected);
 }
 /* *="o" means correct or wrong, not pending */
 questionnaire question[answer*="o"] .wrapper-answer {
   transition: border 0.5s steps(1,end), background-color 0.5s steps(1,end);
 }
 questionnaire question[answer*="o"] answer[correct="true"][selected="true"] .wrapper-answer {
-  border: 2px solid var(--correct-medium);
+  border: 2px solid var(--correct-border);
 }
 questionnaire question[answer*="o"] answer[correct="true"] .wrapper-answer {
-  background-color: var(--correct-light);
+  background-color: var(--correct-background);
 }
 questionnaire question[answer*="o"] answer[correct="false"][selected="true"] .wrapper-answer {
-  border: 2px solid var(--wrong-medium);
-  background-color: var(--wrong-light);
+  border: 2px solid var(--wrong-border);
+  background-color: var(--wrong-background);
 }
 
 /* explanation */
@@ -1085,41 +1089,41 @@ questionnaire .bubble:hover {
   transform: scale(0.9);
 }
 questionnaire .bubble-pending {
-  background-color: var(--pending-light);
-  border-color: var(--pending-medium);
+  background-color: var(--bubble-pending);
+  border-color: var(--pending-border);
 }
 questionnaire .bubble-current {
   height: 2em;
   width: 2em;
   border-radius: 1em;
-  background-color: var(--current);
+  background-color: var(--bubble-current);
   transition: height 0.5s ease-out 0.5s, width 0.5s ease-out 0.5s, border-radius 0.5s ease-out 0.5s;
 }
 questionnaire .bubble-correct {
-  background-color: var(--correct-light);
-  border-color: var(--correct-dark);
+  background-color: var(--correct-background);
+  border-color: var(--correct-border);
 }
 questionnaire .bubble-wrong {
-  background-color: var(--wrong-light);
-  border-color: var(--wrong-dark);
+  background-color: var(--wrong-background);
+  border-color: var(--wrong-border);
 }
 
 /* SUMMARY */
 questionnaire .summary[visible="true"] {
   display: block;
   text-align: center;
-  border: 1px solid var(--pending-medium);
+  border: 1px solid var(--pending-border);
 }
 questionnaire .summary-bar-container {
   width: 100%;
-  background-color: var(--current);
+  background-color: var(--summary-bar-background);
   margin: 1em;
   margin-left: 0;
   margin-right: 0;
 }
 questionnaire .summary-bar {
-  background-color: var(--correct-light);
-  border: 1px solid var(--correct-dark);
+  background-color: var(--correct-background);
+  border: 1px solid var(--correct-border);
   padding: 0.25em;
   width: 1%;
 }`;

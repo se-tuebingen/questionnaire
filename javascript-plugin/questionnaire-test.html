@@ -16,17 +16,19 @@
 
   /* v-- higher specificity by adding a class to questionnaire */
   .custom question:nth-child(4) {
-    --correct-light: greenyellow;
-    --correct-medium: lime;
-    --correct-dark: darkgreen;
+    --correct-background: greenyellow;
+    --correct-border: lime;
+    --correct-border-light: greenyellow;
+    --correct-text: darkgreen;
 
-    --wrong-light: blanchedalmond;
-    --wrong-medium: crimson;
-    --wrong-dark: purple;
+    --wrong-background: blanchedalmond;
+    --wrong-border: crimson;
+    --wrong-border-light: blanchedalmond;
+    --wrong-text: purple;
 
     --answer-border-and-hover: paleturquoise;
-    --answer-bg: #fdfdfd;
-    --selected: darkcyan;
+    --answer-background: #fdfdfd;
+    --answer-border-selected: darkcyan;
   }
   .custom question:nth-child(4) answer[selected="true"] {
     font-style: italic;
@@ -39,17 +41,19 @@
   <!-- <style>
   /* v-- same specificity, but defined after, so overrides values set by stylesheet in <head> */
   questionnaire {
-    --correct-light: greenyellow;
-    --correct-medium: lime;
-    --correct-dark: darkgreen;
+      --correct-background: greenyellow;
+      --correct-border: lime;
+      --correct-border-light: greenyellow;
+      --correct-text: darkgreen;
 
-    --wrong-light: blanchedalmond;
-    --wrong-medium: crimson;
-    --wrong-dark: purple;
+      --wrong-background: blanchedalmond;
+      --wrong-border: crimson;
+      --wrong-border-light: blanchedalmond;
+      --wrong-text: purple;
 
-    --answer-border-and-hover: paleturquoise;
-    --answer-bg: #fdfdfd;
-    --selected: darkcyan;
+      --answer-border-and-hover: paleturquoise;
+      --answer-background: #fdfdfd;
+      --answer-border-selected: darkcyan;
   }
   </style> -->
 
@@ -57,7 +61,7 @@
   <noscript><style>questionnaire { display: none; }</style></noscript>
   <!-- warning for user - feel free to leave out or customize -->
   <noscript><div>Enable JavaScript to see the quiz</div></noscript>
-  
+
   <!-- nice demo questionnaire -->
   <questionnaire class="custom">
     <question>

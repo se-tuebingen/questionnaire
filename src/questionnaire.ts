@@ -195,7 +195,7 @@ function renderQuestionnaire(questionnaire: Questionnaire) {
       ${questionnaire.questions.map((_, i) => `
         <p   class="bubble bubble-pending ${i == 0 ? 'bubble-current' : ''}"
              question="${i + 1}"
-             onclick="gotoQuestion(event)"
+             onclick="${questionnaire.questions.length <= 1 ? '' : 'gotoQuestion(event)'}"
              title="${i18n[lang].goto} ${i + 1}"></p>`).join('')}
       </div>
       ${questionnaire.questions.map(renderQuestion).join('')}

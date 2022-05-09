@@ -12,7 +12,7 @@
 
 ;;;;;;;;;;; Type Definitions
 (define questiontypes (or/c "singlechoice" "multiplechoice" "infer"))
-(define texsolutionstyles (or/c "inline" "margin"))
+(define texsolutionstyles (or/c "inline" "margin" "html"))
 (define language (or/c "en" "de"))
  ; one-of does not work with strings
 (define arbitrary-content?
@@ -154,6 +154,30 @@
   (wrap-tag explanation-tag-wrapper content)
 )
 
+; noscript
+(define
+  noscript-tag-wrapper
+  (style "" (list (alt-tag "noscript")))
+)
+
+(define/contract
+  (noscript-tag content)
+  (-> arbitrary-content? block?)
+  (wrap-tag noscript-tag-wrapper content)
+)
+
+; inline style
+(define
+  style-tag-wrapper
+  (style "" (list (alt-tag "style")))
+)
+
+(define/contract
+  (inline-style s)
+  (-> string? block?)
+  (wrap-tag style-tag-wrapper s)
+)
+
 ;;;; Render-Functions for each struct
 ; helper
 (define/contract
@@ -197,6 +221,24 @@
   (nested-flow
     (style #f (list (js-addition "questionnaire.js")))
     (list
+      (noscript-tag (list
+        (inline-style (string-append
+          "questionnaire, .static-questionnaire, .questionnaire-toggle {display:none;} .questionnaire-toggle:checked + .static-questionnaire{display:block; padding: 0.5em; border: 1px solid silver;}"
+        ))
+        (nested-flow (style #f (list (alt-tag "label"))) (list
+          (paragraph (style #f '()) (cond
+            [(string=? (questionnaire-container-language questionnaire) "de")
+             (italic "Wenn Sie in ihrem Browser JavaScript aktivieren, erscheint hier ein interaktives Quiz. Alternativ können Sie auf diesen Text klicken und eine statische Version anzeigen/verbergen.")]
+            [(string=? (questionnaire-container-language questionnaire) "en")
+             (italic "If you activate JavaScript in your browser, an interactive quiz will show up at this place. Alternatively, you can click this text to show/hide a static version.")]
+          ))
+          (nested-flow (style "questionnaire-toggle" (list (alt-tag "input") (attributes (list (cons 'type "checkbox"))))
+          ) '())
+          (nested-flow (style "static-questionnaire" '())
+            (list (render-latex "html" #t questionnaire))
+          )
+        ))
+      ))
       (questionnaire-tag (questionnaire-container-language questionnaire)
        (map render-question-html
          (questionnaire-container-questions questionnaire))))
@@ -312,8 +354,28 @@
           (questionnaire-container-questions questionnaire))))
     ])
   (cond [(string=? solstyle "inline") rotatedtext]
-        [(string=? solstyle "margin") (margin-note rotatedtext)])
+        [(string=? solstyle "margin") (margin-note rotatedtext)]
+        [(string=? solstyle "html")
+         (wrap-spoiler
+           (questionnaire-container-language questionnaire)
+           rotatedtext)])
   )
+)
+
+(define (wrap-spoiler lang content)
+  (nested-flow (style #f (list (alt-tag "label"))) (list
+    (paragraph (style #f '()) (cond
+      [(string=? lang "de")
+       (bold "Lösungen zeigen/verbergen")]
+      [(string=? lang "en")
+       (bold "Show/hide solutions")]
+    ))
+    (nested-flow (style "questionnaire-toggle" (list (alt-tag "input") (attributes (list (cons 'type "checkbox"))))
+    ) '())
+    (nested-flow (style "static-questionnaire" '())
+      (list content)
+    )
+  ))
 )
 
 ; helper for generating latex macros
@@ -324,6 +386,7 @@
          #"\\newcommand{\\QRotateinline}[1]{{\\rotatebox{180}{\\parbox{\\textwidth}{#1}}}}"]
         [(string=? version "margin")
           #"\\newcommand{\\QRotatemargin}[1]{{\\rotatebox{180}{\\parbox{\\marginparwidth}{#1}}}}"]
+        [(string=? version "html") #""]
   )
 )
 

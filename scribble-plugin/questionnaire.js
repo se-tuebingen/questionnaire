@@ -84,7 +84,11 @@ function setup() {
         }
     }
 }
-window.onload = setup;
+// other scripts might want to use window.onload too, so register
+// event listener instead of overriding it
+window.addEventListener('load', () => {
+    setup();
+});
 // render questionnaire:
 // addEventListener for "click"-Events
 // build wrapper-<div> and <img>-icons for

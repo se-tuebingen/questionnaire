@@ -1,5 +1,4 @@
 # interactive-textbooks
-[Etherpad](http://160.uk.to/pad/p/interactive-textbooks)
 [![Generate HTML & PDF](https://github.com/se-tuebingen/interactive-textbooks/actions/workflows/publish.yml/badge.svg)](https://github.com/se-tuebingen/interactive-textbooks/actions/workflows/publish.yml)
 
 ## Demo

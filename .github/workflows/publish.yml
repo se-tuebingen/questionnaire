@@ -17,6 +17,8 @@ jobs:
           variant: 'CS'
           version: 'stable'
       - run: raco pkg install --deps search-auto scribble-math
+      - name: Update Package sources
+        run: sudo apt-get update
       - name: Install TexLive
         run: sudo apt-get install texlive-latex-base texlive-fonts-recommended texlive-fonts-extra
       - name: Install TypeScript

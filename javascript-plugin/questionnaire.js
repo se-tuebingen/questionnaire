@@ -264,7 +264,7 @@ function showNextQuestion(event) {
         summaryBar.innerHTML = '?';
         summaryBar.style.width = `${percentage}%`;
         summaryBar.animate([
-            { width: 0 },
+            { width: 0 }, // wait 1s for paging animation
             { width: 0 },
             { width: `${percentage}%`, easing: 'ease-out' }
         ], 2000);

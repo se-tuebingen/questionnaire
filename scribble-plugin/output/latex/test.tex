@@ -359,6 +359,8 @@
 \newcommand{\refelemleft}[1]{\refparaleft{#1}}
 \newenvironment{refcolumnleft}{}{}
 
+\newcommand{\reffootnote}[1]{\footnote{#1}}
+
 % Macros used by `title' and `author':
 \newcommand{\titleAndVersionAndAuthors}[3]{\title{#1\\{\normalsize \SVersionBefore{}#2}}\author{#3}\maketitle}
 \newcommand{\titleAndVersionAndEmptyAuthors}[3]{\title{#1\\{\normalsize \SVersionBefore{}#2}}#3\maketitle}
@@ -378,11 +380,14 @@
 \let\SOriginalthesubsection\thesubsection
 \let\SOriginalthesubsubsection\thesubsubsection
 
+\newcommand{\SNextTitlePlain}[1]{\def\theNextTitlePlain{#1}}
+\newcommand{\STexOrPDFTitle}[1]{\texorpdfstring{#1}{\theNextTitlePlain}}
+
 % sections
-\newcommand{\Spart}[2]{\part[#1]{#2}}
-\newcommand{\Ssection}[2]{\section[#1]{#2}\let\thesubsection\SOriginalthesubsection}
-\newcommand{\Ssubsection}[2]{\subsection[#1]{#2}\let\thesubsubsection\SOriginalthesubsubsection}
-\newcommand{\Ssubsubsection}[2]{\subsubsection[#1]{#2}}
+\newcommand{\Spart}[2]{\part[\STexOrPDFTitle{#1}]{#2}}
+\newcommand{\Ssection}[2]{\section[\STexOrPDFTitle{#1}]{#2}\let\thesubsection\SOriginalthesubsection}
+\newcommand{\Ssubsection}[2]{\subsection[\STexOrPDFTitle{#1}]{#2}\let\thesubsubsection\SOriginalthesubsubsection}
+\newcommand{\Ssubsubsection}[2]{\subsubsection[\STexOrPDFTitle{#1}]{#2}}
 \newcommand{\Ssubsubsubsection}[2]{{\bf #2}}
 \newcommand{\Ssubsubsubsubsection}[2]{\Ssubsubsubsection{#1}{#2}}
 
@@ -395,10 +400,10 @@
 \newcommand{\Ssubsubsubsubsectionstar}[1]{\Ssubsubsubsectionstar{#1}}
 
 % "starx" means unnumbered but in ToC:
-\newcommand{\Spartstarx}[2]{\Spartstar{#2}\phantomsection\addcontentsline{toc}{part}{#1}}
-\newcommand{\Ssectionstarx}[2]{\Ssectionstar{#2}\phantomsection\addcontentsline{toc}{section}{#1}}
-\newcommand{\Ssubsectionstarx}[2]{\Ssubsectionstar{#2}\phantomsection\addcontentsline{toc}{subsection}{#1}}
-\newcommand{\Ssubsubsectionstarx}[2]{\Ssubsubsectionstar{#2}\phantomsection\addcontentsline{toc}{subsubsection}{#1}}
+\newcommand{\Spartstarx}[2]{\Spartstar{#2}\phantomsection\addcontentsline{toc}{part}{\STexOrPDFTitle{#1}}}
+\newcommand{\Ssectionstarx}[2]{\Ssectionstar{#2}\phantomsection\addcontentsline{toc}{section}{\STexOrPDFTitle{#1}}}
+\newcommand{\Ssubsectionstarx}[2]{\Ssubsectionstar{#2}\phantomsection\addcontentsline{toc}{subsection}{\STexOrPDFTitle{#1}}}
+\newcommand{\Ssubsubsectionstarx}[2]{\Ssubsubsectionstar{#2}\phantomsection\addcontentsline{toc}{subsubsection}{\STexOrPDFTitle{#1}}}
 \newcommand{\Ssubsubsubsectionstarx}[2]{\Ssubsubsubsectionstar{#2}}
 \newcommand{\Ssubsubsubsubsectionstarx}[2]{\Ssubsubsubsubsectionstar{#2}}
 
@@ -564,7 +569,7 @@ This manual aims to cover most possible valid configurations.
 
 \newpage \tableofcontents \newpage
 
-\sectionNewpage
+\SNextTitlePlain{Single{-}Choice and Multiple Choice}\sectionNewpage
 
 \Ssection{Single{-}Choice and Multiple Choice}{Single{-}Choice and Multiple Choice}\label{t:x28part_x22Singlex2dChoicex5fandx5fMultiplex5fChoicex22x29}
 
@@ -615,7 +620,7 @@ b)Singing is hard with masks on or network latency
 
 \QRotateinline{1.ac}\end{SVInsetFlow}
 
-\sectionNewpage
+\SNextTitlePlain{More than one Question}\sectionNewpage
 
 \Ssection{More than one Question}{More than one Question}\label{t:x28part_x22Morex5fthanx5fonex5fQuestionx22x29}
 
@@ -675,7 +680,7 @@ b)But actually yes
 
 \textbf{c})Whatever floats your goat}\end{refcontent}\end{refcolumn}}\end{SVInsetFlow}
 
-\sectionNewpage
+\SNextTitlePlain{Moving questions to another section}\sectionNewpage
 
 \Ssection{Moving questions to another section}{Moving questions to another section}\label{t:x28part_x22Movingx5fquestionsx5ftox5fanotherx5fsectionx22x29}
 
@@ -697,7 +702,7 @@ In the pdf version, we should see the "What is this course about?" question here
 
 \noindent 
 
-\sectionNewpage
+\SNextTitlePlain{Including arbitrary Content}\sectionNewpage
 
 \Ssection{Including arbitrary Content}{Including arbitrary Content}\label{t:x28part_x22Includingx5farbitraryx5fContentx22x29}
 
@@ -946,7 +951,7 @@ In order to test scroll behaviour, here is add some additional content:
 
 \item  And much more, which cannot be covered in its entirety\end{itemize}
 
-\sectionNewpage
+\SNextTitlePlain{internationalization}\sectionNewpage
 
 \Ssection{internationalization}{internationalization}\label{t:x28part_x22internationalizationx22x29}
 

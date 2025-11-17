@@ -1,5 +1,5 @@
-# interactive-textbooks
-[![Generate HTML & PDF](https://github.com/se-tuebingen/interactive-textbooks/actions/workflows/publish.yml/badge.svg)](https://github.com/se-tuebingen/interactive-textbooks/actions/workflows/publish.yml)
+# Questionnaire
+[![Generate HTML & PDF](https://github.com/se-tuebingen/questionnaire/actions/workflows/publish.yml/badge.svg)](https://github.com/se-tuebingen/questionnaire/actions/workflows/publish.yml)
 
 ## Demo
 
@@ -17,7 +17,7 @@ There is also a module for Scribble (the Racket documentation tool), which not o
 
 ### JavaScript module
 
-[Demo](https://se-tuebingen.github.io/interactive-textbooks/javascript-plugin/questionnaire-test.html) | [Source](https://github.com/se-tuebingen/interactive-textbooks/blob/master/tests/javascript-plugin/questionnaire-test.html)
+[Demo](https://se-tuebingen.github.io/questionnaire/javascript-plugin/questionnaire-test.html) | [Source](https://github.com/se-tuebingen/questionnaire/blob/master/tests/javascript-plugin/questionnaire-test.html)
 
 
 In order to use the JavaScript module, one only needs to create HTML in the correct format and include the script somewhere on the page:
@@ -49,7 +49,7 @@ In order to use the JavaScript module, one only needs to create HTML in the corr
 
 ### Scribble-Plugin
 
-[Demo](https://se-tuebingen.github.io/interactive-textbooks/scribble-plugin/output/html/test/) | [Source](https://github.com/se-tuebingen/interactive-textbooks/blob/master/tests/scribble-plugin/test.scrbl)
+[Demo](https://se-tuebingen.github.io/questionnaire/scribble-plugin/output/html/test/) | [Source](https://github.com/se-tuebingen/questionnaire/blob/master/tests/scribble-plugin/test.scrbl)
 
 Copy the Scribble-Plugin and the JavaScript-Plugin (`questionnaire.rkt` *and* `questionnaire.js`) to your source folder and import it with
 ```scribble
@@ -105,7 +105,7 @@ The style sheet is added to the head of the HTML document. The containing styles
 
 - **Colors are defined via [CSS Variables](https://www.w3schools.com/css/css3_variables.asp)** so that they can be changed more easily. _For a full list of variables, refer to the source at `src/ressources/style.css`, as it may change between versions._
 
-**For an instructive example, see [the source of the HTML demo page](https://github.com/se-tuebingen/interactive-textbooks/blob/master/tests/javascript-plugin/questionnaire-test.html).**
+**For an instructive example, see [the source of the HTML demo page](https://github.com/se-tuebingen/questionnaire/blob/master/tests/javascript-plugin/questionnaire-test.html).**
 
 ## Development
 
